@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-auth
+  namespace: kube-system
+data:
+  mapRoles: |
+%{ for arn in eks_managed_nodes_role_arns ~}
+    - rolearn: ${arn}
+      username: system:node:{{EC2PrivateDNSName}}
+      groups:
+        - system:bootstrappers
+        - system:nodes
+%{ endfor ~}
+%{ for role, arn in eks_master_role_arns ~}
+    - rolearn: ${arn}
+      username: ${role}
+      groups:
+        - system:masters
+%{ endfor ~}
