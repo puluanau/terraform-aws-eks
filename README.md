@@ -1,2 +1,2 @@
 # terraform-aws-eks
-Terraform module for deploying a Domino on EKS
+Terraform module to deploy EKS on AWS
