@@ -221,7 +221,8 @@ resource "aws_eks_node_group" "platform" {
 }
 
 locals {
-  gpu_bootstrap_extra_args = "--node-labels lifecycle=OnDemand  --node-labels=dominodatalab.com/node-pool=default-gpu,nvidia.com/gpu=true,dominodatalab.com/domino-node=true --register-with-taints=nvidia.com/gpu=true:NoSchedule"
+  # gpu_bootstrap_extra_args = "--node-labels lifecycle=OnDemand  --node-labels=dominodatalab.com/node-pool=default-gpu,nvidia.com/gpu=true,dominodatalab.com/domino-node=true --register-with-taints=nvidia.com/gpu=true:NoSchedule"
+  gpu_bootstrap_extra_args = ""
   gpu_user_data = base64encode(templatefile("${path.module}/templates/linux_custom.tpl", {
     cluster_name             = aws_eks_cluster.this.name
     cluster_endpoint         = aws_eks_cluster.this.endpoint
@@ -290,11 +291,16 @@ resource "aws_eks_node_group" "gpu" {
     version = aws_launch_template.gpu.latest_version
   }
 
-
+  taint {
+    key    = "nvidia.com/gpu"
+    value  = "true"
+    effect = "NO_SCHEDULE"
+  }
   labels = {
     "lifecycle"                     = "OnDemand"
-    "dominodatalab.com/node-pool"   = "gpu"
+    "dominodatalab.com/node-pool"   = "default-gpu"
     "dominodatalab.com/domino-node" = "true"
+    "nvidia.com/gpu"                = "true"
   }
 
   lifecycle {

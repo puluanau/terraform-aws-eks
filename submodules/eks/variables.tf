@@ -31,7 +31,7 @@ variable "node_groups" {
     "compute" = {
       instance_type = "m5.2xlarge"
       min           = 0
-      max           = 10
+      max           = 30
       desired       = 1
     },
     "platform" = {
