@@ -27,8 +27,17 @@ variable "number_of_azs" {
 
 variable "availability_zones" {
   type        = list(string)
-  description = "List of Availibility zones to distribute the deployment, EKS needs at least 2,https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html."
-  default     = []
+  description = <<EOT
+    List of Availibility zones to distribute the deployment, EKS needs at least 2,https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html.
+    Note that setting this variable bypasses validation of the status of the zones data 'aws_availability_zones' 'available'.
+    Caller is responsible for validating status of these zones.
+  EOT
+
+  validation {
+    condition     = length(var.availability_zones) == 0 || length(var.availability_zones) >= 2
+    error_message = "EKS deployment needs at least 2 zones."
+  }
+  default = []
 }
 
 
@@ -51,18 +60,37 @@ variable "k8s_version" {
 
 variable "public_cidr_network_bits" {
   type        = number
-  description = "Number of network bits to allocate to the public subnet. i.e /27 -> 30 IPs."
+  description = "Number of network bits to allocate to the public subnet. i.e /27 -> 32 IPs."
   default     = 27
 }
 
 variable "private_cidr_network_bits" {
   type        = number
-  description = "Number of network bits to allocate to the public subnet. i.e /19 -> 8,190 IPs."
+  description = "Number of network bits to allocate to the private subnet. i.e /19 -> 8,192 IPs."
   default     = 19
 }
 
 variable "node_groups" {
-  type        = map(map(any))
+  type = object({
+    compute = object({
+      instance_type = string
+      min           = number
+      max           = number
+      desired       = number
+    }),
+    platform = object({
+      instance_type = string
+      min           = number
+      max           = number
+      desired       = number
+    }),
+    gpu = object({
+      instance_type = string
+      min           = number
+      max           = number
+      desired       = number
+    })
+  })
   description = "EKS managed node groups definition."
   default = {
     "compute" = {

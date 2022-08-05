@@ -56,6 +56,7 @@ aws s3 rb s3://"${AWS_TERRAFORM_REMOTE_STATE_BUCKET}" --force
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.0 |
 | <a name="requirement_local"></a> [local](#requirement\_local) | >= 2.2.0 |
+| <a name="requirement_null"></a> [null](#requirement\_null) | >= 3.1.1 |
 | <a name="requirement_tls"></a> [tls](#requirement\_tls) | >= 3.4.0 |
 
 ## Providers
@@ -64,6 +65,7 @@ aws s3 rb s3://"${AWS_TERRAFORM_REMOTE_STATE_BUCKET}" --force
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | 4.22.0 |
 | <a name="provider_local"></a> [local](#provider\_local) | 2.2.3 |
+| <a name="provider_null"></a> [null](#provider\_null) | 3.1.1 |
 | <a name="provider_tls"></a> [tls](#provider\_tls) | 3.4.0 |
 
 ## Modules
@@ -85,12 +87,14 @@ aws s3 rb s3://"${AWS_TERRAFORM_REMOTE_STATE_BUCKET}" --force
 | [local_sensitive_file.pvt_key](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/sensitive_file) | resource |
 | [tls_private_key.domino](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) | resource |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
+| [aws_ec2_instance_type_offerings.nodes](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ec2_instance_type_offerings) | data source |
+| [null_data_source.validate_zones](https://registry.terraform.io/providers/hashicorp/null/latest/docs/data-sources/data_source) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | List of Availibility zones to distribute the deployment, EKS needs at least 2,https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html. | `list(string)` | `[]` | no |
+| <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | List of Availibility zones to distribute the deployment, EKS needs at least 2,https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html.<br>    Note that setting this variable bypasses validation of the status of the zones data 'aws\_availability\_zones' 'available'.<br>    Caller is responsible for validating status of these zones. | `list(string)` | `[]` | no |
 | <a name="input_base_cidr_block"></a> [base\_cidr\_block](#input\_base\_cidr\_block) | CIDR block to serve the main private and public subnets. | `string` | `"10.0.0.0/16"` | no |
 | <a name="input_create_bastion"></a> [create\_bastion](#input\_create\_bastion) | Create bastion toggle. | `bool` | `false` | no |
 | <a name="input_deploy_id"></a> [deploy\_id](#input\_deploy\_id) | Domino Deployment ID. | `string` | `"domino-eks"` | no |
@@ -98,10 +102,10 @@ aws s3 rb s3://"${AWS_TERRAFORM_REMOTE_STATE_BUCKET}" --force
 | <a name="input_eks_master_role_names"></a> [eks\_master\_role\_names](#input\_eks\_master\_role\_names) | IAM role names to be added as masters in eks. | `list(string)` | `[]` | no |
 | <a name="input_enable_route53_iam_policy"></a> [enable\_route53\_iam\_policy](#input\_enable\_route53\_iam\_policy) | Enable route53 IAM policy toggle. | `bool` | `false` | no |
 | <a name="input_k8s_version"></a> [k8s\_version](#input\_k8s\_version) | EKS cluster k8s version. | `string` | `"1.22"` | no |
-| <a name="input_node_groups"></a> [node\_groups](#input\_node\_groups) | EKS managed node groups definition. | `map(map(any))` | <pre>{<br>  "compute": {<br>    "desired": 1,<br>    "instance_type": "m5.2xlarge",<br>    "max": 10,<br>    "min": 0<br>  },<br>  "gpu": {<br>    "desired": 1,<br>    "instance_type": "g4dn.xlarge",<br>    "max": 10,<br>    "min": 0<br>  },<br>  "platform": {<br>    "desired": 1,<br>    "instance_type": "m5.4xlarge",<br>    "max": 10,<br>    "min": 0<br>  }<br>}</pre> | no |
+| <a name="input_node_groups"></a> [node\_groups](#input\_node\_groups) | EKS managed node groups definition. | <pre>object({<br>    compute = object({<br>      instance_type = string<br>      min           = number<br>      max           = number<br>      desired       = number<br>    }),<br>    platform = object({<br>      instance_type = string<br>      min           = number<br>      max           = number<br>      desired       = number<br>    }),<br>    gpu = object({<br>      instance_type = string<br>      min           = number<br>      max           = number<br>      desired       = number<br>    })<br>  })</pre> | <pre>{<br>  "compute": {<br>    "desired": 1,<br>    "instance_type": "m5.2xlarge",<br>    "max": 10,<br>    "min": 0<br>  },<br>  "gpu": {<br>    "desired": 1,<br>    "instance_type": "g4dn.xlarge",<br>    "max": 10,<br>    "min": 0<br>  },<br>  "platform": {<br>    "desired": 1,<br>    "instance_type": "m5.4xlarge",<br>    "max": 10,<br>    "min": 0<br>  }<br>}</pre> | no |
 | <a name="input_number_of_azs"></a> [number\_of\_azs](#input\_number\_of\_azs) | Number of AZ to distribute the deployment, EKS needs at least 2. | `number` | `3` | no |
-| <a name="input_private_cidr_network_bits"></a> [private\_cidr\_network\_bits](#input\_private\_cidr\_network\_bits) | Number of network bits to allocate to the public subnet. i.e /19 -> 8,190 IPs. | `number` | `19` | no |
-| <a name="input_public_cidr_network_bits"></a> [public\_cidr\_network\_bits](#input\_public\_cidr\_network\_bits) | Number of network bits to allocate to the public subnet. i.e /27 -> 30 IPs. | `number` | `27` | no |
+| <a name="input_private_cidr_network_bits"></a> [private\_cidr\_network\_bits](#input\_private\_cidr\_network\_bits) | Number of network bits to allocate to the private subnet. i.e /19 -> 8,192 IPs. | `number` | `19` | no |
+| <a name="input_public_cidr_network_bits"></a> [public\_cidr\_network\_bits](#input\_public\_cidr\_network\_bits) | Number of network bits to allocate to the public subnet. i.e /27 -> 32 IPs. | `number` | `27` | no |
 | <a name="input_region"></a> [region](#input\_region) | AWS region for the deployment | `string` | n/a | yes |
 | <a name="input_route53_hosted_zone"></a> [route53\_hosted\_zone](#input\_route53\_hosted\_zone) | AWS Route53 Hosted zone. | `string` | n/a | yes |
 | <a name="input_ssh_pvt_key_name"></a> [ssh\_pvt\_key\_name](#input\_ssh\_pvt\_key\_name) | ssh private key filename. | `string` | `"domino.pem"` | no |
@@ -118,4 +122,5 @@ aws s3 rb s3://"${AWS_TERRAFORM_REMOTE_STATE_BUCKET}" --force
 | <a name="output_k8s_tunnel_command"></a> [k8s\_tunnel\_command](#output\_k8s\_tunnel\_command) | Command to run the k8s tunnel mallory. |
 | <a name="output_region"></a> [region](#output\_region) | Deployment region. |
 | <a name="output_ssh_bastion_command"></a> [ssh\_bastion\_command](#output\_ssh\_bastion\_command) | Command to ssh into the bastion host |
+| <a name="output_zone_validation"></a> [zone\_validation](#output\_zone\_validation) | UNUSED, To silence TFLint unused resource warning |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

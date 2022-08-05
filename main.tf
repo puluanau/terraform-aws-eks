@@ -1,20 +1,27 @@
-resource "tls_private_key" "domino" {
-  algorithm = "RSA"
+# Validating zone offerings.
+
+# Check the zones where the instance types are being offered
+data "aws_ec2_instance_type_offerings" "nodes" {
+  for_each = var.node_groups
+
+  filter {
+    name = "instance-type"
+    # values = toset([for i in var.node_groups : i.instance_type])
+    values = [each.value.instance_type]
+  }
+
+  location_type = "availability-zone"
+
+  lifecycle {
+    # Validating the number of zones is greater than 2. EKS needs at least 2.
+    postcondition {
+      condition     = length(toset(self.locations)) >= 2
+      error_message = "Availability of the instance types does not satisfy the number of zones"
+    }
+  }
 }
 
-
-resource "aws_key_pair" "domino" {
-  key_name   = var.deploy_id
-  public_key = trimspace(tls_private_key.domino.public_key_openssh)
-}
-
-resource "local_sensitive_file" "pvt_key" {
-  content         = tls_private_key.domino.private_key_openssh
-  file_permission = "0400"
-  filename        = local.ssh_pvt_key_path
-}
-
-
+# Get "available" azs for the region
 data "aws_availability_zones" "available" {
   state = "available"
   filter {
@@ -24,14 +31,43 @@ data "aws_availability_zones" "available" {
 }
 
 locals {
-  availability_zones_data = zipmap(data.aws_availability_zones.available.names, data.aws_availability_zones.available.zone_ids)
-  ## EKS needs at least 2 availability zones: https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html
-  availability_zone_names = length(var.availability_zones) >= 2 ? toset(var.availability_zones) : toset(slice(keys(local.availability_zones_data), 0, var.number_of_azs))
-  availability_zone_ids   = [for name in local.availability_zone_names : local.availability_zones_data[name]]
-  availability_zones      = zipmap(local.availability_zone_names, local.availability_zone_ids)
-  bastion_user            = "ec2-user"
-  ssh_pvt_key_path        = "resources/${var.deploy_id}/${var.ssh_pvt_key_name}"
-  kubeconfig_path         = "resources/${var.deploy_id}/kubeconfig"
+  # Get zones where ALL instance types are offered(intersection).
+  zone_intersection_instance_offerings = setintersection(toset(data.aws_ec2_instance_type_offerings.nodes["compute"].locations), toset(data.aws_ec2_instance_type_offerings.nodes["platform"].locations), toset(data.aws_ec2_instance_type_offerings.nodes["gpu"].locations))
+  # Get the zones that are available and offered in the region for the instance types.
+  az_names           = length(var.availability_zones) > 0 ? var.availability_zones : data.aws_availability_zones.available.names
+  offered_azs        = setintersection(local.zone_intersection_instance_offerings, toset(local.az_names))
+  available_azs_data = zipmap(data.aws_availability_zones.available.names, data.aws_availability_zones.available.zone_ids)
+  # Getting the required azs name and id.
+  availability_zones = { for name in slice(tolist(local.offered_azs), 0, var.number_of_azs) : name => local.available_azs_data[name] }
+  bastion_user       = "ec2-user"
+  ssh_pvt_key_path   = "resources/${var.deploy_id}/${var.ssh_pvt_key_name}"
+  kubeconfig_path    = "resources/${var.deploy_id}/kubeconfig"
+}
+
+# Validate that the number of offered and available zones satisfy the number of required zones. https://github.com/hashicorp/terraform/issues/31122 may result in a more elegant validation and deprecation of the null_data_source
+data "null_data_source" "validate_zones" {
+  lifecycle {
+    precondition {
+      condition     = length(local.offered_azs) >= var.number_of_azs
+      error_message = "Availability of the instance types does not satisfy the number of zones"
+    }
+  }
+}
+
+## Creating SSH pvt key to access bastion and EKS nodes
+resource "tls_private_key" "domino" {
+  algorithm = "RSA"
+}
+
+resource "local_sensitive_file" "pvt_key" {
+  content         = tls_private_key.domino.private_key_openssh
+  file_permission = "0400"
+  filename        = local.ssh_pvt_key_path
+}
+
+resource "aws_key_pair" "domino" {
+  key_name   = var.deploy_id
+  public_key = trimspace(tls_private_key.domino.public_key_openssh)
 }
 
 module "subnets_cidr" {

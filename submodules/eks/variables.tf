@@ -65,6 +65,10 @@ variable "private_subnets" {
     zone_id    = string
     id         = string
   }))
+  validation {
+    condition     = length(var.private_subnets) >= 2
+    error_message = "EKS deployment needs at least 2 subnets. https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html."
+  }
 }
 
 variable "vpc_id" {
