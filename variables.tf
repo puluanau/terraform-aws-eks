@@ -41,7 +41,7 @@ variable "availability_zones" {
 }
 
 
-variable "route53_hosted_zone" {
+variable "route53_hosted_zone_name" {
   type        = string
   description = "AWS Route53 Hosted zone."
 }
@@ -73,43 +73,70 @@ variable "private_cidr_network_bits" {
 variable "node_groups" {
   type = object({
     compute = object({
-      instance_type = string
-      min           = number
-      max           = number
-      desired       = number
+      ami            = optional(string)
+      instance_type  = string
+      min_per_az     = number
+      max_per_az     = number
+      desired_per_az = number
+      volume = object({
+        size = string
+        type = string
+      })
     }),
     platform = object({
-      instance_type = string
-      min           = number
-      max           = number
-      desired       = number
+      ami            = optional(string)
+      instance_type  = string
+      min_per_az     = number
+      max_per_az     = number
+      desired_per_az = number
+      volume = object({
+        size = string
+        type = string
+      })
     }),
     gpu = object({
-      instance_type = string
-      min           = number
-      max           = number
-      desired       = number
+      ami            = optional(string)
+      instance_type  = string
+      min_per_az     = number
+      max_per_az     = number
+      desired_per_az = number
+      volume = object({
+        size = string
+        type = string
+      })
     })
   })
   description = "EKS managed node groups definition."
   default = {
     "compute" = {
-      instance_type = "m5.2xlarge"
-      min           = 0
-      max           = 10
-      desired       = 1
+      instance_type  = "m5.2xlarge"
+      min_per_az     = 0
+      max_per_az     = 10
+      desired_per_az = 1
+      volume = {
+        size = "100"
+        type = "gp3"
+      }
     },
     "platform" = {
-      instance_type = "m5.4xlarge"
-      min           = 0
-      max           = 10
-      desired       = 1
+      instance_type  = "m5.4xlarge"
+      min_per_az     = 0
+      max_per_az     = 10
+      desired_per_az = 1
+      volume = {
+        size = "100"
+        type = "gp3"
+      }
     },
     "gpu" = {
-      instance_type = "g4dn.xlarge"
-      min           = 0
-      max           = 10
-      desired       = 1
+      instance_type  = "g4dn.xlarge"
+      min_per_az     = 0
+      max_per_az     = 10
+      desired_per_az = 0
+      volume = {
+        size = "100"
+        type = "gp3"
+      }
     }
   }
 }
@@ -131,12 +158,6 @@ variable "eks_master_role_names" {
   type        = list(string)
   description = "IAM role names to be added as masters in eks."
   default     = []
-}
-
-variable "enable_route53_iam_policy" {
-  type        = bool
-  description = "Enable route53 IAM policy toggle."
-  default     = false
 }
 
 variable "vpc_id" {
@@ -162,4 +183,10 @@ variable "ssh_pvt_key_name" {
   type        = string
   description = "ssh private key filename."
   default     = "domino.pem"
+}
+
+variable "s3_force_destroy_toggle" {
+  description = "Toogle to allow recursive deletion of all objects in the s3 buckets. if 'false' terraform will NOT be able to delete non-empty buckets"
+  type        = string
+  default     = "false"
 }

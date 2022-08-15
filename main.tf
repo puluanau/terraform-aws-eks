@@ -98,10 +98,10 @@ locals {
 
 
 module "storage" {
-  source                = "./submodules/storage"
-  deploy_id             = var.deploy_id
-  efs_access_point_path = var.efs_access_point_path
-  route53_hosted_zone   = var.route53_hosted_zone
+  source                  = "./submodules/storage"
+  deploy_id               = var.deploy_id
+  efs_access_point_path   = var.efs_access_point_path
+  s3_force_destroy_toggle = var.s3_force_destroy_toggle
   subnets = [for s in local.private_subnets : {
     name       = s.name
     id         = s.id
@@ -131,10 +131,9 @@ module "eks" {
   deploy_id                 = var.deploy_id
   private_subnets           = local.private_subnets
   ssh_pvt_key_name          = aws_key_pair.domino.key_name
-  route53_hosted_zone       = var.route53_hosted_zone
+  route53_hosted_zone_name  = var.route53_hosted_zone_name
   bastion_security_group_id = try(module.bastion[0].security_group_id, "")
   create_bastion_sg         = var.create_bastion
-  enable_route53_iam_policy = var.enable_route53_iam_policy
   kubeconfig_path           = local.kubeconfig_path
   node_groups               = var.node_groups
   s3_buckets                = module.storage.s3_buckets

@@ -10,7 +10,7 @@ output "k8s_tunnel_command" {
 
 output "hostname" {
   description = "Domino instance URL."
-  value       = "${var.deploy_id}.${var.route53_hosted_zone}"
+  value       = "${var.deploy_id}.${var.route53_hosted_zone_name}"
 }
 
 output "efs_filesystem_id" {

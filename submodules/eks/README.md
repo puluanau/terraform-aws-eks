@@ -5,7 +5,7 @@
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.2.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.0 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | >= 3.1.0 |
 
@@ -75,13 +75,12 @@ No modules.
 | <a name="input_deploy_id"></a> [deploy\_id](#input\_deploy\_id) | Domino Deployment ID | `string` | n/a | yes |
 | <a name="input_eks_cluster_addons"></a> [eks\_cluster\_addons](#input\_eks\_cluster\_addons) | EKS cluster addons. | `list(string)` | <pre>[<br>  "vpc-cni",<br>  "kube-proxy",<br>  "coredns"<br>]</pre> | no |
 | <a name="input_eks_security_group_rules"></a> [eks\_security\_group\_rules](#input\_eks\_security\_group\_rules) | EKS security group rules. | `map(any)` | `{}` | no |
-| <a name="input_enable_route53_iam_policy"></a> [enable\_route53\_iam\_policy](#input\_enable\_route53\_iam\_policy) | Enable route53 iam policy toggle. | `bool` | `false` | no |
 | <a name="input_k8s_version"></a> [k8s\_version](#input\_k8s\_version) | EKS cluster k8s version. | `string` | `"1.22"` | no |
 | <a name="input_kubeconfig_path"></a> [kubeconfig\_path](#input\_kubeconfig\_path) | Kubeconfig filename. | `string` | `"kubeconfig"` | no |
-| <a name="input_node_groups"></a> [node\_groups](#input\_node\_groups) | EKS managed node groups definition | `map(map(any))` | <pre>{<br>  "compute": {<br>    "desired": 1,<br>    "instance_type": "m5.2xlarge",<br>    "max": 30,<br>    "min": 0<br>  },<br>  "gpu": {<br>    "desired": 0,<br>    "instance_type": "g4dn.xlarge",<br>    "max": 10,<br>    "min": 0<br>  },<br>  "platform": {<br>    "desired": 1,<br>    "instance_type": "m5.4xlarge",<br>    "max": 10,<br>    "min": 0<br>  }<br>}</pre> | no |
+| <a name="input_node_groups"></a> [node\_groups](#input\_node\_groups) | EKS managed node groups definition. | <pre>object({<br>    compute = object({<br>      ami            = optional(string)<br>      instance_type  = string<br>      min_per_az     = number<br>      max_per_az     = number<br>      desired_per_az = number<br>      volume = object({<br>        size = string<br>        type = string<br>      })<br>    }),<br>    platform = object({<br>      ami            = optional(string)<br>      instance_type  = string<br>      min_per_az     = number<br>      max_per_az     = number<br>      desired_per_az = number<br>      volume = object({<br>        size = string<br>        type = string<br>      })<br>    }),<br>    gpu = object({<br>      ami            = optional(string)<br>      instance_type  = string<br>      min_per_az     = number<br>      max_per_az     = number<br>      desired_per_az = number<br>      volume = object({<br>        size = string<br>        type = string<br>      })<br>    })<br>  })</pre> | n/a | yes |
 | <a name="input_private_subnets"></a> [private\_subnets](#input\_private\_subnets) | Private subnets object | <pre>list(object({<br>    cidr_block = string<br>    name       = string<br>    type       = string<br>    zone       = string<br>    zone_id    = string<br>    id         = string<br>  }))</pre> | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | AWS region for the deployment | `string` | n/a | yes |
-| <a name="input_route53_hosted_zone"></a> [route53\_hosted\_zone](#input\_route53\_hosted\_zone) | Route53 zone | `string` | n/a | yes |
+| <a name="input_route53_hosted_zone_name"></a> [route53\_hosted\_zone\_name](#input\_route53\_hosted\_zone\_name) | Route53 zone | `string` | n/a | yes |
 | <a name="input_s3_buckets"></a> [s3\_buckets](#input\_s3\_buckets) | S3 buckets information that the nodegroups need access to | <pre>list(object({<br>    bucket_name = string<br>    arn         = string<br>  }))</pre> | n/a | yes |
 | <a name="input_ssh_pvt_key_name"></a> [ssh\_pvt\_key\_name](#input\_ssh\_pvt\_key\_name) | ssh private key filename. | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | Deployment tags | `map(string)` | n/a | yes |

@@ -1,7 +1,3 @@
-data "aws_route53_zone" "this" {
-  name         = var.route53_hosted_zone
-  private_zone = false
-}
 data "aws_canonical_user_id" "current" {}
 data "aws_elb_service_account" "this" {}
 

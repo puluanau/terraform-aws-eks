@@ -25,28 +25,42 @@ variable "k8s_version" {
 }
 
 variable "node_groups" {
-  type        = map(map(any))
-  description = "EKS managed node groups definition"
-  default = {
-    "compute" = {
-      instance_type = "m5.2xlarge"
-      min           = 0
-      max           = 30
-      desired       = 1
-    },
-    "platform" = {
-      instance_type = "m5.4xlarge"
-      min           = 0
-      max           = 10
-      desired       = 1
-    },
-    "gpu" = {
-      instance_type = "g4dn.xlarge"
-      min           = 0
-      max           = 10
-      desired       = 0
-    }
-  }
+  description = "EKS managed node groups definition."
+  type = object({
+    compute = object({
+      ami            = optional(string)
+      instance_type  = string
+      min_per_az     = number
+      max_per_az     = number
+      desired_per_az = number
+      volume = object({
+        size = string
+        type = string
+      })
+    }),
+    platform = object({
+      ami            = optional(string)
+      instance_type  = string
+      min_per_az     = number
+      max_per_az     = number
+      desired_per_az = number
+      volume = object({
+        size = string
+        type = string
+      })
+    }),
+    gpu = object({
+      ami            = optional(string)
+      instance_type  = string
+      min_per_az     = number
+      max_per_az     = number
+      desired_per_az = number
+      volume = object({
+        size = string
+        type = string
+      })
+    })
+  })
 }
 
 variable "kubeconfig_path" {
@@ -81,7 +95,7 @@ variable "ssh_pvt_key_name" {
   description = "ssh private key filename."
 }
 
-variable "route53_hosted_zone" {
+variable "route53_hosted_zone_name" {
   type        = string
   description = "Route53 zone"
 }
@@ -90,12 +104,6 @@ variable "bastion_security_group_id" {
   type        = string
   description = "Bastion security group id."
   default     = ""
-}
-
-variable "enable_route53_iam_policy" {
-  type        = bool
-  description = "Enable route53 iam policy toggle."
-  default     = false
 }
 
 variable "eks_cluster_addons" {

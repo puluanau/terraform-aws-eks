@@ -4,7 +4,7 @@ resource "aws_efs_file_system" "eks" {
   provisioned_throughput_in_mibps = "0"
   throughput_mode                 = "bursting"
 
-  tags = merge({ "Name" = "${var.deploy_id}" }, var.tags)
+  tags = merge({ "Name" = var.deploy_id }, var.tags)
 }
 
 resource "aws_security_group" "efs" {

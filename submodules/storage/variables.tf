@@ -16,11 +16,6 @@ variable "efs_access_point_path" {
 
 }
 
-variable "route53_hosted_zone" {
-  type        = string
-  description = "AWS Route53 Hosted zone."
-}
-
 variable "tags" {
   type        = map(string)
   description = "Deployment tags."
@@ -36,7 +31,13 @@ variable "subnets" {
 }
 
 variable "vpc_id" {
-  type        = string
   description = "VPC ID"
+  type        = string
 
+}
+
+variable "s3_force_destroy_toggle" {
+  description = "Toogle to allow recursive deletion of all objects in the s3 buckets. if 'false' terraform will NOT be able to delete non-empty buckets"
+  type        = string
+  default     = "false"
 }

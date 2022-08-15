@@ -12,7 +12,7 @@ data "aws_iam_policy_document" "eks_nodes" {
 }
 
 data "aws_route53_zone" "this" {
-  name         = var.route53_hosted_zone
+  name         = var.route53_hosted_zone_name
   private_zone = false
 }
 
@@ -22,10 +22,23 @@ resource "aws_iam_role" "eks_nodes" {
   tags               = var.tags
 }
 
-## EKS Nodes security-group
 locals {
-  aws_route53_zone_arn = data.aws_route53_zone.this.arn
+  # gpu_bootstrap_extra_args = "--node-labels lifecycle=OnDemand  --node-labels=dominodatalab.com/node-pool=default-gpu,nvidia.com/gpu=true,dominodatalab.com/domino-node=true --register-with-taints=nvidia.com/gpu=true:NoSchedule"
+
+  aws_route53_zone_arn     = data.aws_route53_zone.this.arn
+  gpu_bootstrap_extra_args = ""
+  gpu_user_data = base64encode(templatefile("${path.module}/templates/linux_custom.tpl", {
+    cluster_name             = aws_eks_cluster.this.name
+    cluster_endpoint         = aws_eks_cluster.this.endpoint
+    cluster_auth_base64      = aws_eks_cluster.this.certificate_authority[0].data
+    bootstrap_extra_args     = local.gpu_bootstrap_extra_args
+    pre_bootstrap_user_data  = ""
+    post_bootstrap_user_data = "echo ALL DONE !!!"
+  }))
+  node_group_gpu_ami_id = var.node_groups.gpu.ami != null ? var.node_groups.gpu.ami : data.aws_ami.eks_gpu.image_id
+  # node_group_compute_ami_id = var.node_groups.compute.ami != null ? var.node_groups.compute.ami : data.aws_ami.eks_gpu.image_id
 }
+
 
 resource "aws_security_group" "eks_nodes" {
   name        = "${var.deploy_id}-nodes"
@@ -56,9 +69,6 @@ resource "aws_security_group_rule" "node" {
   )
 }
 
-## END - EKS Nodes security-group
-
-
 data "aws_ami" "eks_gpu" {
   filter {
     name   = "name"
@@ -69,7 +79,12 @@ data "aws_ami" "eks_gpu" {
 }
 
 resource "aws_launch_template" "compute" {
-  name = "${var.deploy_id}-compute"
+  name                    = "${var.deploy_id}-compute"
+  disable_api_termination = "false"
+  instance_type           = var.node_groups.compute.instance_type
+  key_name                = var.ssh_pvt_key_name
+  vpc_security_group_ids  = [aws_security_group.eks_nodes.id]
+  image_id                = var.node_groups.compute.ami
 
   block_device_mappings {
     device_name = "/dev/xvda"
@@ -77,15 +92,10 @@ resource "aws_launch_template" "compute" {
     ebs {
       delete_on_termination = "true"
       encrypted             = "true"
-      volume_size           = "100"
-      volume_type           = "gp3"
+      volume_size           = var.node_groups.compute.volume.size
+      volume_type           = var.node_groups.compute.volume.type
     }
   }
-
-  disable_api_termination = "false"
-  instance_type           = var.node_groups.compute.instance_type
-  key_name                = var.ssh_pvt_key_name
-  vpc_security_group_ids  = [aws_security_group.eks_nodes.id]
 
   metadata_options {
     http_endpoint               = "enabled"
@@ -114,9 +124,9 @@ resource "aws_eks_node_group" "compute" {
   subnet_ids      = [each.value.id]
   tags            = var.tags
   scaling_config {
-    min_size     = var.node_groups.compute.min
-    max_size     = var.node_groups.compute.max
-    desired_size = var.node_groups.compute.desired
+    min_size     = var.node_groups.compute.min_per_az
+    max_size     = var.node_groups.compute.max_per_az
+    desired_size = var.node_groups.compute.desired_per_az
   }
 
   launch_template {
@@ -145,7 +155,12 @@ resource "aws_eks_node_group" "compute" {
 }
 
 resource "aws_launch_template" "platform" {
-  name = "${var.deploy_id}-platform"
+  name                    = "${var.deploy_id}-platform"
+  disable_api_termination = "false"
+  instance_type           = var.node_groups.platform.instance_type
+  key_name                = var.ssh_pvt_key_name
+  vpc_security_group_ids  = [aws_security_group.eks_nodes.id]
+  image_id                = var.node_groups.platform.ami
 
   block_device_mappings {
     device_name = "/dev/xvda"
@@ -153,15 +168,10 @@ resource "aws_launch_template" "platform" {
     ebs {
       delete_on_termination = "true"
       encrypted             = "true"
-      volume_size           = "100"
-      volume_type           = "gp3"
+      volume_size           = var.node_groups.platform.volume.size
+      volume_type           = var.node_groups.platform.volume.type
     }
   }
-
-  disable_api_termination = "false"
-  instance_type           = var.node_groups.platform.instance_type
-  key_name                = var.ssh_pvt_key_name
-  vpc_security_group_ids  = [aws_security_group.eks_nodes.id]
 
   metadata_options {
     http_endpoint               = "enabled"
@@ -190,9 +200,9 @@ resource "aws_eks_node_group" "platform" {
   subnet_ids      = [each.value.id]
   tags            = var.tags
   scaling_config {
-    min_size     = var.node_groups.platform.min
-    max_size     = var.node_groups.platform.max
-    desired_size = var.node_groups.platform.desired
+    min_size     = var.node_groups.platform.min_per_az
+    max_size     = var.node_groups.platform.max_per_az
+    desired_size = var.node_groups.platform.desired_per_az
   }
 
   launch_template {
@@ -220,23 +230,9 @@ resource "aws_eks_node_group" "platform" {
   ]
 }
 
-locals {
-  # gpu_bootstrap_extra_args = "--node-labels lifecycle=OnDemand  --node-labels=dominodatalab.com/node-pool=default-gpu,nvidia.com/gpu=true,dominodatalab.com/domino-node=true --register-with-taints=nvidia.com/gpu=true:NoSchedule"
-  gpu_bootstrap_extra_args = ""
-  gpu_user_data = base64encode(templatefile("${path.module}/templates/linux_custom.tpl", {
-    cluster_name             = aws_eks_cluster.this.name
-    cluster_endpoint         = aws_eks_cluster.this.endpoint
-    cluster_auth_base64      = aws_eks_cluster.this.certificate_authority[0].data
-    bootstrap_extra_args     = local.gpu_bootstrap_extra_args
-    pre_bootstrap_user_data  = ""
-    post_bootstrap_user_data = "echo ALL DONE !!!"
-  }))
-}
-
-
 resource "aws_launch_template" "gpu" {
   name                    = "${var.deploy_id}-gpu"
-  image_id                = data.aws_ami.eks_gpu.image_id
+  image_id                = local.node_group_gpu_ami_id
   disable_api_termination = "false"
   instance_type           = var.node_groups.gpu.instance_type
   key_name                = var.ssh_pvt_key_name
@@ -248,11 +244,10 @@ resource "aws_launch_template" "gpu" {
     ebs {
       delete_on_termination = "true"
       encrypted             = "true"
-      volume_size           = "100"
-      volume_type           = "gp3"
+      volume_size           = var.node_groups.gpu.volume.size
+      volume_type           = var.node_groups.gpu.volume.type
     }
   }
-
 
   metadata_options {
     http_endpoint               = "enabled"
@@ -281,9 +276,9 @@ resource "aws_eks_node_group" "gpu" {
   subnet_ids      = [each.value.id]
   tags            = var.tags
   scaling_config {
-    min_size     = var.node_groups.gpu.min
-    max_size     = var.node_groups.gpu.max
-    desired_size = var.node_groups.gpu.desired
+    min_size     = var.node_groups.gpu.min_per_az
+    max_size     = var.node_groups.gpu.max_per_az
+    desired_size = var.node_groups.gpu.desired_per_az
   }
 
   launch_template {

@@ -252,7 +252,7 @@ data "aws_iam_policy_document" "route53" {
 }
 
 resource "aws_iam_policy" "route53" {
-  count  = var.enable_route53_iam_policy ? 1 : 0
+  count  = var.route53_hosted_zone_name != "" ? 1 : 0
   name   = "${var.deploy_id}-Route53"
   path   = "/"
   policy = data.aws_iam_policy_document.route53.json
@@ -314,7 +314,7 @@ resource "aws_iam_role_policy_attachment" "custom_eks_nodes" {
 }
 
 resource "aws_iam_role_policy_attachment" "custom_eks_nodes_route53" {
-  count      = var.enable_route53_iam_policy ? 1 : 0
+  count      = var.route53_hosted_zone_name != "" ? 1 : 0
   policy_arn = local.eks_custom_node_iam_policies["route53"]
   role       = aws_iam_role.eks_nodes.name
 }

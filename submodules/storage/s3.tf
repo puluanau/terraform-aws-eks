@@ -1,16 +1,9 @@
 
 resource "aws_s3_bucket" "backups" {
   bucket              = "${var.deploy_id}-backups"
-  force_destroy       = "true"
-  hosted_zone_id      = data.aws_route53_zone.this.zone_id
+  force_destroy       = var.s3_force_destroy_toggle
   object_lock_enabled = "false"
   tags                = var.tags
-
-  lifecycle {
-    ignore_changes = [
-      hosted_zone_id,
-    ]
-  }
 }
 
 data "aws_iam_policy_document" "backups" {
@@ -75,16 +68,9 @@ data "aws_iam_policy_document" "backups" {
 
 resource "aws_s3_bucket" "blobs" {
   bucket              = "${var.deploy_id}-blobs"
-  force_destroy       = "true"
-  hosted_zone_id      = data.aws_route53_zone.this.zone_id
+  force_destroy       = var.s3_force_destroy_toggle
   object_lock_enabled = "false"
   tags                = var.tags
-
-  lifecycle {
-    ignore_changes = [
-      hosted_zone_id,
-    ]
-  }
 }
 
 data "aws_iam_policy_document" "blobs" {
@@ -151,16 +137,9 @@ data "aws_iam_policy_document" "blobs" {
 
 resource "aws_s3_bucket" "logs" {
   bucket              = "${var.deploy_id}-logs"
-  force_destroy       = "true"
-  hosted_zone_id      = data.aws_route53_zone.this.zone_id
+  force_destroy       = var.s3_force_destroy_toggle
   object_lock_enabled = "false"
   tags                = var.tags
-
-  lifecycle {
-    ignore_changes = [
-      hosted_zone_id,
-    ]
-  }
 }
 
 data "aws_iam_policy_document" "logs" {
@@ -226,16 +205,9 @@ data "aws_iam_policy_document" "logs" {
 
 resource "aws_s3_bucket" "monitoring" {
   bucket              = "${var.deploy_id}-monitoring"
-  force_destroy       = "true"
-  hosted_zone_id      = data.aws_route53_zone.this.zone_id
+  force_destroy       = var.s3_force_destroy_toggle
   object_lock_enabled = "false"
   tags                = var.tags
-
-  lifecycle {
-    ignore_changes = [
-      hosted_zone_id,
-    ]
-  }
 }
 
 data "aws_iam_policy_document" "monitoring" {
@@ -350,16 +322,9 @@ resource "aws_s3_bucket_acl" "monitoring" {
 
 resource "aws_s3_bucket" "registry" {
   bucket              = "${var.deploy_id}-registry"
-  force_destroy       = "true"
-  hosted_zone_id      = data.aws_route53_zone.this.zone_id
+  force_destroy       = var.s3_force_destroy_toggle
   object_lock_enabled = "false"
   tags                = var.tags
-
-  lifecycle {
-    ignore_changes = [
-      hosted_zone_id,
-    ]
-  }
 }
 
 data "aws_iam_policy_document" "registry" {
