@@ -26,6 +26,7 @@ No modules.
 |------|------|
 | [aws_eks_addon.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_addon) | resource |
 | [aws_eks_cluster.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_cluster) | resource |
+| [aws_eks_node_group.additional_node_groups](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_node_group) | resource |
 | [aws_eks_node_group.compute](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_node_group) | resource |
 | [aws_eks_node_group.gpu](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_node_group) | resource |
 | [aws_eks_node_group.platform](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_node_group) | resource |
@@ -42,6 +43,7 @@ No modules.
 | [aws_iam_role_policy_attachment.custom_eks_nodes_route53](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.eks_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_kms_key.eks_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
+| [aws_launch_template.additional_node_groups](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_template) | resource |
 | [aws_launch_template.compute](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_template) | resource |
 | [aws_launch_template.gpu](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_template) | resource |
 | [aws_launch_template.platform](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_template) | resource |
@@ -70,20 +72,20 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_additional_node_groups"></a> [additional\_node\_groups](#input\_additional\_node\_groups) | Additional EKS managed node groups definition. | <pre>map(object({<br>    name           = string<br>    ami            = optional(string)<br>    instance_type  = string<br>    min_per_az     = number<br>    max_per_az     = number<br>    desired_per_az = number<br>    label          = string<br>    volume = object({<br>      size = string<br>      type = string<br>    })<br>  }))</pre> | `{}` | no |
 | <a name="input_bastion_security_group_id"></a> [bastion\_security\_group\_id](#input\_bastion\_security\_group\_id) | Bastion security group id. | `string` | `""` | no |
 | <a name="input_create_bastion_sg"></a> [create\_bastion\_sg](#input\_create\_bastion\_sg) | Create bastion access rules toggle. | `bool` | n/a | yes |
+| <a name="input_default_node_groups"></a> [default\_node\_groups](#input\_default\_node\_groups) | EKS managed node groups definition. | <pre>object({<br>    compute = object({<br>      name           = string<br>      ami            = optional(string)<br>      instance_type  = string<br>      min_per_az     = number<br>      max_per_az     = number<br>      desired_per_az = number<br>      volume = object({<br>        size = string<br>        type = string<br>      })<br>    }),<br>    platform = object({<br>      name           = string<br>      ami            = optional(string)<br>      instance_type  = string<br>      min_per_az     = number<br>      max_per_az     = number<br>      desired_per_az = number<br>      volume = object({<br>        size = string<br>        type = string<br>      })<br>    }),<br>    gpu = object({<br>      name           = string<br>      ami            = optional(string)<br>      instance_type  = string<br>      min_per_az     = number<br>      max_per_az     = number<br>      desired_per_az = number<br>      volume = object({<br>        size = string<br>        type = string<br>      })<br>    })<br>  })</pre> | n/a | yes |
 | <a name="input_deploy_id"></a> [deploy\_id](#input\_deploy\_id) | Domino Deployment ID | `string` | n/a | yes |
 | <a name="input_eks_cluster_addons"></a> [eks\_cluster\_addons](#input\_eks\_cluster\_addons) | EKS cluster addons. | `list(string)` | <pre>[<br>  "vpc-cni",<br>  "kube-proxy",<br>  "coredns"<br>]</pre> | no |
-| <a name="input_eks_security_group_rules"></a> [eks\_security\_group\_rules](#input\_eks\_security\_group\_rules) | EKS security group rules. | `map(any)` | `{}` | no |
+| <a name="input_eks_security_group_rules"></a> [eks\_security\_group\_rules](#input\_eks\_security\_group\_rules) | EKS security group rules. | <pre>map(object({<br>    security_group_id        = string<br>    protocol                 = string<br>    from_port                = string<br>    to_port                  = string<br>    type                     = string<br>    description              = string<br>    source_security_group_id = string<br>  }))</pre> | `{}` | no |
 | <a name="input_k8s_version"></a> [k8s\_version](#input\_k8s\_version) | EKS cluster k8s version. | `string` | `"1.22"` | no |
-| <a name="input_kubeconfig_path"></a> [kubeconfig\_path](#input\_kubeconfig\_path) | Kubeconfig filename. | `string` | `"kubeconfig"` | no |
-| <a name="input_node_groups"></a> [node\_groups](#input\_node\_groups) | EKS managed node groups definition. | <pre>object({<br>    compute = object({<br>      ami            = optional(string)<br>      instance_type  = string<br>      min_per_az     = number<br>      max_per_az     = number<br>      desired_per_az = number<br>      volume = object({<br>        size = string<br>        type = string<br>      })<br>    }),<br>    platform = object({<br>      ami            = optional(string)<br>      instance_type  = string<br>      min_per_az     = number<br>      max_per_az     = number<br>      desired_per_az = number<br>      volume = object({<br>        size = string<br>        type = string<br>      })<br>    }),<br>    gpu = object({<br>      ami            = optional(string)<br>      instance_type  = string<br>      min_per_az     = number<br>      max_per_az     = number<br>      desired_per_az = number<br>      volume = object({<br>        size = string<br>        type = string<br>      })<br>    })<br>  })</pre> | n/a | yes |
+| <a name="input_kubeconfig_path"></a> [kubeconfig\_path](#input\_kubeconfig\_path) | Kubeconfig file path. | `string` | `"kubeconfig"` | no |
 | <a name="input_private_subnets"></a> [private\_subnets](#input\_private\_subnets) | Private subnets object | <pre>list(object({<br>    cidr_block = string<br>    name       = string<br>    type       = string<br>    zone       = string<br>    zone_id    = string<br>    id         = string<br>  }))</pre> | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | AWS region for the deployment | `string` | n/a | yes |
 | <a name="input_route53_hosted_zone_name"></a> [route53\_hosted\_zone\_name](#input\_route53\_hosted\_zone\_name) | Route53 zone | `string` | n/a | yes |
 | <a name="input_s3_buckets"></a> [s3\_buckets](#input\_s3\_buckets) | S3 buckets information that the nodegroups need access to | <pre>list(object({<br>    bucket_name = string<br>    arn         = string<br>  }))</pre> | n/a | yes |
-| <a name="input_ssh_pvt_key_name"></a> [ssh\_pvt\_key\_name](#input\_ssh\_pvt\_key\_name) | ssh private key filename. | `string` | n/a | yes |
-| <a name="input_tags"></a> [tags](#input\_tags) | Deployment tags | `map(string)` | n/a | yes |
+| <a name="input_ssh_pvt_key_path"></a> [ssh\_pvt\_key\_path](#input\_ssh\_pvt\_key\_path) | SSH private key filepath. | `string` | n/a | yes |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID. | `string` | n/a | yes |
 
 ## Outputs

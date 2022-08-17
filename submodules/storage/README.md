@@ -53,9 +53,9 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_deploy_id"></a> [deploy\_id](#input\_deploy\_id) | Domino Deployment ID | `string` | n/a | yes |
 | <a name="input_efs_access_point_path"></a> [efs\_access\_point\_path](#input\_efs\_access\_point\_path) | Filesystem path for efs. | `string` | `"/domino"` | no |
-| <a name="input_s3_force_destroy_toggle"></a> [s3\_force\_destroy\_toggle](#input\_s3\_force\_destroy\_toggle) | Toogle to allow recursive deletion of all objects in the s3 buckets. if 'false' terraform will NOT be able to delete non-empty buckets | `string` | `"false"` | no |
+| <a name="input_s3_encryption_use_sse_kms_key"></a> [s3\_encryption\_use\_sse\_kms\_key](#input\_s3\_encryption\_use\_sse\_kms\_key) | if true use 'aws:kms' else 'AES256' for the s3 server-side-encryption. | `bool` | `false` | no |
+| <a name="input_s3_force_destroy_on_deletion"></a> [s3\_force\_destroy\_on\_deletion](#input\_s3\_force\_destroy\_on\_deletion) | Toogle to allow recursive deletion of all objects in the s3 buckets. if 'false' terraform will NOT be able to delete non-empty buckets | `bool` | `false` | no |
 | <a name="input_subnets"></a> [subnets](#input\_subnets) | List of subnet ids to create EFS mount targets | <pre>list(object({<br>    name       = string<br>    id         = string<br>    cidr_block = string<br>  }))</pre> | n/a | yes |
-| <a name="input_tags"></a> [tags](#input\_tags) | Deployment tags. | `map(string)` | n/a | yes |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID | `string` | n/a | yes |
 
 ## Outputs

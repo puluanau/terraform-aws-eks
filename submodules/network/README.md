@@ -49,7 +49,6 @@ No modules.
 | <a name="input_private_subnets"></a> [private\_subnets](#input\_private\_subnets) | Private subnets object | <pre>list(object({<br>    cidr_block = string<br>    name       = string<br>    type       = string<br>    zone       = string<br>    zone_id    = string<br>  }))</pre> | n/a | yes |
 | <a name="input_public_subnets"></a> [public\_subnets](#input\_public\_subnets) | Public subnets object | <pre>list(object({<br>    cidr_block = string<br>    name       = string<br>    type       = string<br>    zone       = string<br>    zone_id    = string<br>  }))</pre> | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | AWS region for the deployment | `string` | n/a | yes |
-| <a name="input_tags"></a> [tags](#input\_tags) | Deployment tags | `map(string)` | n/a | yes |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID. | `string` | `""` | no |
 
 ## Outputs

@@ -1,10 +1,12 @@
 resource "aws_efs_file_system" "eks" {
-  encrypted                       = "true"
+  encrypted                       = true
   performance_mode                = "generalPurpose"
   provisioned_throughput_in_mibps = "0"
   throughput_mode                 = "bursting"
 
-  tags = merge({ "Name" = var.deploy_id }, var.tags)
+  tags = {
+    "Name" = var.deploy_id
+  }
 }
 
 resource "aws_security_group" "efs" {
@@ -15,7 +17,9 @@ resource "aws_security_group" "efs" {
   lifecycle {
     create_before_destroy = true
   }
-  tags = merge({ "Name" = "${var.deploy_id}-efs" }, var.tags)
+  tags = {
+    "Name" = "${var.deploy_id}-efs"
+  }
 }
 
 resource "aws_security_group_rule" "efs" {
@@ -52,5 +56,4 @@ resource "aws_efs_access_point" "eks" {
 
     path = var.efs_access_point_path
   }
-  tags = var.tags
 }

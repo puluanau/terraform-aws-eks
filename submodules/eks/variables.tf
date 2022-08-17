@@ -13,21 +13,17 @@ variable "region" {
   description = "AWS region for the deployment"
 }
 
-variable "tags" {
-  type        = map(string)
-  description = "Deployment tags"
-}
-
 variable "k8s_version" {
   type        = string
   description = "EKS cluster k8s version."
   default     = "1.22"
 }
 
-variable "node_groups" {
+variable "default_node_groups" {
   description = "EKS managed node groups definition."
   type = object({
     compute = object({
+      name           = string
       ami            = optional(string)
       instance_type  = string
       min_per_az     = number
@@ -39,6 +35,7 @@ variable "node_groups" {
       })
     }),
     platform = object({
+      name           = string
       ami            = optional(string)
       instance_type  = string
       min_per_az     = number
@@ -50,6 +47,7 @@ variable "node_groups" {
       })
     }),
     gpu = object({
+      name           = string
       ami            = optional(string)
       instance_type  = string
       min_per_az     = number
@@ -63,9 +61,27 @@ variable "node_groups" {
   })
 }
 
+variable "additional_node_groups" {
+  description = "Additional EKS managed node groups definition."
+  type = map(object({
+    name           = string
+    ami            = optional(string)
+    instance_type  = string
+    min_per_az     = number
+    max_per_az     = number
+    desired_per_az = number
+    label          = string
+    volume = object({
+      size = string
+      type = string
+    })
+  }))
+  default = {}
+}
+
 variable "kubeconfig_path" {
   type        = string
-  description = "Kubeconfig filename."
+  description = "Kubeconfig file path."
   default     = "kubeconfig"
 }
 
@@ -90,9 +106,9 @@ variable "vpc_id" {
   description = "VPC ID."
 }
 
-variable "ssh_pvt_key_name" {
+variable "ssh_pvt_key_path" {
   type        = string
-  description = "ssh private key filename."
+  description = "SSH private key filepath."
 }
 
 variable "route53_hosted_zone_name" {
@@ -110,18 +126,25 @@ variable "eks_cluster_addons" {
   type        = list(string)
   description = "EKS cluster addons."
   default     = ["vpc-cni", "kube-proxy", "coredns"]
-  # default     = ["vpc-cni", "kube-proxy", "coredns", "aws-ebs-csi-driver"]
 }
 
 variable "eks_security_group_rules" {
-  type        = map(any)
   description = "EKS security group rules."
-  default     = {}
+  type = map(object({
+    security_group_id        = string
+    protocol                 = string
+    from_port                = string
+    to_port                  = string
+    type                     = string
+    description              = string
+    source_security_group_id = string
+  }))
+  default = {}
 }
 
 variable "create_bastion_sg" {
-  type        = bool
   description = "Create bastion access rules toggle."
+  type        = bool
 }
 
 variable "s3_buckets" {

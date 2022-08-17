@@ -4,14 +4,11 @@ resource "aws_subnet" "public" {
   availability_zone_id = each.value.zone_id
   vpc_id               = local.vpc_id
   cidr_block           = each.value.cidr_block
-  tags = merge(
-    {
-      "Name"                                   = each.value.name,
-      "kubernetes.io/role/elb"                 = "1",
-      "kubernetes.io/cluster/${var.deploy_id}" = "shared",
-    },
-    var.tags
-  )
+  tags = {
+    "Name"                                   = each.value.name,
+    "kubernetes.io/role/elb"                 = "1",
+    "kubernetes.io/cluster/${var.deploy_id}" = "shared",
+  }
 }
 
 resource "aws_subnet" "private" {
@@ -20,12 +17,9 @@ resource "aws_subnet" "private" {
   availability_zone_id = each.value.zone_id
   vpc_id               = local.vpc_id
   cidr_block           = each.value.cidr_block
-  tags = merge(
-    {
-      "Name"                                   = each.value.name,
-      "kubernetes.io/role/internal-elb"        = "1",
-      "kubernetes.io/cluster/${var.deploy_id}" = "shared",
-    },
-    var.tags
-  )
+  tags = {
+    "Name"                                   = each.value.name,
+    "kubernetes.io/role/internal-elb"        = "1",
+    "kubernetes.io/cluster/${var.deploy_id}" = "shared",
+  }
 }

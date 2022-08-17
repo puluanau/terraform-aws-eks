@@ -44,7 +44,7 @@ No modules.
 | <a name="input_mallory_local_normal_port"></a> [mallory\_local\_normal\_port](#input\_mallory\_local\_normal\_port) | Mallory k8s tunnel normal port. | `string` | `"1315"` | no |
 | <a name="input_mallory_local_smart_port"></a> [mallory\_local\_smart\_port](#input\_mallory\_local\_smart\_port) | Mallory k8s tunnel smart(filters based on the blocked list) port. | `string` | `"1316"` | no |
 | <a name="input_managed_nodes_role_arns"></a> [managed\_nodes\_role\_arns](#input\_managed\_nodes\_role\_arns) | EKS managed nodes arns to be added to aws-auth for api auth. | `list(string)` | n/a | yes |
-| <a name="input_ssh_pvt_key_name"></a> [ssh\_pvt\_key\_name](#input\_ssh\_pvt\_key\_name) | ssh private key filename. | `string` | `"domino.pem"` | no |
+| <a name="input_ssh_pvt_key_path"></a> [ssh\_pvt\_key\_path](#input\_ssh\_pvt\_key\_path) | SSH private key filepath. | `string` | n/a | yes |
 
 ## Outputs
 

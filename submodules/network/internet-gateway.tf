@@ -1,6 +1,8 @@
 resource "aws_internet_gateway" "igw" {
   # vpc_id = local.vpc_id
-  tags = merge({ "Name" = "${var.deploy_id}-domino-igw" }, var.tags)
+  tags = {
+    "Name" = "${var.deploy_id}-domino-igw"
+  }
 }
 
 
@@ -15,6 +17,8 @@ resource "aws_eip" "public" {
   network_border_group = var.region
   public_ipv4_pool     = "amazon"
   vpc                  = true
-  tags                 = merge({ "Name" = each.value.name }, var.tags)
-  depends_on           = [aws_internet_gateway.igw]
+  tags = {
+    "Name" = each.value.name
+  }
+  depends_on = [aws_internet_gateway.igw]
 }

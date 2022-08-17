@@ -2,7 +2,21 @@
 data "aws_iam_policy_document" "kms_key" {
   statement {
     actions = [
-      "kms:Create*", "kms:Describe*", "kms:Enable*", "kms:List*", "kms:Put*", "kms:Update*", "kms:Revoke*", "kms:Disable*", "kms:Get*", "kms:Delete*", "kms:ScheduleKeyDeletion", "kms:CancelKeyDeletion", "kubeconms:GenerateDataKey", "kms:TagResource", "kms:UntagResource"
+      "kms:Create*",
+      "kms:Describe*",
+      "kms:Enable*",
+      "kms:List*",
+      "kms:Put*",
+      "kms:Update*",
+      "kms:Revoke*",
+      "kms:Disable*",
+      "kms:Get*",
+      "kms:Delete*",
+      "kms:ScheduleKeyDeletion",
+      "kms:CancelKeyDeletion",
+      "kubeconms:GenerateDataKey",
+      "kms:TagResource",
+      "kms:UntagResource"
     ]
     resources = ["*"]
     effect    = "Allow"
@@ -15,17 +29,16 @@ data "aws_iam_policy_document" "kms_key" {
 
 resource "aws_kms_key" "eks_cluster" {
   customer_master_key_spec = "SYMMETRIC_DEFAULT"
-  enable_key_rotation      = "true"
-  is_enabled               = "true"
+  enable_key_rotation      = true
+  is_enabled               = true
   key_usage                = "ENCRYPT_DECRYPT"
-  multi_region             = "false"
+  multi_region             = false
   policy                   = data.aws_iam_policy_document.kms_key.json
-  tags                     = merge({ "Name" = "${var.deploy_id}-eks-cluster" }, var.tags)
-
+  tags = {
+    "Name" = "${var.deploy_id}-eks-cluster"
+  }
 }
-## END - EKS key
 
-## EKS security-group
 resource "aws_security_group" "eks_cluster" {
   name        = "${var.deploy_id}-cluster"
   description = "EKS cluster security group"
@@ -34,7 +47,9 @@ resource "aws_security_group" "eks_cluster" {
   lifecycle {
     create_before_destroy = true
   }
-  tags = merge({ "Name" = "${var.deploy_id}-eks-cluster" }, var.tags)
+  tags = {
+    "Name" = "${var.deploy_id}-eks-cluster"
+  }
 }
 
 resource "aws_security_group_rule" "eks_cluster" {
@@ -58,7 +73,6 @@ resource "aws_eks_cluster" "this" {
   role_arn                  = aws_iam_role.eks_cluster.arn
   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
   version                   = var.k8s_version
-  tags                      = var.tags
 
   encryption_config {
     provider {
@@ -74,8 +88,8 @@ resource "aws_eks_cluster" "this" {
 
 
   vpc_config {
-    endpoint_private_access = "true"
-    endpoint_public_access  = "false"
+    endpoint_private_access = true
+    endpoint_public_access  = false
     security_group_ids      = [aws_security_group.eks_cluster.id]
     subnet_ids              = [for sb in var.private_subnets : sb.id]
   }
@@ -93,13 +107,14 @@ resource "aws_eks_addon" "this" {
     aws_eks_node_group.platform,
     aws_eks_node_group.gpu,
   ]
-
-  tags = var.tags
 }
 
 resource "null_resource" "kubeconfig" {
   provisioner "local-exec" {
-    command = "export KUBECONFIG=${var.kubeconfig_path}  && aws eks update-kubeconfig --region ${var.region} --name ${aws_eks_cluster.this.name}"
+    environment = {
+      KUBECONFIG = var.kubeconfig_path
+    }
+    command = "aws eks update-kubeconfig --region ${var.region} --name ${aws_eks_cluster.this.name}"
   }
   triggers = {
     domino_eks_cluster_ca = aws_eks_cluster.this.certificate_authority[0].data

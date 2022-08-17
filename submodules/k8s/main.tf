@@ -9,7 +9,7 @@ locals {
   mallory_config_filename       = "mallory.json"
   mallory_container_name        = "mallory_k8s_tunnel"
   mallory_config_path_container = "/root/.config/${local.mallory_config_filename}"
-  pvt_key_path_container        = "/root/${basename(var.ssh_pvt_key_name)}"
+  pvt_key_path_container        = "/root/${basename(var.ssh_pvt_key_path)}"
   k8s_functions_sh_filename     = "k8s-functions.sh"
   k8s_functions_sh_template     = "k8s-functions.sh.tftpl"
   k8s_pre_setup_sh_filename     = "k8s-pre-setup.sh"
@@ -21,7 +21,7 @@ locals {
     custom_resources_url = "https://raw.githubusercontent.com/aws/amazon-vpc-cni-k8s/${var.calico_version}/config/master/calico-crs.yaml"
   }
 
-  k8s_tunnel_command = "docker run --rm --name ${local.mallory_container_name} -d -v $PWD/${local.mallory_config_filename}:${local.mallory_config_path_container} -p ${var.mallory_local_normal_port}:${var.mallory_local_normal_port} -p ${var.mallory_local_smart_port}:${var.mallory_local_smart_port} -v ${var.ssh_pvt_key_name}:${local.pvt_key_path_container} zoobab/mallory"
+  k8s_tunnel_command = "docker run --rm --name ${local.mallory_container_name} -d -v $PWD/${local.mallory_config_filename}:${local.mallory_config_path_container} -p ${var.mallory_local_normal_port}:${var.mallory_local_normal_port} -p ${var.mallory_local_smart_port}:${var.mallory_local_smart_port} -v ${var.ssh_pvt_key_path}:${local.pvt_key_path_container} zoobab/mallory"
 
   resources_directory = "${path.cwd}/resources/${var.deploy_id}"
   templates_dir       = "${path.module}/templates"

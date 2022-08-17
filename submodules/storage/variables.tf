@@ -16,11 +16,6 @@ variable "efs_access_point_path" {
 
 }
 
-variable "tags" {
-  type        = map(string)
-  description = "Deployment tags."
-}
-
 variable "subnets" {
   type = list(object({
     name       = string
@@ -36,8 +31,14 @@ variable "vpc_id" {
 
 }
 
-variable "s3_force_destroy_toggle" {
+variable "s3_force_destroy_on_deletion" {
   description = "Toogle to allow recursive deletion of all objects in the s3 buckets. if 'false' terraform will NOT be able to delete non-empty buckets"
-  type        = string
-  default     = "false"
+  type        = bool
+  default     = false
+}
+
+variable "s3_encryption_use_sse_kms_key" {
+  description = "if true use 'aws:kms' else 'AES256' for the s3 server-side-encryption."
+  type        = bool
+  default     = false
 }

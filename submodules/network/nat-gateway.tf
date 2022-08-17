@@ -3,6 +3,9 @@ resource "aws_nat_gateway" "ngw" {
   allocation_id     = aws_eip.public[each.value.name].allocation_id
   connectivity_type = "public"
   subnet_id         = aws_subnet.public[each.value.name].id
-  tags              = merge({ "Name" = each.value.name }, { "zone" = each.value.zone }, var.tags)
-  depends_on        = [aws_internet_gateway.igw]
+  tags = {
+    "Name" = each.value.name
+    "zone" = each.value.zone
+  }
+  depends_on = [aws_internet_gateway.igw]
 }

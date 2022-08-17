@@ -2,11 +2,11 @@
 
 # Check the zones where the instance types are being offered
 data "aws_ec2_instance_type_offerings" "nodes" {
-  for_each = var.node_groups
+  for_each = merge(var.default_node_groups, var.additional_node_groups)
 
   filter {
     name = "instance-type"
-    # values = toset([for i in var.node_groups : i.instance_type])
+    # values = toset([for i in var.default_node_groups : i.instance_type])
     values = [each.value.instance_type]
   }
 
@@ -32,42 +32,45 @@ data "aws_availability_zones" "available" {
 
 locals {
   # Get zones where ALL instance types are offered(intersection).
-  zone_intersection_instance_offerings = setintersection(toset(data.aws_ec2_instance_type_offerings.nodes["compute"].locations), toset(data.aws_ec2_instance_type_offerings.nodes["platform"].locations), toset(data.aws_ec2_instance_type_offerings.nodes["gpu"].locations))
+  zone_intersection_instance_offerings = setintersection([for k, v in data.aws_ec2_instance_type_offerings.nodes : toset(v.locations)]...)
   # Get the zones that are available and offered in the region for the instance types.
   az_names           = length(var.availability_zones) > 0 ? var.availability_zones : data.aws_availability_zones.available.names
   offered_azs        = setintersection(local.zone_intersection_instance_offerings, toset(local.az_names))
   available_azs_data = zipmap(data.aws_availability_zones.available.names, data.aws_availability_zones.available.zone_ids)
   # Getting the required azs name and id.
-  availability_zones = { for name in slice(tolist(local.offered_azs), 0, var.number_of_azs) : name => local.available_azs_data[name] }
-  bastion_user       = "ec2-user"
-  ssh_pvt_key_path   = "resources/${var.deploy_id}/${var.ssh_pvt_key_name}"
-  kubeconfig_path    = "resources/${var.deploy_id}/kubeconfig"
+
+  bastion_user     = "ec2-user"
+  working_dir      = path.cwd
+  ssh_pvt_key_path = "${local.working_dir}/${var.ssh_pvt_key_path}"
+  kubeconfig_path  = "${local.working_dir}/kubeconfig"
 }
 
 # Validate that the number of offered and available zones satisfy the number of required zones. https://github.com/hashicorp/terraform/issues/31122 may result in a more elegant validation and deprecation of the null_data_source
 data "null_data_source" "validate_zones" {
+  inputs = {
+    validated = true
+  }
   lifecycle {
     precondition {
       condition     = length(local.offered_azs) >= var.number_of_azs
-      error_message = "Availability of the instance types does not satisfy the number of zones"
+      error_message = "Availability of the instance types does not satisfy the desired number of zones, or the desired number of zones is higher than the available/offered zones"
     }
   }
 }
 
-## Creating SSH pvt key to access bastion and EKS nodes
-resource "tls_private_key" "domino" {
-  algorithm = "RSA"
+locals {
+  availability_zones = { for name in slice(tolist(local.offered_azs), 0, var.number_of_azs) : name => local.available_azs_data[name] if data.null_data_source.validate_zones.outputs["validated"] }
 }
 
-resource "local_sensitive_file" "pvt_key" {
-  content         = tls_private_key.domino.private_key_openssh
-  file_permission = "0400"
-  filename        = local.ssh_pvt_key_path
+## Importing SSH pvt key to access bastion and EKS nodes
+
+data "tls_public_key" "domino" {
+  private_key_openssh = file(var.ssh_pvt_key_path)
 }
 
 resource "aws_key_pair" "domino" {
   key_name   = var.deploy_id
-  public_key = trimspace(tls_private_key.domino.public_key_openssh)
+  public_key = trimspace(data.tls_public_key.domino.public_key_openssh)
 }
 
 module "subnets_cidr" {
@@ -88,7 +91,6 @@ module "network" {
   base_cidr_block          = var.base_cidr_block
   vpc_id                   = var.vpc_id
   monitoring_s3_bucket_arn = module.storage.monitoring_s3_bucket_arn
-  tags                     = var.tags
 }
 
 locals {
@@ -98,17 +100,16 @@ locals {
 
 
 module "storage" {
-  source                  = "./submodules/storage"
-  deploy_id               = var.deploy_id
-  efs_access_point_path   = var.efs_access_point_path
-  s3_force_destroy_toggle = var.s3_force_destroy_toggle
+  source                       = "./submodules/storage"
+  deploy_id                    = var.deploy_id
+  efs_access_point_path        = var.efs_access_point_path
+  s3_force_destroy_on_deletion = var.s3_force_destroy_on_deletion
   subnets = [for s in local.private_subnets : {
     name       = s.name
     id         = s.id
     cidr_block = s.cidr_block
   }]
   vpc_id = module.network.vpc_id
-  tags   = var.tags
 }
 
 module "bastion" {
@@ -118,9 +119,9 @@ module "bastion" {
   region                   = var.region
   vpc_id                   = module.network.vpc_id
   deploy_id                = var.deploy_id
-  ssh_pvt_key_name         = aws_key_pair.domino.key_name
+  ssh_pvt_key_path         = aws_key_pair.domino.key_name
   bastion_public_subnet_id = local.public_subnets[0].id
-  tags                     = var.tags
+  bastion_ami_id           = var.bastion_ami_id
 }
 
 module "eks" {
@@ -130,21 +131,21 @@ module "eks" {
   vpc_id                    = module.network.vpc_id
   deploy_id                 = var.deploy_id
   private_subnets           = local.private_subnets
-  ssh_pvt_key_name          = aws_key_pair.domino.key_name
+  ssh_pvt_key_path          = aws_key_pair.domino.key_name
   route53_hosted_zone_name  = var.route53_hosted_zone_name
   bastion_security_group_id = try(module.bastion[0].security_group_id, "")
   create_bastion_sg         = var.create_bastion
   kubeconfig_path           = local.kubeconfig_path
-  node_groups               = var.node_groups
+  default_node_groups       = var.default_node_groups
+  additional_node_groups    = var.additional_node_groups
   s3_buckets                = module.storage.s3_buckets
-  tags                      = var.tags
 }
 
 
 module "k8s_setup" {
   source                  = "./submodules/k8s"
   deploy_id               = var.deploy_id
-  ssh_pvt_key_name        = abspath(local.ssh_pvt_key_path)
+  ssh_pvt_key_path        = abspath(local.ssh_pvt_key_path)
   bastion_user            = local.bastion_user
   bastion_public_ip       = try(module.bastion[0].public_ip, "")
   k8s_cluster_endpoint    = module.eks.cluster_endpoint

@@ -27,8 +27,3 @@ output "deploy_id" {
   description = "Deployment ID."
   value       = var.deploy_id
 }
-
-output "zone_validation" {
-  description = "UNUSED, To silence TFLint unused resource warning"
-  value       = data.null_data_source.validate_zones.id
-}

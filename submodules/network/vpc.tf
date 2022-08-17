@@ -8,11 +8,13 @@ data "aws_vpc" "this" {
 
 resource "aws_vpc" "this" {
   count                            = var.vpc_id != "" ? 0 : 1
-  assign_generated_ipv6_cidr_block = "false"
+  assign_generated_ipv6_cidr_block = false
   cidr_block                       = var.base_cidr_block
   enable_dns_hostnames             = true
   enable_dns_support               = true
-  tags                             = merge({ "Name" = var.deploy_id }, var.tags)
+  tags = {
+    "Name" = var.deploy_id
+  }
 }
 
 locals {
@@ -28,7 +30,9 @@ resource "aws_vpc_endpoint" "s3" {
     [for s in aws_route_table.private : s.id]
   )
 
-  tags = merge({ "Name" = "${var.deploy_id}-s3" }, var.tags)
+  tags = {
+    "Name" = "${var.deploy_id}-s3"
+  }
 }
 
 data "aws_network_acls" "default" {
@@ -73,8 +77,6 @@ resource "aws_default_network_acl" "default" {
   lifecycle {
     ignore_changes = [subnet_ids]
   }
-
-  tags = var.tags
 }
 
 resource "aws_flow_log" "this" {

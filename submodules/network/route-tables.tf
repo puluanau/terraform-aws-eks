@@ -5,14 +5,11 @@ resource "aws_route_table" "public" {
     gateway_id = aws_internet_gateway.igw.id
   }
   vpc_id = local.vpc_id
-  tags = merge(
-    {
-      "Name"                                   = each.value.name,
-      "kubernetes.io/role/elb"                 = "1",
-      "kubernetes.io/cluster/${var.deploy_id}" = "shared",
-    },
-    var.tags
-  )
+  tags = {
+    "Name"                                   = each.value.name,
+    "kubernetes.io/role/elb"                 = "1",
+    "kubernetes.io/cluster/${var.deploy_id}" = "shared",
+  }
 
 }
 
@@ -29,15 +26,11 @@ resource "aws_route_table" "private" {
     nat_gateway_id = aws_nat_gateway.ngw[each.value.zone].id
   }
   vpc_id = local.vpc_id
-  tags = merge(
-    {
-      "Name"                                   = each.value.name,
-      "kubernetes.io/role/internal-elb"        = "1",
-      "kubernetes.io/cluster/${var.deploy_id}" = "shared",
-    },
-    var.tags
-  )
-
+  tags = {
+    "Name"                                   = each.value.name,
+    "kubernetes.io/role/internal-elb"        = "1",
+    "kubernetes.io/cluster/${var.deploy_id}" = "shared",
+  }
 }
 
 resource "aws_route_table_association" "private" {

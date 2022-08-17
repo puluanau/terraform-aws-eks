@@ -8,52 +8,61 @@ variable "deploy_id" {
   }
 }
 
-variable "region" {
+variable "bastion_ami_id" {
+  description = "AMI ID for the bastion EC2 instance, otherwise we will use the latest 'amazon_linux_2' ami."
   type        = string
-  description = "AWS region for the deployment"
+  default     = ""
 }
-
-variable "tags" {
-  type        = map(string)
-  description = "Deployment tags"
+variable "region" {
+  description = "AWS region for the deployment"
+  type        = string
 }
 
 variable "vpc_id" {
-  type        = string
   description = "VPC ID."
+  type        = string
 }
 
-variable "ssh_pvt_key_name" {
+variable "ssh_pvt_key_path" {
+  description = "SSH private key filepath."
   type        = string
-  description = "ssh private key filename."
 }
 
 variable "bastion_public_subnet_id" {
-  type        = string
   description = "Public subnet to create bastion host in."
+  type        = string
 }
 
 variable "bastion_security_group_rules" {
-  type = map(any)
 
   description = "Bastion host security group rules."
+  type = map(object({
+    protocol                 = string
+    from_port                = string
+    to_port                  = string
+    type                     = string
+    description              = string
+    cidr_blocks              = list(string)
+    source_security_group_id = string
+
+  }))
 
   default = {
     bastion_outbound_traffic = {
-      description              = "Allow all outbound traffic by default"
       protocol                 = "-1"
       from_port                = "0"
       to_port                  = "0"
       type                     = "egress"
+      description              = "Allow all outbound traffic by default"
       cidr_blocks              = ["0.0.0.0/0"]
       source_security_group_id = null
     }
     bastion_inbound_ssh = {
-      description              = "Inbound ssh"
       protocol                 = "-1"
       from_port                = "22"
       to_port                  = "22"
       type                     = "ingress"
+      description              = "Inbound ssh"
       cidr_blocks              = ["0.0.0.0/0"]
       source_security_group_id = null
     }

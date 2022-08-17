@@ -14,10 +14,9 @@ variable "kubeconfig_path" {
   default     = "kubeconfig"
 }
 
-variable "ssh_pvt_key_name" {
+variable "ssh_pvt_key_path" {
   type        = string
-  description = "ssh private key filename."
-  default     = "domino.pem"
+  description = "SSH private key filepath."
 }
 
 

@@ -14,11 +14,6 @@ variable "region" {
   description = "AWS region for the deployment"
 }
 
-variable "tags" {
-  type        = map(string)
-  description = "Deployment tags"
-}
-
 variable "base_cidr_block" {
   type        = string
   description = "CIDR block to serve the main private and public subnets"

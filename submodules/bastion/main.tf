@@ -16,7 +16,9 @@ resource "aws_security_group" "bastion" {
     create_before_destroy = true
   }
 
-  tags = merge({ "Name" = "${var.deploy_id}-bastion" }, var.tags)
+  tags = {
+    "Name" = "${var.deploy_id}-bastion"
+  }
 }
 resource "aws_security_group_rule" "bastion" {
   for_each = var.bastion_security_group_rules
@@ -55,7 +57,9 @@ data "aws_iam_policy_document" "bastion" {
 resource "aws_iam_role" "bastion" {
   assume_role_policy = data.aws_iam_policy_document.bastion.json
   name               = "${var.deploy_id}-bastion"
-  tags               = merge({ "Name" = "${var.deploy_id}-bastion" }, var.tags)
+  tags = {
+    "Name" = "${var.deploy_id}-bastion"
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "bastion" {
@@ -68,8 +72,8 @@ resource "aws_iam_instance_profile" "bastion" {
   role = aws_iam_role.bastion.name
 }
 
-
 data "aws_ami" "amazon_linux_2" {
+  count       = var.bastion_ami_id == "" ? 1 : 0
   most_recent = true
   owners      = ["amazon"]
 
@@ -79,9 +83,13 @@ data "aws_ami" "amazon_linux_2" {
   }
 }
 
+locals {
+  bastion_ami_id = var.bastion_ami_id != "" ? var.bastion_ami_id : data.aws_ami.amazon_linux_2[0].id
+}
+
 resource "aws_instance" "bastion" {
-  ami                         = data.aws_ami.amazon_linux_2.id
-  associate_public_ip_address = "true"
+  ami                         = local.bastion_ami_id
+  associate_public_ip_address = true
   iam_instance_profile        = aws_iam_instance_profile.bastion.name
   monitoring                  = true
 
@@ -89,18 +97,18 @@ resource "aws_instance" "bastion" {
     capacity_reservation_preference = "open"
   }
 
-  disable_api_termination = "false"
-  ebs_optimized           = "false"
+  disable_api_termination = false
+  ebs_optimized           = false
 
   enclave_options {
-    enabled = "false"
+    enabled = false
   }
 
-  get_password_data                    = "false"
-  hibernation                          = "false"
+  get_password_data                    = false
+  hibernation                          = false
   instance_initiated_shutdown_behavior = "stop"
   instance_type                        = "t2.micro"
-  key_name                             = var.ssh_pvt_key_name
+  key_name                             = var.ssh_pvt_key_path
 
   metadata_options {
     http_endpoint               = "enabled"
@@ -110,19 +118,21 @@ resource "aws_instance" "bastion" {
   }
 
   root_block_device {
-    delete_on_termination = "true"
-    encrypted             = "true"
+    delete_on_termination = true
+    encrypted             = true
     iops                  = "3000"
     throughput            = "125"
     volume_size           = "40"
     volume_type           = "gp3"
   }
 
-  source_dest_check = "true"
+  source_dest_check = true
   subnet_id         = var.bastion_public_subnet_id
 
   vpc_security_group_ids = [aws_security_group.bastion.id]
-  tags                   = merge({ "Name" = "${var.deploy_id}-bastion" }, var.tags)
+  tags = {
+    "Name" = "${var.deploy_id}-bastion"
+  }
   lifecycle {
     ignore_changes = [
       root_block_device[0].tags,
@@ -133,8 +143,7 @@ resource "aws_instance" "bastion" {
 resource "aws_eip" "bastion" {
   instance             = aws_instance.bastion.id
   network_border_group = var.region
-  vpc                  = "true"
-  tags                 = var.tags
+  vpc                  = true
 }
 
 data "aws_iam_policy_document" "bastion_assume_role" {

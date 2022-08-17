@@ -1,9 +1,12 @@
 
+locals {
+  s3_server_side_encryption = var.s3_encryption_use_sse_kms_key ? "aws:kms" : "AES256"
+}
 resource "aws_s3_bucket" "backups" {
   bucket              = "${var.deploy_id}-backups"
-  force_destroy       = var.s3_force_destroy_toggle
-  object_lock_enabled = "false"
-  tags                = var.tags
+  force_destroy       = var.s3_force_destroy_on_deletion
+  object_lock_enabled = false
+
 }
 
 data "aws_iam_policy_document" "backups" {
@@ -38,7 +41,7 @@ data "aws_iam_policy_document" "backups" {
     condition {
       test     = "StringNotEquals"
       variable = "s3:x-amz-server-side-encryption"
-      values   = ["AES256"]
+      values   = [local.s3_server_side_encryption]
     }
 
     principals {
@@ -68,9 +71,9 @@ data "aws_iam_policy_document" "backups" {
 
 resource "aws_s3_bucket" "blobs" {
   bucket              = "${var.deploy_id}-blobs"
-  force_destroy       = var.s3_force_destroy_toggle
-  object_lock_enabled = "false"
-  tags                = var.tags
+  force_destroy       = var.s3_force_destroy_on_deletion
+  object_lock_enabled = false
+
 }
 
 data "aws_iam_policy_document" "blobs" {
@@ -107,7 +110,7 @@ data "aws_iam_policy_document" "blobs" {
     condition {
       test     = "StringNotEquals"
       variable = "s3:x-amz-server-side-encryption"
-      values   = ["AES256"]
+      values   = [local.s3_server_side_encryption]
     }
 
     principals {
@@ -137,9 +140,9 @@ data "aws_iam_policy_document" "blobs" {
 
 resource "aws_s3_bucket" "logs" {
   bucket              = "${var.deploy_id}-logs"
-  force_destroy       = var.s3_force_destroy_toggle
-  object_lock_enabled = "false"
-  tags                = var.tags
+  force_destroy       = var.s3_force_destroy_on_deletion
+  object_lock_enabled = false
+
 }
 
 data "aws_iam_policy_document" "logs" {
@@ -175,7 +178,7 @@ data "aws_iam_policy_document" "logs" {
     condition {
       test     = "StringNotEquals"
       variable = "s3:x-amz-server-side-encryption"
-      values   = ["AES256"]
+      values   = [local.s3_server_side_encryption]
     }
 
     principals {
@@ -205,9 +208,9 @@ data "aws_iam_policy_document" "logs" {
 
 resource "aws_s3_bucket" "monitoring" {
   bucket              = "${var.deploy_id}-monitoring"
-  force_destroy       = var.s3_force_destroy_toggle
-  object_lock_enabled = "false"
-  tags                = var.tags
+  force_destroy       = var.s3_force_destroy_on_deletion
+  object_lock_enabled = false
+
 }
 
 data "aws_iam_policy_document" "monitoring" {
@@ -322,9 +325,9 @@ resource "aws_s3_bucket_acl" "monitoring" {
 
 resource "aws_s3_bucket" "registry" {
   bucket              = "${var.deploy_id}-registry"
-  force_destroy       = var.s3_force_destroy_toggle
-  object_lock_enabled = "false"
-  tags                = var.tags
+  force_destroy       = var.s3_force_destroy_on_deletion
+  object_lock_enabled = false
+
 }
 
 data "aws_iam_policy_document" "registry" {
@@ -358,7 +361,7 @@ data "aws_iam_policy_document" "registry" {
     condition {
       test     = "StringNotEquals"
       variable = "s3:x-amz-server-side-encryption"
-      values   = ["AES256"]
+      values   = [local.s3_server_side_encryption]
     }
 
     principals {
@@ -398,9 +401,9 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "buckets_encryptio
   bucket = each.value.bucket_name
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      sse_algorithm = local.s3_server_side_encryption
     }
-    bucket_key_enabled = "false"
+    bucket_key_enabled = false
   }
 }
 

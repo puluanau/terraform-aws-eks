@@ -70,9 +70,10 @@ variable "private_cidr_network_bits" {
   default     = 19
 }
 
-variable "node_groups" {
+variable "default_node_groups" {
   type = object({
     compute = object({
+      name           = string
       ami            = optional(string)
       instance_type  = string
       min_per_az     = number
@@ -84,6 +85,7 @@ variable "node_groups" {
       })
     }),
     platform = object({
+      name           = string
       ami            = optional(string)
       instance_type  = string
       min_per_az     = number
@@ -95,6 +97,7 @@ variable "node_groups" {
       })
     }),
     gpu = object({
+      name           = string
       ami            = optional(string)
       instance_type  = string
       min_per_az     = number
@@ -109,6 +112,7 @@ variable "node_groups" {
   description = "EKS managed node groups definition."
   default = {
     "compute" = {
+      name           = "compute"
       instance_type  = "m5.2xlarge"
       min_per_az     = 0
       max_per_az     = 10
@@ -119,6 +123,7 @@ variable "node_groups" {
       }
     },
     "platform" = {
+      name           = "platform"
       instance_type  = "m5.4xlarge"
       min_per_az     = 0
       max_per_az     = 10
@@ -129,6 +134,7 @@ variable "node_groups" {
       }
     },
     "gpu" = {
+      name           = "gpu"
       instance_type  = "g4dn.xlarge"
       min_per_az     = 0
       max_per_az     = 10
@@ -139,6 +145,24 @@ variable "node_groups" {
       }
     }
   }
+}
+
+variable "additional_node_groups" {
+  description = "Additional EKS managed node groups definition."
+  type = map(object({
+    ami            = optional(string)
+    name           = string
+    instance_type  = string
+    min_per_az     = number
+    max_per_az     = number
+    desired_per_az = number
+    label          = string
+    volume = object({
+      size = string
+      type = string
+    })
+  }))
+  default = {}
 }
 
 variable "base_cidr_block" {
@@ -172,6 +196,12 @@ variable "create_bastion" {
   default     = false
 }
 
+variable "bastion_ami_id" {
+  description = "AMI ID for the bastion EC2 instance, otherwise we will use the latest 'amazon_linux_2' ami"
+  type        = string
+  default     = ""
+}
+
 variable "efs_access_point_path" {
   type        = string
   description = "Filesystem path for efs."
@@ -179,14 +209,17 @@ variable "efs_access_point_path" {
 
 }
 
-variable "ssh_pvt_key_name" {
+variable "ssh_pvt_key_path" {
   type        = string
-  description = "ssh private key filename."
-  default     = "domino.pem"
+  description = "SSH private key filepath."
+  validation {
+    condition     = fileexists(var.ssh_pvt_key_path)
+    error_message = "Private key does not exist. Please provide the right path or generate a key with the following command: ssh-keygen -q -P '' -t rsa -b 4096 -m PEM -f domino.pem"
+  }
 }
 
-variable "s3_force_destroy_toggle" {
+variable "s3_force_destroy_on_deletion" {
   description = "Toogle to allow recursive deletion of all objects in the s3 buckets. if 'false' terraform will NOT be able to delete non-empty buckets"
-  type        = string
-  default     = "false"
+  type        = bool
+  default     = false
 }
