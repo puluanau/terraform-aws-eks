@@ -11,7 +11,13 @@ open_ssh_tunnel_to_k8s_api() {
     https_proxy=http://localhost:$MALLORY_PORT
     export https_proxy
   fi
-  eval ${k8s_tunnel_command} && sleep 3
+
+  if test -f "${mallory_config_file}"; then
+    eval ${k8s_tunnel_command} && sleep 3
+  else
+    echo "Mallory config file ${mallory_config_file} does not exist." && exit 1
+  fi
+
   echo
 }
 

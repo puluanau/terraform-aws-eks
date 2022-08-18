@@ -23,7 +23,7 @@ locals {
 
   k8s_tunnel_command = "docker run --rm --name ${local.mallory_container_name} -d -v $PWD/${local.mallory_config_filename}:${local.mallory_config_path_container} -p ${var.mallory_local_normal_port}:${var.mallory_local_normal_port} -p ${var.mallory_local_smart_port}:${var.mallory_local_smart_port} -v ${var.ssh_pvt_key_path}:${local.pvt_key_path_container} zoobab/mallory"
 
-  resources_directory = "${path.cwd}/resources/${var.deploy_id}"
+  resources_directory = path.cwd
   templates_dir       = "${path.module}/templates"
 
   templates = {
@@ -34,6 +34,7 @@ locals {
         k8s_tunnel_command          = local.k8s_tunnel_command
         mallory_port                = var.mallory_local_smart_port
         mallory_container_name      = local.mallory_container_name
+        mallory_config_file         = local.mallory_config_filename
         aws_auth_yaml               = basename(local.aws_auth_filename)
         calico_operator_url         = local.calico.operator_url
         calico_custom_resources_url = local.calico.custom_resources_url
@@ -90,4 +91,7 @@ resource "null_resource" "run_k8s_pre_setup" {
   depends_on = [
     local_file.templates,
   ]
+  lifecycle {
+    ignore_changes = [id]
+  }
 }

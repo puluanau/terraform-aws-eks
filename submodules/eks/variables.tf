@@ -16,7 +16,6 @@ variable "region" {
 variable "k8s_version" {
   type        = string
   description = "EKS cluster k8s version."
-  default     = "1.22"
 }
 
 variable "default_node_groups" {
