@@ -13,6 +13,7 @@ open_ssh_tunnel_to_k8s_api() {
   fi
 
   if test -f "${mallory_config_file}"; then
+    { docker kill ${mallory_container_name} && docker rm ${mallory_container_name}; } || true
     eval ${k8s_tunnel_command} && sleep 3
   else
     echo "Mallory config file ${mallory_config_file} does not exist." && exit 1

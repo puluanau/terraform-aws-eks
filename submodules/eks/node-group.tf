@@ -17,7 +17,7 @@ data "aws_route53_zone" "this" {
 }
 
 resource "aws_iam_role" "eks_nodes" {
-  name               = "${var.deploy_id}-eks-nodes"
+  name               = "${local.eks_cluster_name}-eks-nodes"
   assume_role_policy = data.aws_iam_policy_document.eks_nodes.json
 }
 
@@ -40,7 +40,7 @@ locals {
 
 
 resource "aws_security_group" "eks_nodes" {
-  name        = "${var.deploy_id}-nodes"
+  name        = "${local.eks_cluster_name}-nodes"
   description = "EKS cluster Nodes security group"
   vpc_id      = var.vpc_id
 
@@ -48,7 +48,7 @@ resource "aws_security_group" "eks_nodes" {
     create_before_destroy = true
   }
   tags = {
-    "Name" = "${var.deploy_id}-eks-nodes"
+    "Name" = "${local.eks_cluster_name}-eks-nodes"
   }
 }
 
@@ -80,7 +80,7 @@ data "aws_ami" "eks_gpu" {
 }
 
 resource "aws_launch_template" "compute" {
-  name                    = "${var.deploy_id}-compute"
+  name                    = "${local.eks_cluster_name}-compute"
   disable_api_termination = false
   instance_type           = var.default_node_groups.compute.instance_type
   key_name                = var.ssh_pvt_key_path
@@ -106,14 +106,14 @@ resource "aws_launch_template" "compute" {
   tag_specifications {
     resource_type = "instance"
     tags = {
-      "Name" = "${var.deploy_id}-compute"
+      "Name" = "${local.eks_cluster_name}-compute"
     }
   }
 
   tag_specifications {
     resource_type = "volume"
     tags = {
-      "Name" = "${var.deploy_id}-compute"
+      "Name" = "${local.eks_cluster_name}-compute"
     }
   }
 }
@@ -121,7 +121,7 @@ resource "aws_launch_template" "compute" {
 resource "aws_eks_node_group" "compute" {
   for_each        = { for sb in var.private_subnets : sb.zone => sb if lookup(var.default_node_groups, "compute", {}) != {} }
   cluster_name    = aws_eks_cluster.this.name
-  node_group_name = "${var.deploy_id}-compute-${each.value.zone}"
+  node_group_name = "${local.eks_cluster_name}-compute-${each.value.zone}"
   node_role_arn   = aws_iam_role.eks_nodes.arn
   subnet_ids      = [each.value.id]
   scaling_config {
@@ -156,7 +156,7 @@ resource "aws_eks_node_group" "compute" {
 }
 
 resource "aws_launch_template" "platform" {
-  name                    = "${var.deploy_id}-platform"
+  name                    = "${local.eks_cluster_name}-platform"
   disable_api_termination = false
   instance_type           = var.default_node_groups.platform.instance_type
   key_name                = var.ssh_pvt_key_path
@@ -182,14 +182,14 @@ resource "aws_launch_template" "platform" {
   tag_specifications {
     resource_type = "instance"
     tags = {
-      "Name" = "${var.deploy_id}-platform"
+      "Name" = "${local.eks_cluster_name}-platform"
     }
   }
 
   tag_specifications {
     resource_type = "volume"
     tags = {
-      "Name" = "${var.deploy_id}-platform"
+      "Name" = "${local.eks_cluster_name}-platform"
     }
   }
 }
@@ -197,7 +197,7 @@ resource "aws_launch_template" "platform" {
 resource "aws_eks_node_group" "platform" {
   for_each        = { for sb in var.private_subnets : sb.zone => sb if lookup(var.default_node_groups, "platform", {}) != {} }
   cluster_name    = aws_eks_cluster.this.name
-  node_group_name = "${var.deploy_id}-platform-${each.value.zone}"
+  node_group_name = "${local.eks_cluster_name}-platform-${each.value.zone}"
   node_role_arn   = aws_iam_role.eks_nodes.arn
   subnet_ids      = [each.value.id]
   scaling_config {
@@ -232,7 +232,7 @@ resource "aws_eks_node_group" "platform" {
 }
 
 resource "aws_launch_template" "gpu" {
-  name                    = "${var.deploy_id}-gpu"
+  name                    = "${local.eks_cluster_name}-gpu"
   image_id                = local.node_group_gpu_ami_id
   disable_api_termination = false
   instance_type           = var.default_node_groups.gpu.instance_type
@@ -258,14 +258,14 @@ resource "aws_launch_template" "gpu" {
   tag_specifications {
     resource_type = "instance"
     tags = {
-      "Name" = "${var.deploy_id}-gpu"
+      "Name" = "${local.eks_cluster_name}-gpu"
     }
   }
 
   tag_specifications {
     resource_type = "volume"
     tags = {
-      "Name" = "${var.deploy_id}-gpu"
+      "Name" = "${local.eks_cluster_name}-gpu"
     }
   }
 }
@@ -273,7 +273,7 @@ resource "aws_launch_template" "gpu" {
 resource "aws_eks_node_group" "gpu" {
   for_each        = { for sb in var.private_subnets : sb.zone => sb if lookup(var.default_node_groups, "gpu", {}) != {} }
   cluster_name    = aws_eks_cluster.this.name
-  node_group_name = "${var.deploy_id}-gpu-${each.value.zone}"
+  node_group_name = "${local.eks_cluster_name}-gpu-${each.value.zone}"
   node_role_arn   = aws_iam_role.eks_nodes.arn
   subnet_ids      = [each.value.id]
   scaling_config {
@@ -330,7 +330,7 @@ locals {
 
 resource "aws_launch_template" "additional_node_groups" {
   for_each                = var.additional_node_groups
-  name                    = "${var.deploy_id}-${try(each.value.name, each.key)}"
+  name                    = "${local.eks_cluster_name}-${try(each.value.name, each.key)}"
   disable_api_termination = false
   instance_type           = each.value.instance_type
   key_name                = var.ssh_pvt_key_path
@@ -356,14 +356,14 @@ resource "aws_launch_template" "additional_node_groups" {
   tag_specifications {
     resource_type = "instance"
     tags = {
-      "Name" = "${var.deploy_id}-${each.key}"
+      "Name" = "${local.eks_cluster_name}-${try(each.value.name, each.key)}"
     }
   }
 
   tag_specifications {
     resource_type = "volume"
     tags = {
-      "Name" = "${var.deploy_id}-${each.key}"
+      "Name" = "${local.eks_cluster_name}-${try(each.value.name, each.key)}"
     }
   }
 }
@@ -371,7 +371,7 @@ resource "aws_launch_template" "additional_node_groups" {
 resource "aws_eks_node_group" "additional_node_groups" {
   for_each        = { for ng in local.additional_node_groups_per_zone : "${ng.node_group.name}-${ng.subnet_zone}" => ng }
   cluster_name    = aws_eks_cluster.this.name
-  node_group_name = "${var.deploy_id}-platform-${each.value.subnet_zone}"
+  node_group_name = "${local.eks_cluster_name}-platform-${each.value.subnet_zone}"
   node_role_arn   = aws_iam_role.eks_nodes.arn
   subnet_ids      = [each.value.subnet_id]
   scaling_config {

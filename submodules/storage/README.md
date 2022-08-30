@@ -62,7 +62,9 @@ No modules.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_efs_volume_handle"></a> [efs\_volume\_handle](#output\_efs\_volume\_handle) | EFS volume handle <filesystem id id>::<accesspoint id> |
+| <a name="output_efs_access_point_id"></a> [efs\_access\_point\_id](#output\_efs\_access\_point\_id) | EFS access\_point id |
+| <a name="output_efs_file_system_id"></a> [efs\_file\_system\_id](#output\_efs\_file\_system\_id) | EFS filesystem id |
+| <a name="output_efs_volume_handle"></a> [efs\_volume\_handle](#output\_efs\_volume\_handle) | EFS volume handle <filesystem id>::<accesspoint id> |
 | <a name="output_monitoring_s3_bucket_arn"></a> [monitoring\_s3\_bucket\_arn](#output\_monitoring\_s3\_bucket\_arn) | Monitoring bucket arn |
 | <a name="output_s3_buckets"></a> [s3\_buckets](#output\_s3\_buckets) | S3 buckets name and arn |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

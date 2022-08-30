@@ -36,3 +36,4 @@ k8s-functions.sh
 k8s-pre-setup.sh
 kubeconfig
 mallory.json
+domino.yml

@@ -1,6 +1,16 @@
 output "efs_volume_handle" {
-  description = "EFS volume handle <filesystem id id>::<accesspoint id>"
+  description = "EFS volume handle <filesystem id>::<accesspoint id>"
   value       = "${aws_efs_access_point.eks.file_system_id}::${aws_efs_access_point.eks.id}"
+}
+
+output "efs_access_point_id" {
+  description = "EFS access_point id"
+  value       = aws_efs_access_point.eks.id
+}
+
+output "efs_file_system_id" {
+  description = "EFS filesystem id"
+  value       = aws_efs_file_system.eks.id
 }
 
 output "monitoring_s3_bucket_arn" {

@@ -35,12 +35,12 @@ resource "aws_kms_key" "eks_cluster" {
   multi_region             = false
   policy                   = data.aws_iam_policy_document.kms_key.json
   tags = {
-    "Name" = "${var.deploy_id}-eks-cluster"
+    "Name" = "${local.eks_cluster_name}-eks-cluster"
   }
 }
 
 resource "aws_security_group" "eks_cluster" {
-  name        = "${var.deploy_id}-cluster"
+  name        = "${local.eks_cluster_name}-cluster"
   description = "EKS cluster security group"
   vpc_id      = var.vpc_id
 
@@ -48,7 +48,7 @@ resource "aws_security_group" "eks_cluster" {
     create_before_destroy = true
   }
   tags = {
-    "Name" = "${var.deploy_id}-eks-cluster"
+    "Name" = "${local.eks_cluster_name}-eks-cluster"
   }
 }
 
@@ -69,7 +69,7 @@ resource "aws_security_group_rule" "eks_cluster" {
 
 ## EKS cluster
 resource "aws_eks_cluster" "this" {
-  name                      = var.deploy_id
+  name                      = local.eks_cluster_name
   role_arn                  = aws_iam_role.eks_cluster.arn
   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
   version                   = var.k8s_version

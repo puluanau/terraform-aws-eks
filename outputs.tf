@@ -13,9 +13,19 @@ output "hostname" {
   value       = "${var.deploy_id}.${var.route53_hosted_zone_name}"
 }
 
-output "efs_filesystem_id" {
+output "efs_volume_handle" {
   description = "EFS volume handle <filesystem id id>::<accesspoint id>"
   value       = module.storage.efs_volume_handle
+}
+
+output "efs_access_point_id" {
+  description = "EFS access_point id"
+  value       = module.storage.efs_access_point_id
+}
+
+output "efs_file_system_id" {
+  description = "EFS filesystem id"
+  value       = module.storage.efs_file_system_id
 }
 
 output "region" {

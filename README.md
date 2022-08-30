@@ -131,7 +131,9 @@ aws s3 rb s3://"${AWS_TERRAFORM_REMOTE_STATE_BUCKET}" --force
 | Name | Description |
 |------|-------------|
 | <a name="output_deploy_id"></a> [deploy\_id](#output\_deploy\_id) | Deployment ID. |
-| <a name="output_efs_filesystem_id"></a> [efs\_filesystem\_id](#output\_efs\_filesystem\_id) | EFS volume handle <filesystem id id>::<accesspoint id> |
+| <a name="output_efs_access_point_id"></a> [efs\_access\_point\_id](#output\_efs\_access\_point\_id) | EFS access\_point id |
+| <a name="output_efs_file_system_id"></a> [efs\_file\_system\_id](#output\_efs\_file\_system\_id) | EFS filesystem id |
+| <a name="output_efs_volume_handle"></a> [efs\_volume\_handle](#output\_efs\_volume\_handle) | EFS volume handle <filesystem id id>::<accesspoint id> |
 | <a name="output_hostname"></a> [hostname](#output\_hostname) | Domino instance URL. |
 | <a name="output_k8s_tunnel_command"></a> [k8s\_tunnel\_command](#output\_k8s\_tunnel\_command) | Command to run the k8s tunnel mallory. |
 | <a name="output_region"></a> [region](#output\_region) | Deployment region. |

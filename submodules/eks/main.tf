@@ -3,12 +3,13 @@ data "aws_partition" "current" {}
 data "aws_caller_identity" "aws_account" {}
 
 locals {
+  eks_cluster_name  = var.deploy_id
   aws_account_id    = data.aws_caller_identity.aws_account.account_id
   dns_suffix        = data.aws_partition.current.dns_suffix
   policy_arn_prefix = "arn:${data.aws_partition.current.partition}:iam::aws:policy"
   eks_cluster_security_group_rules = {
     ingress_nodes_443 = {
-      description = "Private subnets to ${var.deploy_id} EKS cluster API"
+      description = "Private subnets to ${local.eks_cluster_name} EKS cluster API"
       protocol    = "tcp"
       from_port   = 443
       to_port     = 443
@@ -24,7 +25,7 @@ locals {
       cidr_blocks = [for sb in var.private_subnets : sb.cidr_block]
     }
     egress_nodes_443 = {
-      description = "${var.deploy_id} EKS cluster API to private subnets"
+      description = "${local.eks_cluster_name} EKS cluster API to private subnets"
       protocol    = "tcp"
       from_port   = 443
       to_port     = 443
@@ -32,7 +33,7 @@ locals {
       cidr_blocks = [for sb in var.private_subnets : sb.cidr_block]
     }
     egress_nodes_kubelet = {
-      description = "${var.deploy_id} EKS cluster API to private subnets"
+      description = "${local.eks_cluster_name} EKS cluster API to private subnets"
       protocol    = "tcp"
       from_port   = 10250
       to_port     = 10250
@@ -178,7 +179,39 @@ locals {
       type        = "egress"
       cidr_blocks = ["0.0.0.0/0"]
     }
-    inter_node_traffic_int = {
+    inter_node_traffic_in_80 = {
+      description = "Node to node http traffic"
+      protocol    = "tcp"
+      from_port   = 80
+      to_port     = 80
+      type        = "ingress"
+      self        = true
+    }
+    inter_node_traffic_out_80 = {
+      description = "Node to node http traffic"
+      protocol    = "tcp"
+      from_port   = 80
+      to_port     = 80
+      type        = "egress"
+      self        = true
+    }
+    inter_node_traffic_in_443 = {
+      description = "Node to node https traffic"
+      protocol    = "tcp"
+      from_port   = 443
+      to_port     = 443
+      type        = "ingress"
+      self        = true
+    }
+    inter_node_traffic_out_443 = {
+      description = "Node to node https traffic"
+      protocol    = "tcp"
+      from_port   = 443
+      to_port     = 443
+      type        = "egress"
+      self        = true
+    }
+    inter_node_traffic_in = {
       description = "Node to node pod/svc trafic in"
       protocol    = "tcp"
       from_port   = 1025
@@ -193,6 +226,45 @@ locals {
       to_port     = 65535
       type        = "egress"
       self        = true
+    }
+  }
+
+  bastion_eks_security_group_rules = {
+    bastion_to_eks_api = {
+      description              = "Bastion outbound to eks cluster ${local.eks_cluster_name}:443 API"
+      protocol                 = "tcp"
+      from_port                = "443"
+      to_port                  = "443"
+      type                     = "egress"
+      security_group_id        = var.bastion_security_group_id
+      source_security_group_id = aws_security_group.eks_cluster.id
+    }
+    bastion_to_eks_nodes_ssh = {
+      description              = "Bastion ssh to eks cluster nodes outbound"
+      protocol                 = "tcp"
+      from_port                = "22"
+      to_port                  = "22"
+      type                     = "egress"
+      security_group_id        = var.bastion_security_group_id
+      source_security_group_id = aws_security_group.eks_nodes.id
+    }
+    eks_api_from_bastion = {
+      description              = "Eks cluster ${local.eks_cluster_name}:443 inbound from bastion"
+      protocol                 = "tcp"
+      from_port                = "443"
+      to_port                  = "443"
+      type                     = "ingress"
+      security_group_id        = aws_security_group.eks_cluster.id
+      source_security_group_id = var.bastion_security_group_id
+    }
+    eks_nodes_ssh_from_bastion = {
+      description              = "Bastion ssh to eks cluster nodes inbound"
+      protocol                 = "tcp"
+      from_port                = "22"
+      to_port                  = "22"
+      type                     = "ingress"
+      security_group_id        = var.bastion_security_group_id
+      source_security_group_id = aws_security_group.eks_nodes.id
     }
   }
 }

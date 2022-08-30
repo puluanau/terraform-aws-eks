@@ -21,8 +21,6 @@ resource "aws_iam_role_policy_attachment" "eks_cluster" {
   role       = aws_iam_role.eks_cluster.name
 }
 
-
-## Customer managed policies
 data "aws_iam_policy_document" "domino_ecr_restricted" {
   statement {
 

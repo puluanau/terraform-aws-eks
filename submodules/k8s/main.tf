@@ -91,7 +91,4 @@ resource "null_resource" "run_k8s_pre_setup" {
   depends_on = [
     local_file.templates,
   ]
-  lifecycle {
-    ignore_changes = [id]
-  }
 }
