@@ -40,7 +40,6 @@ variable "availability_zones" {
   default = []
 }
 
-
 variable "route53_hosted_zone_name" {
   type        = string
   description = "AWS Route53 Hosted zone."
