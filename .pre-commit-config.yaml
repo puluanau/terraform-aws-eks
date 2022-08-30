@@ -34,8 +34,8 @@ repos:
           - '--args=--only=terraform_standard_module_structure'
           - '--args=--only=terraform_workspace_remote'
       - id: terraform_validate
-      # - id: terrascan # Skipping until they update lifecycle block; Data resources do not have lifecycle settings, so a lifecycle block is not allowed.
-        # args:
-        #   - '--args=--non-recursive'
-        #   - '--args=--policy-type=aws'
-        #   - '--args=--skip-rules=AC_AWS_0369' #Flow logs are enabled, terrascan does not follow the logical path of the resource
+      - id: terrascan # Skipping until they update lifecycle block; Data resources do not have lifecycle settings, so a lifecycle block is not allowed.
+        args:
+          - '--args=--non-recursive'
+          - '--args=--policy-type=aws'
+          - '--args=--skip-rules=AC_AWS_0369' #Flow logs are enabled, terrascan does not follow the logical path of the resource
