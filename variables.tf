@@ -221,3 +221,9 @@ variable "s3_force_destroy_on_deletion" {
   type        = bool
   default     = false
 }
+
+variable "enable_vpc_endpoints_s3" {
+  description = "Enable VPC endpoints for S3 service. This is intented for mission critical, highly available deployments"
+  type        = bool
+  default     = false
+}
