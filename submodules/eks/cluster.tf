@@ -65,7 +65,9 @@ resource "aws_security_group_rule" "eks_cluster" {
   source_security_group_id = try(each.value.source_security_group_id, null)
 }
 
-## END - EKS security-group
+resource "aws_cloudwatch_log_group" "eks_cluster" {
+  name = "/aws/eks/${local.eks_cluster_name}/cluster"
+}
 
 ## EKS cluster
 resource "aws_eks_cluster" "this" {
@@ -93,7 +95,10 @@ resource "aws_eks_cluster" "this" {
     security_group_ids      = [aws_security_group.eks_cluster.id]
     subnet_ids              = [for sb in var.private_subnets : sb.id]
   }
-  depends_on = [aws_iam_role_policy_attachment.eks_cluster]
+  depends_on = [
+    aws_iam_role_policy_attachment.eks_cluster,
+    aws_cloudwatch_log_group.eks_cluster
+  ]
 }
 
 resource "aws_eks_addon" "this" {

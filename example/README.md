@@ -25,10 +25,10 @@ No resources.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_deploy_id"></a> [deploy\_id](#input\_deploy\_id) | Domino Deployment ID. | `string` | `"domino-eks-example"` | no |
+| <a name="input_deploy_id"></a> [deploy\_id](#input\_deploy\_id) | Domino Deployment ID. | `string` | `"mhtfeks"` | no |
 | <a name="input_k8s_version"></a> [k8s\_version](#input\_k8s\_version) | EKS cluster k8s version. | `string` | `"1.23"` | no |
-| <a name="input_region"></a> [region](#input\_region) | AWS region for the deployment | `string` | n/a | yes |
-| <a name="input_tags"></a> [tags](#input\_tags) | Deployment tags. | `map(string)` | <pre>{<br>  "deploy_id": "domino-eks-example",<br>  "deploy_tag": "domino-eks-example",<br>  "deploy_type": "terraform-aws-eks",<br>  "domino-deploy-id": "domino-eks-example"<br>}</pre> | no |
+| <a name="input_region"></a> [region](#input\_region) | AWS region for the deployment | `string` | `"us-west-2"` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Deployment tags. | `map(string)` | <pre>{<br>  "deploy_id": "domino-eks",<br>  "deploy_tag": "domino-eks",<br>  "deploy_type": "terraform-aws-eks",<br>  "domino-deploy-id": "domino-eks"<br>}</pre> | no |
 
 ## Outputs
 
