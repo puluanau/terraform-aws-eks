@@ -5,12 +5,10 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
-
 resource "aws_internet_gateway_attachment" "this" {
   internet_gateway_id = aws_internet_gateway.igw.id
   vpc_id              = local.vpc_id
 }
-
 
 resource "aws_eip" "public" {
   for_each             = { for sb in var.public_subnets : sb.name => sb }

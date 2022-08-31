@@ -19,19 +19,6 @@ variable "availability_zones" {
   }
 }
 
-# variable "pod_base_cidr_block" {
-#   type        = string
-#   default     = "100.164.0.0/16"
-#   description = "CIDR block to serve the pods subnets"
-#   validation {
-#     condition = (
-#       try(cidrhost(var.pod_base_cidr_block, 0), null) == regex("^(.*)/", var.pod_base_cidr_block)[0] &&
-#       try(cidrnetmask(var.pod_base_cidr_block), null) == "255.255.0.0"
-#     )
-#     error_message = "Argument pod_base_cidr_block  must be a valid CIDR block."
-#   }
-# }
-
 variable "base_cidr_block" {
   type        = string
   default     = "10.0.0.0/16"

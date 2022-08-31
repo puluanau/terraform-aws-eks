@@ -5,8 +5,7 @@ data "aws_ec2_instance_type_offerings" "nodes" {
   for_each = merge(var.default_node_groups, var.additional_node_groups)
 
   filter {
-    name = "instance-type"
-    # values = toset([for i in var.default_node_groups : i.instance_type])
+    name   = "instance-type"
     values = [each.value.instance_type]
   }
 
@@ -38,7 +37,6 @@ locals {
   offered_azs        = setintersection(local.zone_intersection_instance_offerings, toset(local.az_names))
   available_azs_data = zipmap(data.aws_availability_zones.available.names, data.aws_availability_zones.available.zone_ids)
   # Getting the required azs name and id.
-
   bastion_user     = "ec2-user"
   working_dir      = path.cwd
   ssh_pvt_key_path = "${local.working_dir}/${var.ssh_pvt_key_path}"
@@ -98,7 +96,6 @@ locals {
   private_subnets = module.network.private_subnets
 }
 
-
 module "storage" {
   source                       = "./submodules/storage"
   deploy_id                    = var.deploy_id
@@ -141,10 +138,8 @@ module "eks" {
   s3_buckets                = module.storage.s3_buckets
 }
 
-
 module "k8s_setup" {
   source                  = "./submodules/k8s"
-  deploy_id               = var.deploy_id
   ssh_pvt_key_path        = abspath(local.ssh_pvt_key_path)
   bastion_user            = local.bastion_user
   bastion_public_ip       = try(module.bastion[0].public_ip, "")

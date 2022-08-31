@@ -24,7 +24,6 @@ variable "number_of_azs" {
   }
 }
 
-
 variable "availability_zones" {
   type        = list(string)
   description = <<EOT

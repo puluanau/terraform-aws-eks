@@ -1,5 +1,3 @@
-
-
 data "aws_iam_role" "eks_master_roles" {
   for_each = toset(var.eks_master_role_names)
   name     = each.key

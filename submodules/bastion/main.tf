@@ -6,7 +6,6 @@ locals {
   aws_account_id = data.aws_caller_identity.aws_account.account_id
 }
 
-
 resource "aws_security_group" "bastion" {
   name        = "${var.deploy_id}-bastion"
   description = "Bastion security group"
