@@ -2,10 +2,17 @@ variable "deploy_id" {
   type        = string
   description = "Domino Deployment ID."
   default     = "domino-eks"
+  nullable    = false
 
   validation {
-    condition     = can(regex("^[a-z-0-9]{3,32}$", var.deploy_id))
-    error_message = "Argument deploy_id must: start with a letter, contain lowercase alphanumeric characters(can contain hyphens[-]) with length between 3 and 32 characters."
+    condition     = length(var.deploy_id) >= 3 && length(var.deploy_id) <= 32 && can(regex("^[a-z]([-a-z0-9]*[a-z0-9])$", var.deploy_id))
+    error_message = <<EOT
+      Variable deploy_id must:
+      1. Length must be between 3 and 32 characters.
+      2. Start with a letter.
+      3. End with a letter or digit.
+      4. Contain lowercase Alphanumeric characters and hyphens.
+    EOT
   }
 }
 

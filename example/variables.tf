@@ -1,7 +1,7 @@
 variable "deploy_id" {
   type        = string
   description = "Domino Deployment ID."
-  default     = "mhtfeks"
+  default     = "domino-eks-test"
 }
 
 
@@ -16,10 +16,10 @@ variable "tags" {
   type        = map(string)
   description = "Deployment tags."
   default = {
-    deploy_id        = "domino-eks"
-    deploy_tag       = "domino-eks"
+    deploy_id        = "domino-eks-test"
+    deploy_tag       = "domino-eks-test"
     deploy_type      = "terraform-aws-eks"
-    domino-deploy-id = "domino-eks"
+    domino-deploy-id = "domino-eks-test"
   }
 }
 
