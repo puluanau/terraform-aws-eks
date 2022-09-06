@@ -1,10 +1,12 @@
 # Local .terraform directories
 **/.terraform/*
-
+**/resources/*
 # .tfstate files
 *.tfstate
 *.tfstate.*
 
+**.terraform.lock.hcl*
+**.terraform.lock.hcl
 # Crash log files
 crash.log
 
@@ -27,3 +29,11 @@ override.tf.json
 
 # Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
 # example: *tfplan*
+aws-auth.yaml
+domino.pem
+domino.pem.pub
+k8s-functions.sh
+k8s-pre-setup.sh
+kubeconfig
+mallory.json
+domino.yml
