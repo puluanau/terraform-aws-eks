@@ -1,0 +1,92 @@
+efs_stack:
+- cf: Efs
+  tf: module.domino_eks.module.storage.aws_efs_file_system.eks
+- cf: Efsaccesspoint
+  tf: module.domino_eks.module.storage.aws_efs_access_point.eks
+- cf: EfsEfsMountTarget1
+  tf: module.domino_eks.module.storage.aws_efs_mount_target.eks["{{stack_name}}-PrivateSubnet-{{region}}a-1"]
+- cf: EfsEfsMountTarget2
+  tf: module.domino_eks.module.storage.aws_efs_mount_target.eks["{{stack_name}}-PrivateSubnet-{{region}}b-2"]
+- cf: EfsEfsMountTarget3
+  tf: module.domino_eks.module.storage.aws_efs_mount_target.eks["{{stack_name}}-PrivateSubnet-{{region}}c-3"]
+eks_stack:
+- cf: eks
+  tf: module.domino_eks.module.eks.aws_eks_cluster.this
+- cf: EKSSG
+  tf: module.domino_eks.module.eks.aws_security_group.eks_cluster
+- cf: eksRole
+  tf: module.domino_eks.module.eks.aws_iam_role.eks_cluster
+s3_stack:
+- cf: backups
+  tf: module.domino_eks.module.storage.aws_s3_bucket.backups
+- cf: blobs
+  tf: module.domino_eks.module.storage.aws_s3_bucket.blobs
+- cf: logs
+  tf: module.domino_eks.module.storage.aws_s3_bucket.logs
+- cf: registry
+  tf: module.domino_eks.module.storage.aws_s3_bucket.registry
+vpc_stack:
+- cf: VPC
+  tf: module.domino_eks.module.network.aws_vpc.this[0]
+- cf: VPC{{stack_name}}PrivateSubnet1Subnet
+  tf: module.domino_eks.module.network.aws_subnet.private["{{stack_name}}-PrivateSubnet-{{region}}a-1"]
+- cf: VPC{{stack_name}}PrivateSubnet2Subnet
+  tf: module.domino_eks.module.network.aws_subnet.private["{{stack_name}}-PrivateSubnet-{{region}}b-2"]
+- cf: VPC{{stack_name}}PrivateSubnet3Subnet
+  tf: module.domino_eks.module.network.aws_subnet.private["{{stack_name}}-PrivateSubnet-{{region}}c-3"]
+- cf: VPC{{stack_name}}PublicSubnet1Subnet
+  tf: module.domino_eks.module.network.aws_subnet.public["{{stack_name}}-PublicSubnet-{{region}}a-1"]
+- cf: VPC{{stack_name}}PublicSubnet2Subnet
+  tf: module.domino_eks.module.network.aws_subnet.public["{{stack_name}}-PublicSubnet-{{region}}b-2"]
+- cf: VPC{{stack_name}}PublicSubnet3Subnet
+  tf: module.domino_eks.module.network.aws_subnet.public["{{stack_name}}-PublicSubnet-{{region}}c-3"]
+- cf: VPC{{stack_name}}PublicSubnet1EIP
+  tf: module.domino_eks.module.network.aws_eip.public["{{stack_name}}-PublicSubnet-{{region}}a-1"]
+- cf: VPC{{stack_name}}PublicSubnet2EIP
+  tf: module.domino_eks.module.network.aws_eip.public["{{stack_name}}-PublicSubnet-{{region}}b-2"]
+- cf: VPC{{stack_name}}PublicSubnet3EIP
+  tf: module.domino_eks.module.network.aws_eip.public["{{stack_name}}-PublicSubnet-{{region}}c-3"]
+- cf: VPCIGW
+  tf: module.domino_eks.module.network.aws_internet_gateway.igw
+- cf: VPCchibipug25155PublicSubnet1NATGateway
+  tf: module.domino_eks.module.network.aws_nat_gateway.ngw["{{region}}a"]
+- cf: VPCchibipug25155PublicSubnet2NATGateway
+  tf: module.domino_eks.module.network.aws_nat_gateway.ngw["{{region}}b"]
+- cf: VPCchibipug25155PublicSubnet3NATGateway
+  tf: module.domino_eks.module.network.aws_nat_gateway.ngw["{{region}}c"]
+- cf: VPC{{stack_name}}PrivateSubnet1RouteTable
+  tf: module.domino_eks.module.network.aws_route_table.private["{{stack_name}}-PrivateSubnet-{{region}}a-1"]
+- cf: VPC{{stack_name}}PrivateSubnet2RouteTable
+  tf: module.domino_eks.module.network.aws_route_table.private["{{stack_name}}-PrivateSubnet-{{region}}b-2"]
+- cf: VPC{{stack_name}}PrivateSubnet3RouteTable
+  tf: module.domino_eks.module.network.aws_route_table.private["{{stack_name}}-PrivateSubnet-{{region}}c-3"]
+- cf_rtassoc:
+    subnet: VPC{{stack_name}}PrivateSubnet1Subnet
+    route_table: VPC{{stack_name}}PrivateSubnet1RouteTable
+  tf: module.domino_eks.module.network.aws_route_table_association.private["{{stack_name}}-PrivateSubnet-{{region}}a-1"]
+- cf_rtassoc:
+    subnet: VPC{{stack_name}}PrivateSubnet2Subnet
+    route_table: VPC{{stack_name}}PrivateSubnet2RouteTable
+  tf: module.domino_eks.module.network.aws_route_table_association.private["{{stack_name}}-PrivateSubnet-{{region}}b-2"]
+- cf_rtassoc:
+    subnet: VPC{{stack_name}}PrivateSubnet3Subnet
+    route_table: VPC{{stack_name}}PrivateSubnet3RouteTable
+  tf: module.domino_eks.module.network.aws_route_table_association.private["{{stack_name}}-PrivateSubnet-{{region}}c-3"]
+- cf: VPC{{stack_name}}PublicSubnet1RouteTable
+  tf: module.domino_eks.module.network.aws_route_table.public["{{stack_name}}-PublicSubnet-{{region}}a-1"]
+- cf: VPC{{stack_name}}PublicSubnet2RouteTable
+  tf: module.domino_eks.module.network.aws_route_table.public["{{stack_name}}-PublicSubnet-{{region}}b-2"]
+- cf: VPC{{stack_name}}PublicSubnet3RouteTable
+  tf: module.domino_eks.module.network.aws_route_table.public["{{stack_name}}-PublicSubnet-{{region}}c-3"]
+- cf_rtassoc:
+    subnet: VPC{{stack_name}}PublicSubnet1Subnet
+    route_table: VPC{{stack_name}}PublicSubnet1RouteTable
+  tf: module.domino_eks.module.network.aws_route_table_association.public["{{stack_name}}-PublicSubnet-{{region}}a-1"]
+- cf_rtassoc:
+    subnet: VPC{{stack_name}}PublicSubnet2Subnet
+    route_table: VPC{{stack_name}}PublicSubnet2RouteTable
+  tf: module.domino_eks.module.network.aws_route_table_association.public["{{stack_name}}-PublicSubnet-{{region}}b-2"]
+- cf_rtassoc:
+    subnet: VPC{{stack_name}}PublicSubnet3Subnet
+    route_table: VPC{{stack_name}}PublicSubnet3RouteTable
+  tf: module.domino_eks.module.network.aws_route_table_association.public["{{stack_name}}-PublicSubnet-{{region}}c-3"]
