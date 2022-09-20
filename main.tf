@@ -83,8 +83,8 @@ module "subnets_cidr" {
 module "network" {
   source                   = "./submodules/network"
   region                   = var.region
-  public_subnets           = module.subnets_cidr.public_subnets
-  private_subnets          = module.subnets_cidr.private_subnets
+  public_subnets           = var.public_subnets != null ? var.public_subnets : module.subnets_cidr.public_subnets
+  private_subnets          = var.private_subnets != null ? var.private_subnets : module.subnets_cidr.private_subnets
   deploy_id                = var.deploy_id
   base_cidr_block          = var.base_cidr_block
   vpc_id                   = var.vpc_id
