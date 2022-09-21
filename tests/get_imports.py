@@ -67,7 +67,14 @@ for map_stack, items in resource_map.items():
     for item in items:
         tf_import_path = t(item["tf"])
         if value := item.get("value"):
-            resource_id = value
+            resource_id = t(value)
+        elif cf_sgr := item.get("cf_sgr"):
+            sg = resources[t(cf_sgr["sg"])]
+            resource_id = f"{sg}{t(cf_sgr['rule'])}"
+        elif cf_igw_attachment := item.get("cf_igw_attachment"):
+            igw_id = resources[t(cf_igw_attachment["igw"])]
+            vpc_id = resources[t(cf_igw_attachment["vpc"])]
+            resource_id = f"{igw_id}:{vpc_id}"
         elif assoc := item.get("cf_rtassoc"):
             resource_id = f"{resources[t(assoc['subnet'])]}/{resources[t(assoc['route_table'])]}"
         else:
