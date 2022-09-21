@@ -119,7 +119,7 @@ data "aws_iam_policy_document" "autoscaler" {
 }
 
 resource "aws_iam_policy" "autoscaler" {
-  name   = "${var.deploy_id}-Autoscaler"
+  name   = "${var.deploy_id}-autoscaler"
   path   = "/"
   policy = data.aws_iam_policy_document.autoscaler.json
 }
@@ -253,7 +253,7 @@ data "aws_iam_policy_document" "route53" {
 
 resource "aws_iam_policy" "route53" {
   count  = var.route53_hosted_zone_name != "" ? 1 : 0
-  name   = "${var.deploy_id}-Route53"
+  name   = "${var.deploy_id}-route53"
   path   = "/"
   policy = data.aws_iam_policy_document.route53.json
 }
