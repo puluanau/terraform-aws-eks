@@ -75,6 +75,16 @@ variable "private_cidr_network_bits" {
   default     = 19
 }
 
+variable "public_subnets" {
+  description = "Manual specification of public subnets"
+  default     = null
+}
+
+variable "private_subnets" {
+  description = "Manual specification of private subnets"
+  default     = null
+}
+
 variable "default_node_groups" {
   type = object({
     compute = object({
