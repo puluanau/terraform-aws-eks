@@ -26,7 +26,7 @@ I set all those to 0, set one new platform asg to 1. The cluster-autoscaler didn
 
 I manually scaled every platform/compute ASG to 1, after which Domino appeared functional. I built an enviornment, a model, tested the model and tested a workspace.
 
-I did randomly get logged out once, which was weird. This happened during a model build, which also failed. Not sure what happened, didn't look into it. Subsequent rebuild was totally fine.
+I did randomly get logged out once, which was weird. This happened during a model build, which also failed. Not sure what happened, didn't look into it. Subsequent rebuild was totally fine, and I was logged in for a longer period of time after that without it happening again.
 
 Important note: _I TESTED THIS WITH A 5.1.4 INSTALL_
 
@@ -42,5 +42,8 @@ Important note: _I TESTED THIS WITH A 5.1.4 INSTALL_
 * Make a script to collate all the resources for every nested stack and then, in reverse order, run something like this for each one:
   * aws cloudformation delete-stack some-nested-stack --retain-resources every,logical,id,in,the,stack
   * I made a script that I HAVEN'T TESTED called `./kill_cloudformation.py`. It may be horrible. It doesn't know order yet either.
+  * Probably makes sense to whitelist certain things that actually are going away in the transition
+* If we don't smooth over the subnets with lifecycle ignores, maybe something to generate the subnet block?
+* I noticed we didn't handle efs backup in this module
 
 If all these things happen, I think we have a realistic migration path away from CDK that doesn't involve a lift-and-shift
