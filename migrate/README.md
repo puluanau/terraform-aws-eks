@@ -40,9 +40,13 @@ Important note: _I TESTED THIS WITH A 5.1.4 INSTALL_
   * I tried adding some of the tags that were different, but it didn't make a difference
   * Didn't dig any deeper
 * Make a script to collate all the resources for every nested stack and then, in reverse order, run something like this for each one:
-  * aws cloudformation delete-stack some-nested-stack --retain-resources every,logical,id,in,the,stack
-  * I made a script that I HAVEN'T TESTED called `./kill_cloudformation.py`. It may be horrible. It doesn't know order yet either.
-  * Probably makes sense to whitelist certain things that actually are going away in the transition
+  * Might sense to whitelist certain things that actually are going away in the transition?
+  * It's weird, but also the easiest/least scary as long as we put the right protections in place:
+    * Create policy/role with only access to cloudformation
+    * Delete a stack specifying this role
+    * Every resource fails
+    * Re-run delete, but specifying retain resources for every still-extant resource
+    * Repeate in reverse order across all nested stacks until you hit the root
 * If we don't smooth over the subnets with lifecycle ignores, maybe something to generate the subnet block?
 * I noticed we didn't handle efs backup in this module
 
