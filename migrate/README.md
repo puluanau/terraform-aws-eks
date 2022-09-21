@@ -47,3 +47,7 @@ Important note: _I TESTED THIS WITH A 5.1.4 INSTALL_
 * I noticed we didn't handle efs backup in this module
 
 If all these things happen, I think we have a realistic migration path away from CDK that doesn't involve a lift-and-shift
+
+# UPDATE
+
+Trying to scale this down after writing this up, platform and compute asgs scaled themselves up. So autoscaler works after all.
