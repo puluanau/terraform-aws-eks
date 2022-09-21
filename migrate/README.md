@@ -41,5 +41,6 @@ Important note: _I TESTED THIS WITH A 5.1.4 INSTALL_
   * Didn't dig any deeper
 * Make a script to collate all the resources for every nested stack and then, in reverse order, run something like this for each one:
   * aws cloudformation delete-stack some-nested-stack --retain-resources every,logical,id,in,the,stack
+  * I made a script that I HAVEN'T TESTED called `./kill_cloudformation.py`. It may be horrible. It doesn't know order yet either.
 
 If all these things happen, I think we have a realistic migration path away from CDK that doesn't involve a lift-and-shift
