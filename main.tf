@@ -88,7 +88,6 @@ module "network" {
   deploy_id                = var.deploy_id
   base_cidr_block          = var.base_cidr_block
   vpc_id                   = var.vpc_id
-  enable_vpc_endpoints_s3  = var.enable_vpc_endpoints_s3
   monitoring_s3_bucket_arn = module.storage.monitoring_s3_bucket_arn
 
 }

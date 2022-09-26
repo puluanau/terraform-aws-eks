@@ -58,9 +58,3 @@ variable "monitoring_s3_bucket_arn" {
   type        = string
   description = "Monitoring bucket for vpc flow logging"
 }
-
-variable "enable_vpc_endpoints_s3" {
-  description = "Enable VPC endpoints for S3 service. This is intented for mission critical, highly available deployments"
-  type        = bool
-  default     = false
-}

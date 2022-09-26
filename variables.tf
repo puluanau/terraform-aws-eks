@@ -76,79 +76,71 @@ variable "private_cidr_network_bits" {
 }
 
 variable "default_node_groups" {
-  type = object({
-    compute = object({
-      name           = string
-      ami            = optional(string)
-      instance_type  = string
-      min_per_az     = number
-      max_per_az     = number
-      desired_per_az = number
-      volume = object({
-        size = string
-        type = string
-      })
-    }),
-    platform = object({
-      name           = string
-      ami            = optional(string)
-      instance_type  = string
-      min_per_az     = number
-      max_per_az     = number
-      desired_per_az = number
-      volume = object({
-        size = string
-        type = string
-      })
-    }),
-    gpu = object({
-      name           = string
-      ami            = optional(string)
-      instance_type  = string
-      min_per_az     = number
-      max_per_az     = number
-      desired_per_az = number
-      volume = object({
-        size = string
-        type = string
-      })
-    })
-  })
   description = "EKS managed node groups definition."
+  type = object(
+    {
+      compute = object(
+        {
+          name           = optional(string, "compute")
+          ami            = optional(string)
+          instance_type  = optional(string, "m5.2xlarge")
+          min_per_az     = optional(number, 0)
+          max_per_az     = optional(number, 10)
+          desired_per_az = optional(number, 1)
+          volume = optional(object(
+            {
+              size = optional(number, 100)
+              type = optional(string, "gp3")
+            }),
+            {
+              size = 100
+              type = "gp3"
+            }
+          )
+      }),
+      platform = object(
+        {
+          name           = optional(string, "platform")
+          ami            = optional(string)
+          instance_type  = optional(string, "m5.4xlarge")
+          min_per_az     = optional(number, 0)
+          max_per_az     = optional(number, 10)
+          desired_per_az = optional(number, 1)
+          volume = optional(object(
+            {
+              size = optional(number, 100)
+              type = optional(string, "gp3")
+            }),
+            {
+              size = 100
+              type = "gp3"
+            }
+          )
+      }),
+      gpu = object(
+        {
+          name           = optional(string, "gpu")
+          ami            = optional(string)
+          instance_type  = optional(string, "g4dn.xlarge")
+          min_per_az     = optional(number, 0)
+          max_per_az     = optional(number, 10)
+          desired_per_az = optional(number, 0)
+          volume = optional(object(
+            {
+              size = optional(number, 100)
+              type = optional(string, "gp3")
+            }),
+            {
+              size = 100
+              type = "gp3"
+            }
+          )
+      })
+  })
   default = {
-    "compute" = {
-      name           = "compute"
-      instance_type  = "m5.2xlarge"
-      min_per_az     = 0
-      max_per_az     = 10
-      desired_per_az = 1
-      volume = {
-        size = "100"
-        type = "gp3"
-      }
-    },
-    "platform" = {
-      name           = "platform"
-      instance_type  = "m5.4xlarge"
-      min_per_az     = 0
-      max_per_az     = 10
-      desired_per_az = 1
-      volume = {
-        size = "100"
-        type = "gp3"
-      }
-    },
-    "gpu" = {
-      name           = "gpu"
-      instance_type  = "g4dn.xlarge"
-      min_per_az     = 0
-      max_per_az     = 10
-      desired_per_az = 0
-      volume = {
-        size = "100"
-        type = "gp3"
-      }
-    }
+    compute  = {}
+    platform = {}
+    gpu      = {}
   }
 }
 
@@ -225,12 +217,6 @@ variable "ssh_pvt_key_path" {
 
 variable "s3_force_destroy_on_deletion" {
   description = "Toogle to allow recursive deletion of all objects in the s3 buckets. if 'false' terraform will NOT be able to delete non-empty buckets"
-  type        = bool
-  default     = false
-}
-
-variable "enable_vpc_endpoints_s3" {
-  description = "Enable VPC endpoints for S3 service. This is intented for mission critical, highly available deployments"
   type        = bool
   default     = false
 }

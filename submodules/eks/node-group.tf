@@ -22,8 +22,6 @@ resource "aws_iam_role" "eks_nodes" {
 }
 
 locals {
-  # gpu_bootstrap_extra_args = "--node-labels lifecycle=OnDemand  --node-labels=dominodatalab.com/node-pool=default-gpu,nvidia.com/gpu=true,dominodatalab.com/domino-node=true --register-with-taints=nvidia.com/gpu=true:NoSchedule"
-
   aws_route53_zone_arn     = data.aws_route53_zone.this.arn
   gpu_bootstrap_extra_args = ""
   gpu_user_data = base64encode(templatefile("${path.module}/templates/linux_custom.tpl", {
@@ -35,7 +33,6 @@ locals {
     post_bootstrap_user_data = "echo ALL DONE !!!"
   }))
   node_group_gpu_ami_id = var.default_node_groups.gpu.ami != null ? var.default_node_groups.gpu.ami : data.aws_ami.eks_gpu.image_id
-  # node_group_compute_ami_id = var.default_node_groups.compute.ami != null ? var.default_node_groups.compute.ami : data.aws_ami.eks_gpu.image_id
 }
 
 
