@@ -136,6 +136,8 @@ aws s3 rb s3://"${AWS_TERRAFORM_REMOTE_STATE_BUCKET}" --force
 | <a name="output_efs_volume_handle"></a> [efs\_volume\_handle](#output\_efs\_volume\_handle) | EFS volume handle <filesystem id id>::<accesspoint id> |
 | <a name="output_hostname"></a> [hostname](#output\_hostname) | Domino instance URL. |
 | <a name="output_k8s_tunnel_command"></a> [k8s\_tunnel\_command](#output\_k8s\_tunnel\_command) | Command to run the k8s tunnel mallory. |
+| <a name="output_key_pair_name"></a> [key\_pair\_name](#output\_key\_pair\_name) | SSH key pair name. |
 | <a name="output_region"></a> [region](#output\_region) | Deployment region. |
+| <a name="output_s3_buckets"></a> [s3\_buckets](#output\_s3\_buckets) | S3 buckets name,arn. |
 | <a name="output_ssh_bastion_command"></a> [ssh\_bastion\_command](#output\_ssh\_bastion\_command) | Command to ssh into the bastion host |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
