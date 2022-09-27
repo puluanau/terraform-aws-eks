@@ -45,7 +45,6 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_base_cidr_block"></a> [base\_cidr\_block](#input\_base\_cidr\_block) | CIDR block to serve the main private and public subnets | `string` | n/a | yes |
 | <a name="input_deploy_id"></a> [deploy\_id](#input\_deploy\_id) | Domino Deployment ID | `string` | `""` | no |
-| <a name="input_enable_vpc_endpoints_s3"></a> [enable\_vpc\_endpoints\_s3](#input\_enable\_vpc\_endpoints\_s3) | Enable VPC endpoints for S3 service. This is intented for mission critical, highly available deployments | `bool` | `false` | no |
 | <a name="input_monitoring_s3_bucket_arn"></a> [monitoring\_s3\_bucket\_arn](#input\_monitoring\_s3\_bucket\_arn) | Monitoring bucket for vpc flow logging | `string` | n/a | yes |
 | <a name="input_private_subnets"></a> [private\_subnets](#input\_private\_subnets) | Private subnets object | <pre>list(object({<br>    cidr_block = string<br>    name       = string<br>    type       = string<br>    zone       = string<br>    zone_id    = string<br>  }))</pre> | n/a | yes |
 | <a name="input_public_subnets"></a> [public\_subnets](#input\_public\_subnets) | Public subnets object | <pre>list(object({<br>    cidr_block = string<br>    name       = string<br>    type       = string<br>    zone       = string<br>    zone_id    = string<br>  }))</pre> | n/a | yes |

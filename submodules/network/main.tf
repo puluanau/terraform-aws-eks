@@ -20,7 +20,6 @@ locals {
 }
 
 resource "aws_vpc_endpoint" "s3" {
-  count             = var.enable_vpc_endpoints_s3 ? 1 : 0
   vpc_id            = local.vpc_id
   service_name      = "com.amazonaws.${var.region}.s3"
   vpc_endpoint_type = "Gateway"

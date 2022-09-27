@@ -9,6 +9,5 @@ module "domino_eks" {
   s3_force_destroy_on_deletion = true
   create_bastion               = true
   ssh_pvt_key_path             = "domino.pem"
-  enable_vpc_endpoints_s3      = false
   tags                         = var.tags
 }

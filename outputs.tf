@@ -37,3 +37,13 @@ output "deploy_id" {
   description = "Deployment ID."
   value       = var.deploy_id
 }
+
+output "s3_buckets" {
+  description = "S3 buckets name,arn."
+  value       = module.storage.s3_buckets
+}
+
+output "key_pair_name" {
+  description = "SSH key pair name."
+  value       = aws_key_pair.domino.key_name
+}
