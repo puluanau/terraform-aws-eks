@@ -43,6 +43,14 @@ locals {
   }
 
   node_security_group_rules = {
+    ingress_cluster_15017 = {
+      description                   = "Cluster API to node groups 15017, istio"
+      protocol                      = "tcp"
+      from_port                     = 15017
+      to_port                       = 15017
+      type                          = "ingress"
+      source_cluster_security_group = true
+    }
     ingress_cluster_9443 = {
       description                   = "Cluster API to node groups 9443, hephaestus"
       protocol                      = "tcp"
