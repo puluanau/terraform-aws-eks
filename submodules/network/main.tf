@@ -1,11 +1,4 @@
-data "aws_vpc" "this" {
-  count = var.vpc_id != "" ? 1 : 0
-  state = "available"
-  id    = var.vpc_id
-}
-
 resource "aws_vpc" "this" {
-  count                            = var.vpc_id != "" ? 0 : 1
   assign_generated_ipv6_cidr_block = false
   cidr_block                       = var.base_cidr_block
   enable_dns_hostnames             = true
@@ -16,7 +9,7 @@ resource "aws_vpc" "this" {
 }
 
 locals {
-  vpc_id = var.vpc_id != "" ? data.aws_vpc.this[0].id : aws_vpc.this[0].id
+  vpc_id = aws_vpc.this.id
 }
 
 resource "aws_vpc_endpoint" "s3" {
@@ -79,7 +72,7 @@ resource "aws_default_network_acl" "default" {
 }
 
 resource "aws_flow_log" "this" {
-  log_destination          = var.monitoring_s3_bucket_arn
+  log_destination          = var.flow_log_bucket_arn
   vpc_id                   = local.vpc_id
   max_aggregation_interval = 600
   log_destination_type     = "s3"

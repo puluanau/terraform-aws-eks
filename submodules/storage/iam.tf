@@ -32,9 +32,3 @@ resource "aws_iam_policy" "s3" {
   path   = "/"
   policy = data.aws_iam_policy_document.s3.json
 }
-
-resource "aws_iam_role_policy_attachment" "s3" {
-  for_each   = toset([for r in var.roles : r.name])
-  policy_arn = aws_iam_policy.s3.arn
-  role       = each.value
-}

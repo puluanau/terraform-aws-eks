@@ -17,11 +17,8 @@ variable "efs_access_point_path" {
 }
 
 variable "subnets" {
-  type = map(object({
-    id         = string
-    cidr_block = string
-  }))
-  description = "Subnets to create EFS mount targets"
+  type        = list(string)
+  description = "List of Subnets IDs to create EFS mount targets"
 }
 
 variable "vpc_id" {
@@ -40,9 +37,4 @@ variable "s3_encryption_use_sse_kms_key" {
   description = "if true use 'aws:kms' else 'AES256' for the s3 server-side-encryption."
   type        = bool
   default     = false
-}
-
-variable "roles" {
-  description = "List of roles to grant s3 permissions"
-  type        = list(any)
 }

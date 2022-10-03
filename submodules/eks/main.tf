@@ -1,4 +1,3 @@
-
 data "aws_partition" "current" {}
 data "aws_caller_identity" "aws_account" {}
 
@@ -9,36 +8,36 @@ locals {
   policy_arn_prefix = "arn:${data.aws_partition.current.partition}:iam::aws:policy"
   eks_cluster_security_group_rules = {
     ingress_nodes_443 = {
-      description = "Private subnets to ${local.eks_cluster_name} EKS cluster API"
-      protocol    = "tcp"
-      from_port   = 443
-      to_port     = 443
-      type        = "ingress"
-      cidr_blocks = [for sb in var.private_subnets : sb.cidr_block]
+      description              = "Private subnets to ${local.eks_cluster_name} EKS cluster API"
+      protocol                 = "tcp"
+      from_port                = 443
+      to_port                  = 443
+      type                     = "ingress"
+      source_security_group_id = aws_security_group.eks_nodes.id
     }
     egress_nodes_9443 = {
-      description = "EKS control plane to nodes"
-      protocol    = "tcp"
-      from_port   = 9443
-      to_port     = 9443
-      type        = "egress"
-      cidr_blocks = [for sb in var.private_subnets : sb.cidr_block]
+      description              = "EKS control plane to nodes"
+      protocol                 = "tcp"
+      from_port                = 9443
+      to_port                  = 9443
+      type                     = "egress"
+      source_security_group_id = aws_security_group.eks_nodes.id
     }
     egress_nodes_443 = {
-      description = "${local.eks_cluster_name} EKS cluster API to private subnets"
-      protocol    = "tcp"
-      from_port   = 443
-      to_port     = 443
-      type        = "egress"
-      cidr_blocks = [for sb in var.private_subnets : sb.cidr_block]
+      description              = "${local.eks_cluster_name} EKS cluster API to private subnets"
+      protocol                 = "tcp"
+      from_port                = 443
+      to_port                  = 443
+      type                     = "egress"
+      source_security_group_id = aws_security_group.eks_nodes.id
     }
     egress_nodes_kubelet = {
-      description = "${local.eks_cluster_name} EKS cluster API to private subnets"
-      protocol    = "tcp"
-      from_port   = 10250
-      to_port     = 10250
-      type        = "egress"
-      cidr_blocks = [for sb in var.private_subnets : sb.cidr_block]
+      description              = "${local.eks_cluster_name} EKS cluster API to private subnets"
+      protocol                 = "tcp"
+      from_port                = 10250
+      to_port                  = 10250
+      type                     = "egress"
+      source_security_group_id = aws_security_group.eks_nodes.id
     }
   }
 

@@ -216,6 +216,8 @@ locals {
     "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
     "arn:aws:iam::aws:policy/AmazonElasticFileSystemReadOnlyAccess",
   ])
+
+  custom_node_policies = concat([aws_iam_policy.custom_eks_node_policy.arn], var.node_iam_policies)
 }
 
 resource "aws_iam_role_policy_attachment" "aws_eks_nodes" {
@@ -225,6 +227,7 @@ resource "aws_iam_role_policy_attachment" "aws_eks_nodes" {
 }
 
 resource "aws_iam_role_policy_attachment" "custom_eks_nodes" {
-  policy_arn = aws_iam_policy.custom_eks_node_policy.arn
+  count      = length(local.custom_node_policies)
+  policy_arn = element(local.custom_node_policies, count.index)
   role       = aws_iam_role.eks_nodes.name
 }

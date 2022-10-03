@@ -118,12 +118,8 @@ variable "kubeconfig_path" {
 }
 
 variable "private_subnets" {
-  description = "Private subnets object"
-  type = map(object({
-    id                = string
-    availability_zone = string
-    cidr_block        = string
-  }))
+  description = "List of Private subnets IDs"
+  type        = list(string)
   validation {
     condition     = length(var.private_subnets) >= 2
     error_message = "EKS deployment needs at least 2 subnets. https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html."
@@ -155,4 +151,14 @@ variable "eks_cluster_addons" {
 variable "create_bastion_sg" {
   description = "Create bastion access rules toggle."
   type        = bool
+}
+
+variable "node_iam_policies" {
+  description = "Additional IAM Policy Arns for Nodes"
+  type        = list(string)
+}
+
+variable "efs_security_group" {
+  description = "Security Group ID for EFS"
+  type        = string
 }

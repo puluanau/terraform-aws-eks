@@ -22,21 +22,11 @@ resource "aws_security_group" "efs" {
   }
 }
 
-resource "aws_security_group_rule" "efs" {
-  security_group_id = aws_security_group.efs.id
-  protocol          = "tcp"
-  from_port         = 2049
-  to_port           = 2049
-  type              = "ingress"
-  description       = "EFS access"
-  cidr_blocks       = [for s in var.subnets : s.cidr_block]
-}
-
 resource "aws_efs_mount_target" "eks" {
-  for_each        = var.subnets
+  count           = length(var.subnets)
   file_system_id  = aws_efs_file_system.eks.id
   security_groups = [aws_security_group.efs.id]
-  subnet_id       = each.value.id
+  subnet_id       = element(var.subnets, count.index)
 }
 
 resource "aws_efs_access_point" "eks" {

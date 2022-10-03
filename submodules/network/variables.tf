@@ -14,8 +14,21 @@ variable "region" {
   description = "AWS region for the deployment"
 }
 
+variable "availability_zones" {
+  type        = map(string)
+  description = "Map of availability zone: names - >  ids where the subnets will be created"
+  validation {
+    condition = (
+      length(compact(distinct(keys(var.availability_zones)))) == length(keys(var.availability_zones)) &&
+      length(compact(distinct(values(var.availability_zones)))) == length(values(var.availability_zones))
+    )
+    error_message = "Argument availability_zones must not contain any duplicate/empty key or value."
+  }
+}
+
 variable "base_cidr_block" {
   type        = string
+  default     = "10.0.0.0/16"
   description = "CIDR block to serve the main private and public subnets"
   validation {
     condition = (
@@ -26,35 +39,19 @@ variable "base_cidr_block" {
   }
 }
 
-variable "public_subnets" {
-  description = "Public subnets object"
-  type = list(object({
-    cidr_block = string
-    name       = string
-    type       = string
-    zone       = string
-    zone_id    = string
-  }))
+variable "public_cidr_network_bits" {
+  type        = number
+  description = "Number of network bits to allocate to the public subnet. i.e /27 -> 30 IPs"
+  default     = 27
 }
 
-variable "private_subnets" {
-  description = "Private subnets object"
-  type = list(object({
-    cidr_block = string
-    name       = string
-    type       = string
-    zone       = string
-    zone_id    = string
-  }))
+variable "private_cidr_network_bits" {
+  type        = number
+  description = "Number of network bits to allocate to the public subnet. i.e /19 -> 8,190 IPs"
+  default     = 19
 }
 
-variable "vpc_id" {
+variable "flow_log_bucket_arn" {
   type        = string
-  description = "VPC ID."
-  default     = ""
-}
-
-variable "monitoring_s3_bucket_arn" {
-  type        = string
-  description = "Monitoring bucket for vpc flow logging"
+  description = "Bucket for vpc flow logging"
 }

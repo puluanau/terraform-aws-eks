@@ -48,6 +48,16 @@ resource "aws_security_group_rule" "node" {
   )
 }
 
+resource "aws_security_group_rule" "efs" {
+  security_group_id        = var.efs_security_group
+  protocol                 = "tcp"
+  from_port                = 2049
+  to_port                  = 2049
+  type                     = "ingress"
+  description              = "EFS access"
+  source_security_group_id = aws_security_group.eks_nodes.id
+}
+
 locals {
   node_groups = merge(var.additional_node_groups, var.default_node_groups)
   node_groups_per_zone = flatten([
@@ -120,7 +130,7 @@ resource "aws_eks_node_group" "node_groups" {
   cluster_name    = aws_eks_cluster.this.name
   node_group_name = "${local.eks_cluster_name}-${each.key}"
   node_role_arn   = aws_iam_role.eks_nodes.arn
-  subnet_ids      = [each.value.subnet.id]
+  subnet_ids      = [each.value.subnet]
   scaling_config {
     min_size     = each.value.node_group.min_per_az
     max_size     = each.value.node_group.max_per_az

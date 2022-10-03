@@ -4,11 +4,11 @@ output "vpc_id" {
 }
 
 output "private_subnets" {
-  description = "Private subnets object."
-  value       = aws_subnet.private
+  description = "List of IDs of private subnets"
+  value       = [for sb in aws_subnet.private : sb.id]
 }
 
 output "public_subnets" {
-  description = "Public subnets object."
-  value       = aws_subnet.public
+  description = "List of IDs of public subnets"
+  value       = [for sb in aws_subnet.public : sb.id]
 }

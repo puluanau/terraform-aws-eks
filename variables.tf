@@ -190,8 +190,20 @@ variable "eks_master_role_names" {
 
 variable "vpc_id" {
   type        = string
-  description = "VPC ID for bringing your own vpc, will bypass creation of such."
-  default     = ""
+  description = "Optional VPC ID, it will bypass creation of such. public_subnets and private_subnets are also required."
+  default     = null
+}
+
+variable "public_subnets" {
+  type        = list(string)
+  description = "Optional list of public subnet ids"
+  default     = null
+}
+
+variable "private_subnets" {
+  type        = list(string)
+  description = "Optional list of private subnet ids"
+  default     = null
 }
 
 variable "create_bastion" {

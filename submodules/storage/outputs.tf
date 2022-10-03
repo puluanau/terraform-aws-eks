@@ -15,3 +15,13 @@ output "s3_buckets" {
     "arn"         = b.arn
   } }
 }
+
+output "s3_policy" {
+  description = "s3 IAM Policy arn"
+  value       = aws_iam_policy.s3.arn
+}
+
+output "efs_security_group" {
+  description = "EFS security group id"
+  value       = aws_security_group.efs.id
+}
