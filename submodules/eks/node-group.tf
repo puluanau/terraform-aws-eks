@@ -137,7 +137,7 @@ resource "aws_eks_node_group" "node_groups" {
     desired_size = each.value.node_group.desired_per_az
   }
 
-  ami_type = each.value.node_group.ami == null ? data.aws_ec2_instance_type.all[each.value.node_group.instance_type].gpus == null ? null : "AL2_x86_64_GPU" : "CUSTOM"
+  ami_type = each.value.node_group.ami != null ? "CUSTOM" : (length(data.aws_ec2_instance_type.all[each.value.node_group.instance_type].gpus) == 0 ? "AL2_x86_64" : "AL2_x86_64_GPU")
   launch_template {
     id      = aws_launch_template.node_groups[each.value.ng_name].id
     version = aws_launch_template.node_groups[each.value.ng_name].latest_version

@@ -15,40 +15,37 @@ variable "region" {
 }
 
 variable "availability_zones" {
-  type        = map(string)
-  description = "Map of availability zone: names - >  ids where the subnets will be created"
+  type        = list(string)
+  description = "List of availability zone names where the subnets will be created"
   validation {
     condition = (
-      length(compact(distinct(keys(var.availability_zones)))) == length(keys(var.availability_zones)) &&
-      length(compact(distinct(values(var.availability_zones)))) == length(values(var.availability_zones))
+      length(compact(distinct(var.availability_zones))) == length(var.availability_zones)
     )
-    error_message = "Argument availability_zones must not contain any duplicate/empty key or value."
+    error_message = "Argument availability_zones must not contain any duplicate/empty values."
   }
 }
 
-variable "base_cidr_block" {
+variable "public_subnets" {
+  type        = list(string)
+  description = "list of cidrs for the public subnets"
+}
+
+variable "private_subnets" {
+  type        = list(string)
+  description = "list of cidrs for the private subnets"
+}
+
+variable "cidr" {
   type        = string
   default     = "10.0.0.0/16"
-  description = "CIDR block to serve the main private and public subnets"
+  description = "The IPv4 CIDR block for the VPC."
   validation {
     condition = (
-      try(cidrhost(var.base_cidr_block, 0), null) == regex("^(.*)/", var.base_cidr_block)[0] &&
-      try(cidrnetmask(var.base_cidr_block), null) == "255.255.0.0"
+      try(cidrhost(var.cidr, 0), null) == regex("^(.*)/", var.cidr)[0] &&
+      try(cidrnetmask(var.cidr), null) == "255.255.0.0"
     )
-    error_message = "Argument base_cidr_block must be a valid CIDR block."
+    error_message = "Argument cidr must be a valid CIDR block."
   }
-}
-
-variable "public_cidr_network_bits" {
-  type        = number
-  description = "Number of network bits to allocate to the public subnet. i.e /27 -> 30 IPs"
-  default     = 27
-}
-
-variable "private_cidr_network_bits" {
-  type        = number
-  description = "Number of network bits to allocate to the public subnet. i.e /19 -> 8,190 IPs"
-  default     = 19
 }
 
 variable "flow_log_bucket_arn" {

@@ -1,6 +1,6 @@
 resource "aws_vpc" "this" {
   assign_generated_ipv6_cidr_block = false
-  cidr_block                       = var.base_cidr_block
+  cidr_block                       = var.cidr
   enable_dns_hostnames             = true
   enable_dns_support               = true
   tags = {

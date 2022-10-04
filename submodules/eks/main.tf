@@ -154,6 +154,14 @@ locals {
       type        = "egress"
       cidr_blocks = ["0.0.0.0/0"]
     }
+    egress_http = {
+      description = "Egress all HTTP to internet"
+      protocol    = "tcp"
+      from_port   = 80
+      to_port     = 80
+      type        = "egress"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
     egress_ntp_tcp = {
       description = "Egress NTP/TCP to internet"
       protocol    = "tcp"

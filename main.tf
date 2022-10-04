@@ -38,31 +38,27 @@ locals {
   # Get zones where ALL instance types are offered(intersection).
   zone_intersection_instance_offerings = setintersection([for k, v in data.aws_ec2_instance_type_offerings.nodes : toset(v.locations)]...)
   # Get the zones that are available and offered in the region for the instance types.
-  az_names           = var.vpc_id != null ? distinct(data.aws_subnet.specified[*].availability_zone) : length(var.availability_zones) > 0 ? var.availability_zones : data.aws_availability_zones.available.names
-  offered_azs        = setintersection(local.zone_intersection_instance_offerings, toset(local.az_names))
-  available_azs_data = zipmap(data.aws_availability_zones.available.names, data.aws_availability_zones.available.zone_ids)
-  # Getting the required azs name and id.
+  az_names    = var.vpc_id != null ? distinct(data.aws_subnet.specified[*].availability_zone) : length(var.availability_zones) > 0 ? var.availability_zones : data.aws_availability_zones.available.names
+  offered_azs = setintersection(local.zone_intersection_instance_offerings, toset(local.az_names))
+  num_of_azs  = var.vpc_id != null ? length(local.az_names) : var.number_of_azs
 }
 
-# Validate that the number of offered and available zones satisfy the number of required zones. https://github.com/hashicorp/terraform/issues/31122 may result in a more elegant validation and deprecation of the null_data_source
-data "null_data_source" "validate_zones" {
-  inputs = {
-    validated = true
-  }
+resource "random_shuffle" "azs" {
+  input        = local.offered_azs
+  result_count = local.num_of_azs
+
   lifecycle {
     precondition {
-      condition     = length(local.offered_azs) >= (var.vpc_id != null ? length(local.az_names) : var.number_of_azs)
+      condition     = length(local.offered_azs) >= local.num_of_azs
       error_message = "Availability of the instance types does not satisfy the desired number of zones, or the desired number of zones is higher than the available/offered zones"
     }
   }
 }
 
 locals {
-  num_of_azs         = var.vpc_id != null ? 0 : var.number_of_azs
-  availability_zones = { for name in slice(tolist(local.offered_azs), 0, local.num_of_azs) : name => local.available_azs_data[name] if data.null_data_source.validate_zones.outputs["validated"] }
-  bastion_user       = "ec2-user"
-  ssh_pvt_key_path   = abspath(pathexpand(var.ssh_pvt_key_path))
-  kubeconfig_path    = var.kubeconfig_path != "" ? abspath(pathexpand(var.kubeconfig_path)) : "${path.cwd}/kubeconfig"
+  bastion_user     = "ec2-user"
+  ssh_pvt_key_path = abspath(pathexpand(var.ssh_pvt_key_path))
+  kubeconfig_path  = var.kubeconfig_path != "" ? abspath(pathexpand(var.kubeconfig_path)) : "${path.cwd}/kubeconfig"
 }
 
 ## Importing SSH pvt key to access bastion and EKS nodes
@@ -85,17 +81,31 @@ module "storage" {
   subnets                      = local.private_subnets
 }
 
+locals {
+  ## Calculating public and private subnets based on the base base cidr and desired network bits
+  base_cidr_network_bits = tonumber(regex("[^/]*$", var.cidr))
+  ## We have one Cidr to carve the nw bits for both pvt and public subnets
+  ## `...local.availability_zones_number * 2)` --> we have 2 types private and public subnets
+  new_bits_list      = concat([for n in range(0, local.num_of_azs) : var.public_cidr_network_bits - local.base_cidr_network_bits], [for n in range(0, local.num_of_azs) : var.private_cidr_network_bits - local.base_cidr_network_bits])
+  subnet_cidr_blocks = cidrsubnets(var.cidr, local.new_bits_list...)
+
+  ## Match the public subnet var to the list of cidr blocks
+  public_cidr_blocks = slice(local.subnet_cidr_blocks, 0, local.num_of_azs)
+  ## Match the private subnet var to the list of cidr blocks
+  private_cidr_blocks = slice(local.subnet_cidr_blocks, local.num_of_azs, length(local.subnet_cidr_blocks))
+}
+
 module "network" {
   count = var.vpc_id == null ? 1 : 0
 
-  source                    = "./submodules/network"
-  deploy_id                 = var.deploy_id
-  region                    = var.region
-  availability_zones        = local.availability_zones
-  public_cidr_network_bits  = var.public_cidr_network_bits
-  private_cidr_network_bits = var.private_cidr_network_bits
-  base_cidr_block           = var.base_cidr_block
-  flow_log_bucket_arn       = module.storage.s3_buckets["monitoring"].arn
+  source              = "./submodules/network"
+  deploy_id           = var.deploy_id
+  region              = var.region
+  cidr                = var.cidr
+  availability_zones  = random_shuffle.azs.result
+  public_subnets      = local.public_cidr_blocks
+  private_subnets     = local.private_cidr_blocks
+  flow_log_bucket_arn = module.storage.s3_buckets["monitoring"].arn
 }
 
 locals {
@@ -131,6 +141,10 @@ module "eks" {
   additional_node_groups    = var.additional_node_groups
   node_iam_policies         = [module.storage.s3_policy]
   efs_security_group        = module.storage.efs_security_group
+
+  depends_on = [
+    module.network
+  ]
 }
 
 data "aws_iam_role" "eks_master_roles" {

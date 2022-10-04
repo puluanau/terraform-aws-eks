@@ -169,14 +169,14 @@ variable "additional_node_groups" {
   default = {}
 }
 
-variable "base_cidr_block" {
+variable "cidr" {
   type        = string
   default     = "10.0.0.0/16"
-  description = "CIDR block to serve the main private and public subnets."
+  description = "The IPv4 CIDR block for the VPC."
   validation {
     condition = (
-      try(cidrhost(var.base_cidr_block, 0), null) == regex("^(.*)/", var.base_cidr_block)[0] &&
-      try(cidrnetmask(var.base_cidr_block), null) == "255.255.0.0"
+      try(cidrhost(var.cidr, 0), null) == regex("^(.*)/", var.cidr)[0] &&
+      try(cidrnetmask(var.cidr), null) == "255.255.0.0"
     )
     error_message = "Argument base_cidr_block must be a valid CIDR block."
   }
