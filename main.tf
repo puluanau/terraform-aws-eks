@@ -105,7 +105,7 @@ module "network" {
   availability_zones  = random_shuffle.azs.result
   public_subnets      = local.public_cidr_blocks
   private_subnets     = local.private_cidr_blocks
-  flow_log_bucket_arn = module.storage.s3_buckets["monitoring"].arn
+  flow_log_bucket_arn = { arn = module.storage.s3_buckets["monitoring"].arn }
 }
 
 locals {
