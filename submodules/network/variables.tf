@@ -54,3 +54,9 @@ variable "flow_log_bucket_arn" {
   description = "Bucket for vpc flow logging"
   default     = null
 }
+
+variable "add_cluster_tag_to_subnet" {
+  type        = bool
+  description = "Toggle k8s cluster tag on subnet"
+  default     = true
+}
