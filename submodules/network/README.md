@@ -41,7 +41,7 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_add_cluster_tag_to_subnet"></a> [add\_cluster\_tag\_to\_subnet](#input\_add\_cluster\_tag\_to\_subnet) | Toggle k8s cluster tag on subnet | `bool` | `true` | no |
+| <a name="input_add_eks_elb_tags"></a> [add\_eks\_elb\_tags](#input\_add\_eks\_elb\_tags) | Toggle k8s cluster tag on subnet | `bool` | `true` | no |
 | <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | List of availability zone names where the subnets will be created | `list(string)` | n/a | yes |
 | <a name="input_cidr"></a> [cidr](#input\_cidr) | The IPv4 CIDR block for the VPC. | `string` | `"10.0.0.0/16"` | no |
 | <a name="input_deploy_id"></a> [deploy\_id](#input\_deploy\_id) | Domino Deployment ID | `string` | `""` | no |

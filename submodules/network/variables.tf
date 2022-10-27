@@ -55,7 +55,7 @@ variable "flow_log_bucket_arn" {
   default     = null
 }
 
-variable "add_cluster_tag_to_subnet" {
+variable "add_eks_elb_tags" {
   type        = bool
   description = "Toggle k8s cluster tag on subnet"
   default     = true

@@ -25,7 +25,7 @@ resource "aws_subnet" "public" {
   availability_zone = each.value.az
   vpc_id            = local.vpc_id
   cidr_block        = each.value.cidr
-  tags = var.add_cluster_tag_to_subnet ? {
+  tags = var.add_eks_elb_tags ? {
     "Name"                                   = each.value.name
     "kubernetes.io/role/elb"                 = "1"
     "kubernetes.io/cluster/${var.deploy_id}" = "shared"
@@ -43,7 +43,7 @@ resource "aws_subnet" "private" {
   availability_zone = each.value.az
   vpc_id            = local.vpc_id
   cidr_block        = each.value.cidr
-  tags = var.add_cluster_tag_to_subnet ? {
+  tags = var.add_eks_elb_tags ? {
     "Name"                                   = each.value.name
     "kubernetes.io/role/internal-elb"        = "1"
     "kubernetes.io/cluster/${var.deploy_id}" = "shared"
