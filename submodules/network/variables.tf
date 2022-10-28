@@ -48,7 +48,15 @@ variable "cidr" {
   }
 }
 
+## This is an object in order to be used as a conditional in count, due to https://github.com/hashicorp/terraform/issues/26755
 variable "flow_log_bucket_arn" {
-  type        = string
+  type        = object({ arn = string })
   description = "Bucket for vpc flow logging"
+  default     = null
+}
+
+variable "add_eks_elb_tags" {
+  type        = bool
+  description = "Toggle k8s cluster tag on subnet"
+  default     = true
 }

@@ -25,10 +25,15 @@ resource "aws_subnet" "public" {
   availability_zone = each.value.az
   vpc_id            = local.vpc_id
   cidr_block        = each.value.cidr
-  tags = {
+  tags = var.add_eks_elb_tags ? {
     "Name"                                   = each.value.name
-    "kubernetes.io/role/elb"                 = "1",
-    "kubernetes.io/cluster/${var.deploy_id}" = "shared",
+    "kubernetes.io/role/elb"                 = "1"
+    "kubernetes.io/cluster/${var.deploy_id}" = "shared"
+    } : {
+    "Name" = each.value.name
+  }
+  lifecycle {
+    ignore_changes = [tags]
   }
 }
 
@@ -38,9 +43,14 @@ resource "aws_subnet" "private" {
   availability_zone = each.value.az
   vpc_id            = local.vpc_id
   cidr_block        = each.value.cidr
-  tags = {
+  tags = var.add_eks_elb_tags ? {
     "Name"                                   = each.value.name
-    "kubernetes.io/role/internal-elb"        = "1",
-    "kubernetes.io/cluster/${var.deploy_id}" = "shared",
+    "kubernetes.io/role/internal-elb"        = "1"
+    "kubernetes.io/cluster/${var.deploy_id}" = "shared"
+    } : {
+    "Name" = each.value.name
+  }
+  lifecycle {
+    ignore_changes = [tags]
   }
 }

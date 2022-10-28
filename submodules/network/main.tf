@@ -72,7 +72,8 @@ resource "aws_default_network_acl" "default" {
 }
 
 resource "aws_flow_log" "this" {
-  log_destination          = var.flow_log_bucket_arn
+  count                    = var.flow_log_bucket_arn != null ? 1 : 0
+  log_destination          = var.flow_log_bucket_arn["arn"]
   vpc_id                   = local.vpc_id
   max_aggregation_interval = 600
   log_destination_type     = "s3"
