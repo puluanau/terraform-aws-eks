@@ -84,6 +84,7 @@ variable "default_node_groups" {
         {
           ami            = optional(string)
           instance_type  = optional(string, "m5.2xlarge")
+          spot           = optional(bool, false)
           min_per_az     = optional(number, 0)
           max_per_az     = optional(number, 10)
           desired_per_az = optional(number, 1)
@@ -105,6 +106,7 @@ variable "default_node_groups" {
         {
           ami            = optional(string)
           instance_type  = optional(string, "m5.4xlarge")
+          spot           = optional(bool, false)
           min_per_az     = optional(number, 1)
           max_per_az     = optional(number, 10)
           desired_per_az = optional(number, 1)
@@ -126,6 +128,7 @@ variable "default_node_groups" {
         {
           ami            = optional(string)
           instance_type  = optional(string, "g4dn.xlarge")
+          spot           = optional(bool, false)
           min_per_az     = optional(number, 0)
           max_per_az     = optional(number, 10)
           desired_per_az = optional(number, 0)
@@ -157,6 +160,7 @@ variable "additional_node_groups" {
   type = map(object({
     ami            = optional(string)
     instance_type  = string
+    spot           = optional(bool, false)
     min_per_az     = number
     max_per_az     = number
     desired_per_az = number
