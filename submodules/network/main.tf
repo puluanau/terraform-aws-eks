@@ -12,6 +12,10 @@ locals {
   vpc_id = aws_vpc.this.id
 }
 
+resource "aws_default_security_group" "default" {
+  vpc_id = local.vpc_id
+}
+
 resource "aws_vpc_endpoint" "s3" {
   vpc_id            = local.vpc_id
   service_name      = "com.amazonaws.${var.region}.s3"
