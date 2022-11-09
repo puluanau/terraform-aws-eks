@@ -19,7 +19,7 @@ resource "aws_iam_role" "eks_nodes" {
 resource "aws_security_group" "eks_nodes" {
   name        = "${local.eks_cluster_name}-nodes"
   description = "EKS cluster Nodes security group"
-  vpc_id      = var.vpc_id
+  vpc_id      = local.vpc_id
 
   lifecycle {
     create_before_destroy = true
@@ -70,6 +70,7 @@ locals {
       }
     ]
   ])
+  node_groups_by_name = { for ngz in local.node_groups_per_zone : "${ngz.ng_name}-${ngz.sb_name}" => ngz }
 }
 
 data "aws_ec2_instance_type" "all" {
@@ -126,11 +127,11 @@ resource "aws_launch_template" "node_groups" {
 }
 
 resource "aws_eks_node_group" "node_groups" {
-  for_each        = { for ngz in local.node_groups_per_zone : "${ngz.ng_name}-${ngz.sb_name}" => ngz }
+  for_each        = local.node_groups_by_name
   cluster_name    = aws_eks_cluster.this.name
   node_group_name = "${local.eks_cluster_name}-${each.key}"
   node_role_arn   = aws_iam_role.eks_nodes.arn
-  subnet_ids      = [each.value.subnet]
+  subnet_ids      = [each.value.subnet.subnet_id]
   scaling_config {
     min_size     = each.value.node_group.min_per_az
     max_size     = each.value.node_group.max_per_az
@@ -152,15 +153,66 @@ resource "aws_eks_node_group" "node_groups" {
   dynamic "taint" {
     for_each = each.value.node_group.taints
     content {
-      key    = taint.key
-      value  = taint.value
-      effect = taint.effect
+      key    = taint.value.key
+      value  = taint.value.value
+      effect = taint.value.effect
     }
   }
+
+  tags = each.value.node_group.tags
 
   lifecycle {
     ignore_changes = [
       scaling_config[0].desired_size,
     ]
+  }
+}
+
+locals {
+  asg_tags = flatten([for name, v in local.node_groups_by_name : [
+    {
+      name  = name
+      key   = "k8s.io/cluster-autoscaler/node-template/label/topology.ebs.csi.aws.com/zone"
+      value = v.subnet.az
+    },
+    {
+      name  = name
+      key   = "k8s.io/cluster-autoscaler/node-template/resources/smarter-devices/fuse"
+      value = "20"
+    },
+    # this is necessary until cluster-autoscaler v1.24, labels and taints are from the nodegroup
+    # https://github.com/kubernetes/autoscaler/commit/b4cadfb4e25b6660c41dbe2b73e66e9a2f3a2cc9
+    [for lkey, lvalue in v.node_group.labels : [
+      {
+        name  = name
+        key   = format("k8s.io/cluster-autoscaler/node-template/label/%v", lkey)
+        value = lvalue
+    }]],
+    [for t in v.node_group.taints : [
+      {
+        name  = name
+        key   = format("k8s.io/cluster-autoscaler/node-template/taint/%v", t.key)
+        value = "${t.value == null ? "" : t.value}:${local.taint_effect_map[t.effect]}"
+      }
+    ]]
+  ]])
+
+  taint_effect_map = {
+    NO_SCHEDULE        = "NoSchedule"
+    NO_EXECUTE         = "NoExecute"
+    PREFER_NO_SCHEDULE = "PreferNoSchedule"
+  }
+}
+
+# https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md#auto-discovery-setup
+resource "aws_autoscaling_group_tag" "tag" {
+  for_each = { for info in local.asg_tags : "${info.name}-${info.key}" => info }
+
+  autoscaling_group_name = aws_eks_node_group.node_groups[each.value.name].resources[0].autoscaling_groups[0].name
+
+  tag {
+    key                 = each.value.key
+    value               = each.value.value
+    propagate_at_launch = false
   }
 }

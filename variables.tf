@@ -91,6 +91,8 @@ variable "default_node_groups" {
           labels = optional(map(string), {
             "dominodatalab.com/node-pool" = "default"
           })
+          taints = optional(list(object({ key = string, value = optional(string), effect = string })), [])
+          tags   = optional(map(string), {})
           volume = optional(object(
             {
               size = optional(number, 100)
@@ -113,6 +115,8 @@ variable "default_node_groups" {
           labels = optional(map(string), {
             "dominodatalab.com/node-pool" = "platform"
           })
+          taints = optional(list(object({ key = string, value = optional(string), effect = string })), [])
+          tags   = optional(map(string), {})
           volume = optional(object(
             {
               size = optional(number, 100)
@@ -136,6 +140,10 @@ variable "default_node_groups" {
             "dominodatalab.com/node-pool" = "default-gpu"
             "nvidia.com/gpu"              = true
           })
+          taints = optional(list(object({ key = string, value = optional(string), effect = string })), [
+            { key = "nvidia.com/gpu", value = "true", effect = "NO_SCHEDULE" }
+          ])
+          tags = optional(map(string), {})
           volume = optional(object(
             {
               size = optional(number, 100)
@@ -165,6 +173,8 @@ variable "additional_node_groups" {
     max_per_az     = number
     desired_per_az = number
     labels         = map(string)
+    taints         = optional(list(object({ key = string, value = optional(string), effect = string })), [])
+    tags           = optional(map(string), {})
     volume = object({
       size = string
       type = string

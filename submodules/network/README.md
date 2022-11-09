@@ -47,15 +47,15 @@ No modules.
 | <a name="input_cidr"></a> [cidr](#input\_cidr) | The IPv4 CIDR block for the VPC. | `string` | `"10.0.0.0/16"` | no |
 | <a name="input_deploy_id"></a> [deploy\_id](#input\_deploy\_id) | Domino Deployment ID | `string` | `""` | no |
 | <a name="input_flow_log_bucket_arn"></a> [flow\_log\_bucket\_arn](#input\_flow\_log\_bucket\_arn) | Bucket for vpc flow logging | `object({ arn = string })` | `null` | no |
-| <a name="input_private_subnets"></a> [private\_subnets](#input\_private\_subnets) | list of cidrs for the private subnets | `list(string)` | n/a | yes |
-| <a name="input_public_subnets"></a> [public\_subnets](#input\_public\_subnets) | list of cidrs for the public subnets | `list(string)` | n/a | yes |
+| <a name="input_private_cidrs"></a> [private\_cidrs](#input\_private\_cidrs) | list of cidrs for the private subnets | `list(string)` | n/a | yes |
+| <a name="input_public_cidrs"></a> [public\_cidrs](#input\_public\_cidrs) | list of cidrs for the public subnets | `list(string)` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | AWS region for the deployment | `string` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_private_subnets"></a> [private\_subnets](#output\_private\_subnets) | List of IDs of private subnets |
-| <a name="output_public_subnets"></a> [public\_subnets](#output\_public\_subnets) | List of IDs of public subnets |
+| <a name="output_private_subnets"></a> [private\_subnets](#output\_private\_subnets) | List of private subnet ID and AZ |
+| <a name="output_public_subnets"></a> [public\_subnets](#output\_public\_subnets) | List of public subnet ID and AZ |
 | <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | VPC id. |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

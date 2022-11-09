@@ -42,7 +42,7 @@ resource "aws_kms_key" "eks_cluster" {
 resource "aws_security_group" "eks_cluster" {
   name        = "${local.eks_cluster_name}-cluster"
   description = "EKS cluster security group"
-  vpc_id      = var.vpc_id
+  vpc_id      = local.vpc_id
 
   lifecycle {
     create_before_destroy = true
@@ -94,7 +94,7 @@ resource "aws_eks_cluster" "this" {
     endpoint_private_access = true
     endpoint_public_access  = false
     security_group_ids      = [aws_security_group.eks_cluster.id]
-    subnet_ids              = var.private_subnets
+    subnet_ids              = [for s in var.private_subnets : s.subnet_id]
   }
   depends_on = [
     aws_iam_role_policy_attachment.eks_cluster,
