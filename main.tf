@@ -2,11 +2,11 @@
 
 # Check the zones where the instance types are being offered
 data "aws_ec2_instance_type_offerings" "nodes" {
-  for_each = toset([for ng in merge(var.default_node_groups, var.additional_node_groups) : ng.instance_type])
+  for_each = { for name, ng in merge(var.default_node_groups, var.additional_node_groups) : name => ng.instance_types }
 
   filter {
     name   = "instance-type"
-    values = [each.value]
+    values = each.value
   }
 
   location_type = "availability-zone"
@@ -74,7 +74,7 @@ module "storage" {
   efs_access_point_path        = var.efs_access_point_path
   s3_force_destroy_on_deletion = var.s3_force_destroy_on_deletion
   vpc_id                       = local.vpc_id
-  subnets                      = [for s in local.private_subnets : s.subnet_id]
+  subnet_ids                   = [for s in local.private_subnets : s.subnet_id]
 }
 
 locals {

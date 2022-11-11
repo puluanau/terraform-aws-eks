@@ -19,7 +19,7 @@ resource "aws_iam_role" "eks_nodes" {
 resource "aws_security_group" "eks_nodes" {
   name        = "${local.eks_cluster_name}-nodes"
   description = "EKS cluster Nodes security group"
-  vpc_id      = local.vpc_id
+  vpc_id      = var.vpc_id
 
   lifecycle {
     create_before_destroy = true
@@ -74,15 +74,18 @@ locals {
 }
 
 data "aws_ec2_instance_type" "all" {
-  for_each      = toset([for ng in local.node_groups : ng.instance_type])
+  for_each      = toset(flatten([for ng in local.node_groups : ng.instance_types]))
   instance_type = each.value
+}
+
+locals {
+  any_gpu = { for name, ng in local.node_groups : name => anytrue([for itype in ng.instance_types : length(data.aws_ec2_instance_type.all[itype].gpus) > 0]) }
 }
 
 resource "aws_launch_template" "node_groups" {
   for_each                = local.node_groups
   name                    = "${local.eks_cluster_name}-${each.key}"
   disable_api_termination = false
-  instance_type           = each.value.instance_type
   key_name                = var.ssh_pvt_key_path
   vpc_security_group_ids  = [aws_security_group.eks_nodes.id]
   image_id                = each.value.ami
@@ -138,8 +141,9 @@ resource "aws_eks_node_group" "node_groups" {
     desired_size = each.value.node_group.desired_per_az
   }
 
-  ami_type      = each.value.node_group.ami != null ? "CUSTOM" : (length(data.aws_ec2_instance_type.all[each.value.node_group.instance_type].gpus) == 0 ? "AL2_x86_64" : "AL2_x86_64_GPU")
-  capacity_type = each.value.node_group.spot ? "SPOT" : "ON_DEMAND"
+  ami_type       = each.value.node_group.ami != null ? "CUSTOM" : local.any_gpu[each.value.ng_name] ? "AL2_x86_64_GPU" : "AL2_x86_64"
+  capacity_type  = each.value.node_group.spot ? "SPOT" : "ON_DEMAND"
+  instance_types = each.value.node_group.instance_types
   launch_template {
     id      = aws_launch_template.node_groups[each.value.ng_name].id
     version = aws_launch_template.node_groups[each.value.ng_name].latest_version

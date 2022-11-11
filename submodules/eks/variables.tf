@@ -25,7 +25,7 @@ variable "default_node_groups" {
       compute = object(
         {
           ami            = optional(string)
-          instance_type  = optional(string, "m5.2xlarge")
+          instance_types = optional(list(string), ["m5.2xlarge"])
           spot           = optional(bool, false)
           min_per_az     = optional(number, 0)
           max_per_az     = optional(number, 10)
@@ -49,7 +49,7 @@ variable "default_node_groups" {
       platform = object(
         {
           ami            = optional(string)
-          instance_type  = optional(string, "m5.4xlarge")
+          instance_types = optional(list(string), ["m5.4xlarge"])
           spot           = optional(bool, false)
           min_per_az     = optional(number, 0)
           max_per_az     = optional(number, 10)
@@ -73,7 +73,7 @@ variable "default_node_groups" {
       gpu = object(
         {
           ami            = optional(string)
-          instance_type  = optional(string, "g4dn.xlarge")
+          instance_types = optional(list(string), ["g4dn.xlarge"])
           spot           = optional(bool, false)
           min_per_az     = optional(number, 0)
           max_per_az     = optional(number, 10)
@@ -107,7 +107,7 @@ variable "additional_node_groups" {
   description = "Additional EKS managed node groups definition."
   type = map(object({
     ami            = optional(string)
-    instance_type  = string
+    instance_types = list(string)
     spot           = optional(bool, false)
     min_per_az     = number
     max_per_az     = number

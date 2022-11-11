@@ -3,7 +3,6 @@ data "aws_caller_identity" "aws_account" {}
 
 locals {
   eks_cluster_name  = var.deploy_id
-  vpc_id            = var.vpc_id
   aws_account_id    = data.aws_caller_identity.aws_account.account_id
   dns_suffix        = data.aws_partition.current.dns_suffix
   policy_arn_prefix = "arn:${data.aws_partition.current.partition}:iam::aws:policy"

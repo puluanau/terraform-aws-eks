@@ -42,7 +42,7 @@ resource "aws_kms_key" "eks_cluster" {
 resource "aws_security_group" "eks_cluster" {
   name        = "${local.eks_cluster_name}-cluster"
   description = "EKS cluster security group"
-  vpc_id      = local.vpc_id
+  vpc_id      = var.vpc_id
 
   lifecycle {
     create_before_destroy = true
