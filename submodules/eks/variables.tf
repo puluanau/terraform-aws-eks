@@ -25,13 +25,16 @@ variable "default_node_groups" {
       compute = object(
         {
           ami            = optional(string)
-          instance_type  = optional(string, "m5.2xlarge")
+          instance_types = optional(list(string), ["m5.2xlarge"])
+          spot           = optional(bool, false)
           min_per_az     = optional(number, 0)
           max_per_az     = optional(number, 10)
           desired_per_az = optional(number, 1)
           labels = optional(map(string), {
             "dominodatalab.com/node-pool" = "default"
           })
+          taints = optional(list(object({ key = string, value = optional(string), effect = string })), [])
+          tags   = optional(map(string), {})
           volume = optional(object(
             {
               size = optional(number, 100)
@@ -46,13 +49,16 @@ variable "default_node_groups" {
       platform = object(
         {
           ami            = optional(string)
-          instance_type  = optional(string, "m5.4xlarge")
+          instance_types = optional(list(string), ["m5.4xlarge"])
+          spot           = optional(bool, false)
           min_per_az     = optional(number, 0)
           max_per_az     = optional(number, 10)
           desired_per_az = optional(number, 1)
           labels = optional(map(string), {
             "dominodatalab.com/node-pool" = "platform"
           })
+          taints = optional(list(object({ key = string, value = optional(string), effect = string })), [])
+          tags   = optional(map(string), {})
           volume = optional(object(
             {
               size = optional(number, 100)
@@ -67,7 +73,8 @@ variable "default_node_groups" {
       gpu = object(
         {
           ami            = optional(string)
-          instance_type  = optional(string, "g4dn.xlarge")
+          instance_types = optional(list(string), ["g4dn.xlarge"])
+          spot           = optional(bool, false)
           min_per_az     = optional(number, 0)
           max_per_az     = optional(number, 10)
           desired_per_az = optional(number, 0)
@@ -75,6 +82,8 @@ variable "default_node_groups" {
             "dominodatalab.com/node-pool" = "default-gpu"
             "nvidia.com/gpu"              = true
           })
+          taints = optional(list(object({ key = string, value = optional(string), effect = string })), [])
+          tags   = optional(map(string), {})
           volume = optional(object(
             {
               size = optional(number, 100)
@@ -98,11 +107,14 @@ variable "additional_node_groups" {
   description = "Additional EKS managed node groups definition."
   type = map(object({
     ami            = optional(string)
-    instance_type  = string
+    instance_types = list(string)
+    spot           = optional(bool, false)
     min_per_az     = number
     max_per_az     = number
     desired_per_az = number
     labels         = map(string)
+    taints         = optional(list(object({ key = string, value = optional(string), effect = string })), [])
+    tags           = optional(map(string), {})
     volume = object({
       size = string
       type = string
@@ -118,8 +130,8 @@ variable "kubeconfig_path" {
 }
 
 variable "private_subnets" {
-  description = "List of Private subnets IDs"
-  type        = list(string)
+  description = "List of Private subnets IDs and AZ"
+  type        = list(object({ subnet_id = string, az = string }))
   validation {
     condition     = length(var.private_subnets) >= 2
     error_message = "EKS deployment needs at least 2 subnets. https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html."

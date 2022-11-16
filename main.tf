@@ -2,11 +2,11 @@
 
 # Check the zones where the instance types are being offered
 data "aws_ec2_instance_type_offerings" "nodes" {
-  for_each = toset([for ng in merge(var.default_node_groups, var.additional_node_groups) : ng.instance_type])
+  for_each = { for name, ng in merge(var.default_node_groups, var.additional_node_groups) : name => ng.instance_types }
 
   filter {
     name   = "instance-type"
-    values = [each.value]
+    values = each.value
   }
 
   location_type = "availability-zone"
@@ -29,30 +29,26 @@ data "aws_availability_zones" "available" {
   }
 }
 
-data "aws_subnet" "specified" {
+data "aws_subnet" "public" {
+  count = var.vpc_id != null ? length(var.public_subnets) : 0
+  id    = var.public_subnets[count.index]
+}
+
+data "aws_subnet" "private" {
   count = var.vpc_id != null ? length(var.private_subnets) : 0
-  id    = element(var.private_subnets, count.index)
+  id    = var.private_subnets[count.index]
 }
 
 locals {
   # Get zones where ALL instance types are offered(intersection).
   zone_intersection_instance_offerings = setintersection([for k, v in data.aws_ec2_instance_type_offerings.nodes : toset(v.locations)]...)
   # Get the zones that are available and offered in the region for the instance types.
-  az_names    = var.vpc_id != null ? distinct(data.aws_subnet.specified[*].availability_zone) : length(var.availability_zones) > 0 ? var.availability_zones : data.aws_availability_zones.available.names
+  az_names    = var.vpc_id != null ? distinct(data.aws_subnet.private[*].availability_zone) : length(var.availability_zones) > 0 ? var.availability_zones : data.aws_availability_zones.available.names
   offered_azs = setintersection(local.zone_intersection_instance_offerings, toset(local.az_names))
   num_of_azs  = var.vpc_id != null ? length(local.az_names) : var.number_of_azs
-}
 
-resource "random_shuffle" "azs" {
-  input        = local.offered_azs
-  result_count = local.num_of_azs
-
-  lifecycle {
-    precondition {
-      condition     = length(local.offered_azs) >= local.num_of_azs
-      error_message = "Availability of the instance types does not satisfy the desired number of zones, or the desired number of zones is higher than the available/offered zones"
-    }
-  }
+  # error -> "Availability of the instance types does not satisfy the desired number of zones, or the desired number of zones is higher than the available/offered zones"
+  azs_to_use = slice(tolist(local.offered_azs), 0, local.num_of_azs)
 }
 
 locals {
@@ -78,7 +74,7 @@ module "storage" {
   efs_access_point_path        = var.efs_access_point_path
   s3_force_destroy_on_deletion = var.s3_force_destroy_on_deletion
   vpc_id                       = local.vpc_id
-  subnets                      = local.private_subnets
+  subnet_ids                   = [for s in local.private_subnets : s.subnet_id]
 }
 
 locals {
@@ -102,16 +98,16 @@ module "network" {
   deploy_id           = var.deploy_id
   region              = var.region
   cidr                = var.cidr
-  availability_zones  = random_shuffle.azs.result
-  public_subnets      = local.public_cidr_blocks
-  private_subnets     = local.private_cidr_blocks
+  availability_zones  = local.azs_to_use
+  public_cidrs        = local.public_cidr_blocks
+  private_cidrs       = local.private_cidr_blocks
   flow_log_bucket_arn = { arn = module.storage.s3_buckets["monitoring"].arn }
 }
 
 locals {
   vpc_id          = var.vpc_id != null ? var.vpc_id : module.network[0].vpc_id
-  public_subnets  = var.vpc_id != null ? var.public_subnets : module.network[0].public_subnets
-  private_subnets = var.vpc_id != null ? var.private_subnets : module.network[0].private_subnets
+  public_subnets  = var.vpc_id != null ? [for s in data.aws_subnet.public : { subnet_id = s.id, az = s.availability_zone }] : module.network[0].public_subnets
+  private_subnets = var.vpc_id != null ? [for s in data.aws_subnet.private : { subnet_id = s.id, az = s.availability_zone }] : module.network[0].private_subnets
 }
 
 module "bastion" {
@@ -122,7 +118,7 @@ module "bastion" {
   region                   = var.region
   vpc_id                   = local.vpc_id
   ssh_pvt_key_path         = aws_key_pair.domino.key_name
-  bastion_public_subnet_id = local.public_subnets[0]
+  bastion_public_subnet_id = local.public_subnets[0].subnet_id
   bastion_ami_id           = var.bastion_ami_id
 }
 

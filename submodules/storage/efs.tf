@@ -23,10 +23,10 @@ resource "aws_security_group" "efs" {
 }
 
 resource "aws_efs_mount_target" "eks" {
-  count           = length(var.subnets)
+  count           = length(var.subnet_ids)
   file_system_id  = aws_efs_file_system.eks.id
   security_groups = [aws_security_group.efs.id]
-  subnet_id       = element(var.subnets, count.index)
+  subnet_id       = element(var.subnet_ids, count.index)
 }
 
 resource "aws_efs_access_point" "eks" {

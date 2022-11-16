@@ -10,4 +10,16 @@ module "domino_eks" {
   create_bastion               = true
   ssh_pvt_key_path             = "domino.pem"
   tags                         = var.tags
+  default_node_groups = {
+    compute = {
+      spot = true
+      labels = {
+        label1 = "value1"
+      }
+    }
+    platform = {}
+    gpu = {
+      taints = [{ key = "abc", effect = "NO_SCHEDULE" }]
+    }
+  }
 }

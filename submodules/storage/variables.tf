@@ -16,7 +16,7 @@ variable "efs_access_point_path" {
 
 }
 
-variable "subnets" {
+variable "subnet_ids" {
   type        = list(string)
   description = "List of Subnets IDs to create EFS mount targets"
 }
