@@ -25,7 +25,7 @@ set_k8s_auth() {
   local AWS_AUTH_YAML="${aws_auth_yaml}"
   if test -f "$AWS_AUTH_YAML"; then
     printf "$GREEN Updating $AWS_AUTH_YAML... $EC \n"
-    kubectl_apply "$AWS_AUTH_YAML" || printf "$RED There was an error applying auth info in kubernetes" && exit 1
+    kubectl_apply "$AWS_AUTH_YAML"
   else
     printf "$RED $AWS_AUTH_YAML does not exist. $EC \n" && exit 1
   fi
@@ -35,10 +35,10 @@ set_k8s_auth() {
 install_calico() {
   local CALICO_OPERATOR_YAML_URL=${calico_operator_url}
   printf "$GREEN Installing Calico Operator $EC \n"
-  kubectl_apply $CALICO_OPERATOR_YAML_URL || printf "$RED There was an error installing the calico operator" && exit 1
+  kubectl_apply $CALICO_OPERATOR_YAML_URL || printf "$RED There was an error installing the calico operator"
   echo
   local CALICO_CRD_YAML_URL=${calico_custom_resources_url}
-  printf "$GREEN Installing Calico Custom resources $EC \n" || printf "$RED There was an error installing the calico CRD" && exit 1
+  printf "$GREEN Installing Calico Custom resources $EC \n" || printf "$RED There was an error installing the calico CRD"
   kubectl_apply $CALICO_CRD_YAML_URL
   echo
 }
