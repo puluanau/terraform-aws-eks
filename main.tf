@@ -158,6 +158,7 @@ module "k8s_setup" {
   eks_node_role_arns   = [for r in module.eks.eks_node_roles : r.arn]
   eks_master_role_arns = [for r in concat(values(data.aws_iam_role.eks_master_roles), module.eks.eks_master_roles) : r.arn]
   kubeconfig_path      = local.kubeconfig_path
+  assume_role_arn      = var.assume_role_arn
   depends_on = [
     module.eks,
     module.bastion

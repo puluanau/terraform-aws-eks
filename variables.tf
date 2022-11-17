@@ -16,6 +16,24 @@ variable "deploy_id" {
   }
 }
 
+variable "access_key" {
+  type        = string
+  description = "Explicit AWS access key id to use"
+  default     = ""
+}
+
+variable "secret_key" {
+  type        = string
+  description = "Explicit AWS secret access key id to use"
+  default     = ""
+}
+
+variable "assume_role_arn" {
+  type        = string
+  description = "Role ARN to assume for deployment"
+  default     = ""
+}
+
 variable "region" {
   type        = string
   description = "AWS region for the deployment"

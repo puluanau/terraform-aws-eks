@@ -1,4 +1,8 @@
-#! /usr/bin/env bash -ex
+#!/usr/bin/env -S bash -ex
+
+if [ -n "$1" ]; then
+  export $(aws sts assume-role --role-arn $1 --role-session-name aws-auth | jq -r '"AWS_ACCESS_KEY_ID=\(.Credentials.AccessKeyId)\nAWS_SECRET_ACCESS_KEY=\(.Credentials.SecretAccessKey)\nAWS_SESSION_TOKEN=\(.Credentials.SessionToken)"')
+fi
 
 RED="\e[31m"
 GREEN="\e[32m"

@@ -44,3 +44,9 @@ variable "calico_version" {
   description = "Calico operator version."
   default     = "v1.11.0"
 }
+
+variable "assume_role_arn" {
+  type        = string
+  description = "Role ARN to assume for deployment"
+  default     = ""
+}
