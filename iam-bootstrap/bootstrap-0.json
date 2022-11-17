@@ -1,0 +1,158 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "S3Gated",
+            "Effect": "Allow",
+            "Action": [
+                "s3:CreateBucket",
+                "s3:DeleteBucket",
+                "s3:DeleteBucketPolicy",
+                "s3:GetAccelerateConfiguration",
+                "s3:GetBucketAcl",
+                "s3:GetBucketCORS",
+                "s3:GetBucketLocation",
+                "s3:GetBucketLogging",
+                "s3:GetBucketObjectLockConfiguration",
+                "s3:GetBucketPolicy",
+                "s3:GetBucketPublicAccessBlock",
+                "s3:GetBucketRequestPayment",
+                "s3:GetBucketTagging",
+                "s3:GetBucketVersioning",
+                "s3:GetBucketWebsite",
+                "s3:GetEncryptionConfiguration",
+                "s3:GetLifecycleConfiguration",
+                "s3:GetReplicationConfiguration",
+                "s3:*Object",
+                "s3:PutAccountPublicAccessBlock",
+                "s3:PutBucketAcl",
+                "s3:PutBucketLogging",
+                "s3:PutBucketPolicy",
+                "s3:PutBucketRequestPayment",
+                "s3:PutBucketTagging",
+                "s3:PutBucketVersioning",
+                "s3:PutBucketPublicAccessBlock",
+                "s3:PutEncryptionConfiguration"
+            ],
+            "Resource": [
+                "arn:aws:s3:::${deploy_id}-*"
+            ]
+        },
+        {
+            "Sid": "S3Ungated",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetBucketLocation",
+                "s3:ListAllMyBuckets",
+                "s3:ListBucket",
+                "s3:ListBucketVersions"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "IAMGated",
+            "Effect": "Allow",
+            "Action": [
+                "iam:AddRoleToInstanceProfile",
+                "iam:AttachRolePolicy",
+                "iam:CreateInstanceProfile",
+                "iam:CreatePolicy",
+                "iam:CreatePolicyVersion",
+                "iam:CreateRole",
+                "iam:CreateServiceLinkedRole",
+                "iam:DeleteInstanceProfile",
+                "iam:DeletePolicy",
+                "iam:DeletePolicyVersion",
+                "iam:DeleteRole",
+                "iam:DeleteRolePolicy",
+                "iam:DetachRolePolicy",
+                "iam:GetInstanceProfile",
+                "iam:GetPolicy",
+                "iam:GetPolicyVersion",
+                "iam:ListAttachedRolePolicies",
+                "iam:ListInstanceProfilesForRole",
+                "iam:ListPolicyVersions",
+                "iam:ListRolePolicies",
+                "iam:PassRole",
+                "iam:PutRolePolicy",
+                "iam:RemoveRoleFromInstanceProfile",
+                "iam:Tag*",
+                "iam:Untag*",
+                "iam:UpdateAssumeRolePolicy"
+            ],
+            "Resource": [
+                "arn:aws:iam::${account_id}:policy/${deploy_id}-*",
+                "arn:aws:iam::${account_id}:role/${deploy_id}-*",
+                "arn:aws:iam::${account_id}:instance-profile/${deploy_id}-*",
+                "arn:aws:iam::${account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
+            ]
+        },
+        {
+            "Sid": "IAMUngated",
+            "Effect": "Allow",
+            "Action": [
+                "iam:GetRole",
+                "iam:GetRolePolicy"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "LogsUngated",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:CreateFlowLogs",
+                "ec2:DescribeFlowLogs",
+                "logs:CreateLogGroup",
+                "logs:CreateLogDelivery",
+                "logs:DescribeLogGroups",
+                "logs:ListTagsLogGroup",
+                "logs:ListTagsForResource"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "EKSUngated",
+            "Effect": "Allow",
+            "Action": [
+                "eks:*Addon*",
+                "eks:CreateCluster",
+                "eks:CreateNodegroup",
+                "eks:DescribeCluster",
+                "eks:DescribeNodegroup",
+                "eks:DescribeUpdate",
+                "eks:ListTagsForResource",
+                "eks:TagResource",
+                "eks:UntagResource"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "Route53Ungated",
+            "Effect": "Allow",
+            "Action": [
+                "route53:ListHostedZones",
+                "route53:GetHostedZone",
+                "route53:ListTagsForResource"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "BackupGated",
+            "Effect": "Allow",
+            "Action": [
+                "backup:*BackupPlan",
+                "backup:*BackupVault*",
+                "backup:CreateBackupSelection",
+                "backup:DeleteBackupSelection",
+                "backup:GetBackupSelection",
+                "backup:ListTags",
+                "backup:TagResource",
+                "backup:UntagResource"
+            ],
+            "Resource": [
+                "arn:aws:backup:*:${account_id}:backup-vault:${deploy_id}-efs",
+                "arn:aws:backup:*:${account_id}:backup-plan:*"
+            ]
+        }
+    ]
+}
