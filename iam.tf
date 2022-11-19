@@ -33,6 +33,7 @@ resource "aws_iam_policy" "route53" {
 }
 
 resource "aws_iam_role_policy_attachment" "route53" {
+  for_each   = var.route53_hosted_zone_name != "" ? toset([for r in module.eks.eks_node_roles : r.name]) : []
   policy_arn = aws_iam_policy.route53[0].arn
-  role       = module.eks.eks_node_roles[0].name
+  role       = each.value
 }
