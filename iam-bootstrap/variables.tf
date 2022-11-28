@@ -16,6 +16,7 @@ variable "region" {
 variable "iam_policy_paths" {
   type        = list(any)
   description = "IAM policies to provision and use for deployment role, can be terraform templates"
+  default     = []
 }
 
 variable "template_config" {
