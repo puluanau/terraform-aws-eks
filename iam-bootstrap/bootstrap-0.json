@@ -77,7 +77,8 @@
                 "iam:PutRolePolicy",
                 "iam:RemoveRoleFromInstanceProfile",
                 "iam:Tag*",
-                "iam:Untag*"
+                "iam:Untag*",
+                "iam:UpdateAssumeRolePolicy"
             ],
             "Resource": [
                 "arn:aws:iam::${account_id}:policy/${deploy_id}-*",
