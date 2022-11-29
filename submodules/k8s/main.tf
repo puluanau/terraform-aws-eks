@@ -17,7 +17,7 @@ locals {
     k8s_functions_sh = {
       filename = local.k8s_functions_sh_filename
       content = templatefile("${local.templates_dir}/${local.k8s_functions_sh_template}", {
-        kubeconfig_path             = var.kubeconfig_path
+        kubeconfig_path             = "${var.kubeconfig_path}.no-role"
         k8s_tunnel_port             = var.k8s_tunnel_port
         aws_auth_yaml               = basename(local.aws_auth_filename)
         calico_operator_url         = local.calico.operator_url
