@@ -8,6 +8,11 @@ data "aws_iam_policy_document" "eks_cluster" {
       type        = "Service"
       identifiers = ["eks.${local.dns_suffix}"]
     }
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${local.aws_account_id}:root"]
+    }
   }
 }
 
