@@ -35,10 +35,10 @@ set_k8s_auth() {
 install_calico() {
   local CALICO_OPERATOR_YAML_URL=${calico_operator_url}
   printf "$GREEN Installing Calico Operator $EC \n"
-  kubectl_apply $CALICO_OPERATOR_YAML_URL || printf "$RED There was an error installing the calico operator"
+  kubectl_apply $CALICO_OPERATOR_YAML_URL
   echo
   local CALICO_CRD_YAML_URL=${calico_custom_resources_url}
-  printf "$GREEN Installing Calico Custom resources $EC \n" || printf "$RED There was an error installing the calico CRD"
+  printf "$GREEN Installing Calico Custom resources $EC \n"
   kubectl_apply $CALICO_CRD_YAML_URL
   echo
 }
@@ -58,8 +58,13 @@ kubectl_apply() {
   if test -f "$k8s_manifest" || validate_url "$k8s_manifest"; then
     echo "Applying $k8s_manifest..."
     HTTPS_PROXY=socks5://127.0.0.1:${k8s_tunnel_port} kubectl --kubeconfig "${kubeconfig_path}" apply -f "$k8s_manifest"
+    if [ $? -ne 0 ]; then
+      printf "$RED Error applying $k8s_manifest \n"
+      exit 1
+    fi
   else
-    printf "$RED $k8s_manifest does not exist. $EC \n" && exit 1
+    printf "$RED $k8s_manifest does not exist. $EC \n"
+    exit 1
   fi
 }
 

@@ -56,6 +56,10 @@ resource "local_file" "templates" {
 }
 
 resource "null_resource" "run_k8s_pre_setup" {
+  triggers = {
+    script_hash = md5(local_file.templates["k8s_presetup"].content)
+  }
+
   provisioner "local-exec" {
     command     = basename(local_file.templates["k8s_presetup"].filename)
     interpreter = ["bash"]
