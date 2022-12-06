@@ -7,9 +7,10 @@ locals {
 }
 
 resource "aws_security_group" "bastion" {
-  name        = "${var.deploy_id}-bastion"
-  description = "Bastion security group"
-  vpc_id      = var.vpc_id
+  name                   = "${var.deploy_id}-bastion"
+  description            = "Bastion security group"
+  revoke_rules_on_delete = true
+  vpc_id                 = var.vpc_id
 
   lifecycle {
     create_before_destroy = true
@@ -48,7 +49,7 @@ data "aws_iam_policy_document" "bastion" {
 
     principals {
       type        = "AWS"
-      identifiers = ["arn:aws:iam::${local.aws_account_id}:root"]
+      identifiers = ["arn:${data.aws_partition.current.partition}:iam::${local.aws_account_id}:root"]
     }
   }
 }
@@ -62,7 +63,7 @@ resource "aws_iam_role" "bastion" {
 }
 
 resource "aws_iam_role_policy_attachment" "bastion" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  policy_arn = "arn:${data.aws_partition.current.partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"
   role       = aws_iam_role.bastion.name
 }
 
@@ -79,6 +80,11 @@ data "aws_ami" "amazon_linux_2" {
   filter {
     name   = "name"
     values = ["amzn2-ami-hvm*"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
   }
 }
 

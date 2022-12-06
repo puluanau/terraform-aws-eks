@@ -60,7 +60,7 @@ variable "security_group_rules" {
       source_security_group_id = null
     }
     bastion_inbound_ssh = {
-      protocol                 = "-1"
+      protocol                 = "tcp"
       from_port                = "22"
       to_port                  = "22"
       type                     = "ingress"

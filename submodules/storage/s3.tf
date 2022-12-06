@@ -14,8 +14,8 @@ data "aws_iam_policy_document" "backups" {
     effect = "Deny"
 
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.backups.bucket}",
-      "arn:aws:s3:::${aws_s3_bucket.backups.bucket}/*",
+      "arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.backups.bucket}",
+      "arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.backups.bucket}/*",
     ]
 
     actions = ["s3:*"]
@@ -35,7 +35,7 @@ data "aws_iam_policy_document" "backups" {
   statement {
     sid       = "DenyIncorrectEncryptionHeader"
     effect    = "Deny"
-    resources = ["arn:aws:s3:::${aws_s3_bucket.backups.bucket}/*"]
+    resources = ["arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.backups.bucket}/*"]
     actions   = ["s3:PutObject"]
 
     condition {
@@ -53,7 +53,7 @@ data "aws_iam_policy_document" "backups" {
   statement {
     sid       = "DenyUnEncryptedObjectUploads"
     effect    = "Deny"
-    resources = ["arn:aws:s3:::${aws_s3_bucket.backups.bucket}/*"]
+    resources = ["arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.backups.bucket}/*"]
     actions   = ["s3:PutObject"]
 
     condition {
@@ -82,8 +82,8 @@ data "aws_iam_policy_document" "blobs" {
     effect = "Deny"
 
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.blobs.bucket}",
-      "arn:aws:s3:::${aws_s3_bucket.blobs.bucket}/*",
+      "arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.blobs.bucket}",
+      "arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.blobs.bucket}/*",
     ]
 
     actions = ["s3:*"]
@@ -104,7 +104,7 @@ data "aws_iam_policy_document" "blobs" {
   statement {
     sid       = "DenyIncorrectEncryptionHeader"
     effect    = "Deny"
-    resources = ["arn:aws:s3:::${aws_s3_bucket.blobs.bucket}/*"]
+    resources = ["arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.blobs.bucket}/*"]
     actions   = ["s3:PutObject"]
 
     condition {
@@ -122,7 +122,7 @@ data "aws_iam_policy_document" "blobs" {
   statement {
     sid       = "DenyUnEncryptedObjectUploads"
     effect    = "Deny"
-    resources = ["arn:aws:s3:::${aws_s3_bucket.blobs.bucket}/*"]
+    resources = ["arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.blobs.bucket}/*"]
     actions   = ["s3:PutObject"]
 
     condition {
@@ -151,8 +151,8 @@ data "aws_iam_policy_document" "logs" {
     effect = "Deny"
 
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.logs.bucket}",
-      "arn:aws:s3:::${aws_s3_bucket.logs.bucket}/*",
+      "arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.logs.bucket}",
+      "arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.logs.bucket}/*",
     ]
 
     actions = ["s3:*"]
@@ -172,7 +172,7 @@ data "aws_iam_policy_document" "logs" {
   statement {
     sid       = "DenyIncorrectEncryptionHeader"
     effect    = "Deny"
-    resources = ["arn:aws:s3:::${aws_s3_bucket.logs.bucket}/*"]
+    resources = ["arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.logs.bucket}/*"]
     actions   = ["s3:PutObject"]
 
     condition {
@@ -190,7 +190,7 @@ data "aws_iam_policy_document" "logs" {
   statement {
     sid       = "DenyUnEncryptedObjectUploads"
     effect    = "Deny"
-    resources = ["arn:aws:s3:::${aws_s3_bucket.logs.bucket}/*"]
+    resources = ["arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.logs.bucket}/*"]
     actions   = ["s3:PutObject"]
 
     condition {
@@ -219,8 +219,8 @@ data "aws_iam_policy_document" "monitoring" {
     effect = "Deny"
 
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.monitoring.bucket}",
-      "arn:aws:s3:::${aws_s3_bucket.monitoring.bucket}/*",
+      "arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.monitoring.bucket}",
+      "arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.monitoring.bucket}/*",
     ]
 
     actions = ["s3:*"]
@@ -240,7 +240,7 @@ data "aws_iam_policy_document" "monitoring" {
   statement {
     sid       = ""
     effect    = "Allow"
-    resources = ["arn:aws:s3:::${aws_s3_bucket.monitoring.bucket}/*"]
+    resources = ["arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.monitoring.bucket}/*"]
 
     actions = [
       "s3:PutObject*",
@@ -256,7 +256,7 @@ data "aws_iam_policy_document" "monitoring" {
   statement {
     sid       = "AWSLogDeliveryWrite"
     effect    = "Allow"
-    resources = ["arn:aws:s3:::${aws_s3_bucket.monitoring.bucket}/*"]
+    resources = ["arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.monitoring.bucket}/*"]
     actions   = ["s3:PutObject"]
 
     condition {
@@ -274,7 +274,7 @@ data "aws_iam_policy_document" "monitoring" {
   statement {
     sid       = "AWSLogDeliveryCheck"
     effect    = "Allow"
-    resources = ["arn:aws:s3:::${aws_s3_bucket.monitoring.bucket}"]
+    resources = ["arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.monitoring.bucket}"]
 
     actions = [
       "s3:GetBucketAcl",
@@ -334,8 +334,8 @@ data "aws_iam_policy_document" "registry" {
   statement {
     effect = "Deny"
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.registry.bucket}",
-      "arn:aws:s3:::${aws_s3_bucket.registry.bucket}/*",
+      "arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.registry.bucket}",
+      "arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.registry.bucket}/*",
     ]
 
     actions = ["s3:*"]
@@ -355,7 +355,7 @@ data "aws_iam_policy_document" "registry" {
   statement {
     sid       = "DenyIncorrectEncryptionHeader"
     effect    = "Deny"
-    resources = ["arn:aws:s3:::${aws_s3_bucket.registry.bucket}/*"]
+    resources = ["arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.registry.bucket}/*"]
     actions   = ["s3:PutObject"]
 
     condition {
@@ -373,7 +373,7 @@ data "aws_iam_policy_document" "registry" {
   statement {
     sid       = "DenyUnEncryptedObjectUploads"
     effect    = "Deny"
-    resources = ["arn:aws:s3:::${aws_s3_bucket.registry.bucket}/*"]
+    resources = ["arn:${data.aws_partition.current.partition}:s3:::${aws_s3_bucket.registry.bucket}/*"]
     actions   = ["s3:PutObject"]
 
     condition {

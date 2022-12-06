@@ -1,5 +1,6 @@
 data "aws_canonical_user_id" "current" {}
 data "aws_elb_service_account" "this" {}
+data "aws_partition" "current" {}
 
 locals {
   s3_buckets = {
