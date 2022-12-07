@@ -25,7 +25,7 @@ data "aws_iam_policy_document" "domino_ecr_restricted" {
   statement {
 
     effect    = "Deny"
-    resources = ["arn:aws:ecr:*:${local.aws_account_id}:*"]
+    resources = ["arn:${data.aws_partition.current.partition}:ecr:*:${local.aws_account_id}:*"]
 
     actions = [
       "ecr:BatchCheckLayerAvailability",
@@ -115,8 +115,8 @@ data "aws_iam_policy_document" "ebs_csi" {
     effect = "Allow"
 
     resources = [
-      "arn:aws:ec2:*:*:volume/*",
-      "arn:aws:ec2:*:*:snapshot/*",
+      "arn:${data.aws_partition.current.partition}:ec2:*:*:volume/*",
+      "arn:${data.aws_partition.current.partition}:ec2:*:*:snapshot/*",
     ]
 
     actions = ["ec2:CreateTags"]
@@ -137,8 +137,8 @@ data "aws_iam_policy_document" "ebs_csi" {
     effect = "Allow"
 
     resources = [
-      "arn:aws:ec2:*:*:volume/*",
-      "arn:aws:ec2:*:*:snapshot/*",
+      "arn:${data.aws_partition.current.partition}:ec2:*:*:volume/*",
+      "arn:${data.aws_partition.current.partition}:ec2:*:*:snapshot/*",
     ]
 
     actions = ["ec2:DeleteTags"]
@@ -210,11 +210,11 @@ resource "aws_iam_policy" "custom_eks_node_policy" {
 
 locals {
   eks_aws_node_iam_policies = toset([
-    "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
-    "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
-    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
-    "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
-    "arn:aws:iam::aws:policy/AmazonElasticFileSystemReadOnlyAccess",
+    "AmazonEKSWorkerNodePolicy",
+    "AmazonEKS_CNI_Policy",
+    "AmazonEC2ContainerRegistryReadOnly",
+    "AmazonSSMManagedInstanceCore",
+    "AmazonElasticFileSystemReadOnlyAccess",
   ])
 
   custom_node_policies = concat([aws_iam_policy.custom_eks_node_policy.arn], var.node_iam_policies)
@@ -222,7 +222,7 @@ locals {
 
 resource "aws_iam_role_policy_attachment" "aws_eks_nodes" {
   for_each   = toset(local.eks_aws_node_iam_policies)
-  policy_arn = each.key
+  policy_arn = "arn:${data.aws_partition.current.partition}:iam::aws:policy/${each.key}"
   role       = aws_iam_role.eks_nodes.name
 }
 

@@ -22,7 +22,7 @@ data "aws_iam_policy_document" "kms_key" {
     effect    = "Allow"
     principals {
       type        = "AWS"
-      identifiers = ["arn:aws:iam::${local.aws_account_id}:root"]
+      identifiers = ["arn:${data.aws_partition.current.partition}:iam::${local.aws_account_id}:root"]
     }
   }
 }
