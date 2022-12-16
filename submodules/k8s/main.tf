@@ -61,8 +61,11 @@ resource "null_resource" "run_k8s_pre_setup" {
   }
 
   provisioner "local-exec" {
-    command     = var.assume_role_arn
-    interpreter = ["bash", basename(local_file.templates["k8s_presetup"].filename)]
+    command     = basename(local_file.templates["k8s_presetup"].filename)
+    environment = {
+        ASSUME_ROLE_ARN = var.assume_role_arn
+    }
+    interpreter = ["bash"]
     working_dir = local.resources_directory
   }
 
