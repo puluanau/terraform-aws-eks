@@ -105,7 +105,8 @@
                 "logs:CreateLogGroup",
                 "logs:CreateLogDelivery",
                 "logs:DescribeLogGroups",
-                "logs:ListTagsLogGroup"
+                "logs:ListTagsLogGroup",
+                "logs:ListTagsForResource"
             ],
             "Resource": "*"
         },
