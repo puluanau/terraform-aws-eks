@@ -61,7 +61,7 @@ resource "null_resource" "run_k8s_pre_setup" {
   }
 
   provisioner "local-exec" {
-    command     = "${basename(local_file.templates["k8s_presetup"].filename)} ${var.assume_role_arn}"
+    command     = "${basename(local_file.templates[\"k8s_presetup\"].filename)} ${var.assume_role_arn}"
     interpreter = ["bash", "-c"]
     working_dir = local.resources_directory
   }
