@@ -1,6 +1,7 @@
 #!/usr/bin/env -S bash -ex
 
 if [ -n "$ASSUME_ROLE_ARN" ]; then
+  echo "Assuming role $ASSUME_ROLE_ARN"
   export $(aws sts assume-role --role-arn $ASSUME_ROLE_ARN --role-session-name aws-auth | jq -r '"AWS_ACCESS_KEY_ID=\(.Credentials.AccessKeyId)\nAWS_SECRET_ACCESS_KEY=\(.Credentials.SecretAccessKey)\nAWS_SESSION_TOKEN=\(.Credentials.SessionToken)"')
 fi
 
