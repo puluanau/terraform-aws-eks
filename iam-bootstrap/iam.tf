@@ -3,13 +3,14 @@ locals {
 }
 
 data "aws_caller_identity" "admin" {}
+data "aws_partition" "current" {}
 
 resource "aws_iam_policy" "deployment" {
   count = length(local.iam_policy_paths)
 
   name = "${var.deploy_id}-deployment-policy-${count.index}"
 
-  policy = templatefile(abspath(pathexpand(local.iam_policy_paths[count.index])), merge({account_id=data.aws_caller_identity.admin.account_id, deploy_id=var.deploy_id, region=var.region},var.template_config))
+  policy = templatefile(abspath(pathexpand(local.iam_policy_paths[count.index])), merge({account_id=data.aws_caller_identity.admin.account_id, deploy_id=var.deploy_id, region=var.region, partition=data.aws_partition.current.partition},var.template_config))
 }
 
 resource "aws_iam_role" "deployment" {
