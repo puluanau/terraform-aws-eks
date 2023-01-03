@@ -117,7 +117,7 @@ aws s3 rb s3://"${AWS_TERRAFORM_REMOTE_STATE_BUCKET}" --force
 | <a name="input_deploy_id"></a> [deploy\_id](#input\_deploy\_id) | Domino Deployment ID. | `string` | `"domino-eks"` | no |
 | <a name="input_efs_access_point_path"></a> [efs\_access\_point\_path](#input\_efs\_access\_point\_path) | Filesystem path for efs. | `string` | `"/domino"` | no |
 | <a name="input_eks_master_role_names"></a> [eks\_master\_role\_names](#input\_eks\_master\_role\_names) | IAM role names to be added as masters in eks. | `list(string)` | `[]` | no |
-| <a name="input_k8s_version"></a> [k8s\_version](#input\_k8s\_version) | EKS cluster k8s version. | `string` | `"1.23"` | no |
+| <a name="input_k8s_version"></a> [k8s\_version](#input\_k8s\_version) | EKS cluster k8s version. | `string` | `"1.24"` | no |
 | <a name="input_kubeconfig_path"></a> [kubeconfig\_path](#input\_kubeconfig\_path) | fully qualified path name to write the kubeconfig file | `string` | `""` | no |
 | <a name="input_number_of_azs"></a> [number\_of\_azs](#input\_number\_of\_azs) | Number of AZ to distribute the deployment, EKS needs at least 2. | `number` | `3` | no |
 | <a name="input_private_cidr_network_bits"></a> [private\_cidr\_network\_bits](#input\_private\_cidr\_network\_bits) | Number of network bits to allocate to the private subnet. i.e /19 -> 8,192 IPs. | `number` | `19` | no |

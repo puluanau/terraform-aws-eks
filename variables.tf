@@ -61,7 +61,7 @@ variable "tags" {
 variable "k8s_version" {
   type        = string
   description = "EKS cluster k8s version."
-  default     = "1.23"
+  default     = "1.24"
 }
 
 variable "public_cidr_network_bits" {
