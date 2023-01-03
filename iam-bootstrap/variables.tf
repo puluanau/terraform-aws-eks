@@ -20,7 +20,7 @@ variable "iam_policy_paths" {
 }
 
 variable "template_config" {
-  type        = map
+  type        = map(any)
   description = "Variables to use for any templating in the IAM policies. AWS account ID (as 'account_id'), deploy_id, region and partition are automatically included."
   default     = {}
 }

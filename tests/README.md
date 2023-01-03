@@ -12,7 +12,7 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws.local"></a> [aws.local](#provider\_aws.local) | 4.40.0 |
+| <a name="provider_aws.local"></a> [aws.local](#provider\_aws.local) | >= 4.0 |
 
 ## Modules
 

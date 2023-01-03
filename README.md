@@ -76,8 +76,8 @@ aws s3 rb s3://"${AWS_TERRAFORM_REMOTE_STATE_BUCKET}" --force
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.40.0 |
-| <a name="provider_tls"></a> [tls](#provider\_tls) | 4.0.4 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.0 |
+| <a name="provider_tls"></a> [tls](#provider\_tls) | >= 3.4.0 |
 
 ## Modules
 
