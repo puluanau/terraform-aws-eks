@@ -66,6 +66,12 @@ variable "internal_cidr" {
   }
 }
 
+variable "use_internal_cidr" {
+  type        = bool
+  description = "Use additional internal CIDR range (ie 100.64.0.0/16) for pod/service networking"
+  default     = true
+}
+
 ## This is an object in order to be used as a conditional in count, due to https://github.com/hashicorp/terraform/issues/26755
 variable "flow_log_bucket_arn" {
   type        = object({ arn = string })

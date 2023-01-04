@@ -225,6 +225,12 @@ variable "internal_cidr" {
   }
 }
 
+variable "use_internal_cidr" {
+  type        = bool
+  description = "Use additional internal CIDR range (ie 100.64.0.0/16) for pod/service networking"
+  default     = true
+}
+
 variable "eks_master_role_names" {
   type        = list(string)
   description = "IAM role names to be added as masters in eks."

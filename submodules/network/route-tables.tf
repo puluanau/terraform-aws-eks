@@ -39,7 +39,7 @@ resource "aws_route_table_association" "private" {
 }
 
 locals {
-  internal_public_map = zipmap(keys(local.internal_cidrs), keys(local.public_cidrs))
+  internal_public_map = var.use_internal_cidr ? zipmap(keys(local.internal_cidrs), keys(local.public_cidrs)) : {}
 }
 
 resource "aws_route_table" "internal" {

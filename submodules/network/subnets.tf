@@ -80,5 +80,5 @@ resource "aws_subnet" "internal" {
   }
 
   ## See https://github.com/hashicorp/terraform-provider-aws/issues/9592
-  depends_on = [aws_vpc_ipv4_cidr_block_association.internal_cidr]
+  depends_on = [aws_vpc_ipv4_cidr_block_association.internal_cidr[0]]
 }

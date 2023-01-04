@@ -13,6 +13,7 @@ locals {
 }
 
 resource "aws_vpc_ipv4_cidr_block_association" "internal_cidr" {
+  count      = var.use_internal_cidr != null ? 1 : 0
   vpc_id     = aws_vpc.this.id
   cidr_block = var.internal_cidr
 }
