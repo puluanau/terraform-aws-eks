@@ -16,6 +16,14 @@ locals {
       "name" = "${var.deploy_id}-private-${element(local.az, i)}"
     }
   }
+
+  ## Get the internal subnets by matching the mask and populating its params
+  internal_cidrs = { for i, cidr in var.internal_cidrs : cidr =>
+    {
+      "az"   = element(local.az, i)
+      "name" = "${var.deploy_id}-internal-${element(local.az, i)}"
+    }
+  }
 }
 
 resource "aws_subnet" "public" {
@@ -38,6 +46,24 @@ resource "aws_subnet" "public" {
 
 resource "aws_subnet" "private" {
   for_each = local.private_cidrs
+
+  availability_zone = each.value.az
+  vpc_id            = local.vpc_id
+  cidr_block        = each.key
+  tags = merge(
+    { "Name" : each.value.name },
+    var.add_eks_elb_tags ? {
+      "kubernetes.io/role/internal-elb"        = "1"
+      "kubernetes.io/cluster/${var.deploy_id}" = "shared"
+  } : {})
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
+}
+
+resource "aws_subnet" "internal" {
+  for_each = local.internal_cidrs
 
   availability_zone = each.value.az
   vpc_id            = local.vpc_id

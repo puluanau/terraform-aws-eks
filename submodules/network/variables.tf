@@ -35,6 +35,11 @@ variable "private_cidrs" {
   description = "list of cidrs for the private subnets"
 }
 
+variable "internal_cidrs" {
+  type        = list(string)
+  description = "list of cidrs for the internal subnets"
+}
+
 variable "cidr" {
   type        = string
   default     = "10.0.0.0/16"
@@ -43,6 +48,19 @@ variable "cidr" {
     condition = (
       try(cidrhost(var.cidr, 0), null) == regex("^(.*)/", var.cidr)[0] &&
       try(cidrnetmask(var.cidr), null) == "255.255.0.0"
+    )
+    error_message = "Argument cidr must be a valid CIDR block."
+  }
+}
+
+variable "internal_cidr" {
+  type        = string
+  default     = "100.64.0.0/16"
+  description = "The IPv4 CIDR block for the VPC."
+  validation {
+    condition = (
+      try(cidrhost(var.internal_cidr, 0), null) == regex("^(.*)/", var.internal_cidr)[0] &&
+      try(cidrnetmask(var.internal_cidr), null) == "255.255.0.0"
     )
     error_message = "Argument cidr must be a valid CIDR block."
   }

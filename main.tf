@@ -89,6 +89,12 @@ locals {
   public_cidr_blocks = slice(local.subnet_cidr_blocks, 0, local.num_of_azs)
   ## Match the private subnet var to the list of cidr blocks
   private_cidr_blocks = slice(local.subnet_cidr_blocks, local.num_of_azs, length(local.subnet_cidr_blocks))
+  ## Determine cidr blocks for internal network
+  base_internal_cidr_network_bits = tonumber(regex("[^/]*$", var.internal_cidr))
+  internal_cidr_blocks = cidrsubnets(
+      var.internal_cidr,
+      [for n in range(0, local.num_of_azs) : var.internal_cidr_network_bits - local.base_internal_cidr_network_bits]...
+)
 }
 
 module "network" {
@@ -98,9 +104,11 @@ module "network" {
   deploy_id           = var.deploy_id
   region              = var.region
   cidr                = var.cidr
+  internal_cidr       = var.internal_cidr
   availability_zones  = local.azs_to_use
   public_cidrs        = local.public_cidr_blocks
   private_cidrs       = local.private_cidr_blocks
+  internal_cidrs      = local.internal_cidr_blocks
   flow_log_bucket_arn = { arn = module.storage.s3_buckets["monitoring"].arn }
 }
 

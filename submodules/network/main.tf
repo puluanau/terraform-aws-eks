@@ -12,6 +12,11 @@ locals {
   vpc_id = aws_vpc.this.id
 }
 
+resource "aws_vpc_ipv4_cidr_block_association" "internal_cidr" {
+  vpc_id     = aws_vpc.this.id
+  cidr_block = var.internal_cidr
+}
+
 resource "aws_default_security_group" "default" {
   vpc_id = local.vpc_id
 }
@@ -23,7 +28,8 @@ resource "aws_vpc_endpoint" "s3" {
 
   route_table_ids = concat(
     [for s in aws_route_table.public : s.id],
-    [for s in aws_route_table.private : s.id]
+    [for s in aws_route_table.private : s.id],
+    [for s in aws_route_table.internal : s.id]
   )
 
   tags = {
@@ -67,7 +73,8 @@ resource "aws_default_network_acl" "default" {
 
   subnet_ids = concat(
     [for s in aws_subnet.public : s.id],
-    [for s in aws_subnet.private : s.id]
+    [for s in aws_subnet.private : s.id],
+    [for s in aws_subnet.internal : s.id]
   )
 
   lifecycle {

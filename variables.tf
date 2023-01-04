@@ -82,6 +82,12 @@ variable "private_cidr_network_bits" {
   default     = 19
 }
 
+variable "internal_cidr_network_bits" {
+  type        = number
+  description = "Number of network bits to allocate to the private subnet. i.e /19 -> 8,192 IPs."
+  default     = 19
+}
+
 variable "default_node_groups" {
   description = "EKS managed node groups definition."
   type = object(
@@ -201,6 +207,19 @@ variable "cidr" {
     condition = (
       try(cidrhost(var.cidr, 0), null) == regex("^(.*)/", var.cidr)[0] &&
       try(cidrnetmask(var.cidr), null) == "255.255.0.0"
+    )
+    error_message = "Argument base_cidr_block must be a valid CIDR block."
+  }
+}
+
+variable "internal_cidr" {
+  type        = string
+  default     = "100.64.0.0/16"
+  description = "The IPv4 CIDR block for the VPC."
+  validation {
+    condition = (
+      try(cidrhost(var.internal_cidr, 0), null) == regex("^(.*)/", var.internal_cidr)[0] &&
+      try(cidrnetmask(var.internal_cidr), null) == "255.255.0.0"
     )
     error_message = "Argument base_cidr_block must be a valid CIDR block."
   }
