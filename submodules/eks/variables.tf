@@ -153,9 +153,9 @@ variable "vpc_id" {
   description = "VPC ID."
 }
 
-variable "ssh_pvt_key_path" {
+variable "ssh_key_pair_name" {
   type        = string
-  description = "SSH private key filepath."
+  description = "SSH key pair name."
 }
 
 variable "bastion_security_group_id" {
@@ -183,4 +183,28 @@ variable "node_iam_policies" {
 variable "efs_security_group" {
   description = "Security Group ID for EFS"
   type        = string
+}
+
+variable "eks_master_role_names" {
+  type        = list(string)
+  description = "IAM role names to be added as masters in eks"
+  default     = []
+}
+
+variable "ssh_pvt_key_path" {
+  type        = string
+  description = "Path to SSH private key"
+  default     = ""
+}
+
+variable "bastion_user" {
+  type        = string
+  description = "Username for bastion instance"
+  default     = ""
+}
+
+variable "bastion_public_ip" {
+  type        = string
+  description = "Public IP of bastion instance"
+  default     = ""
 }

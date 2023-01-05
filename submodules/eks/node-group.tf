@@ -86,7 +86,7 @@ resource "aws_launch_template" "node_groups" {
   for_each                = local.node_groups
   name                    = "${local.eks_cluster_name}-${each.key}"
   disable_api_termination = false
-  key_name                = var.ssh_pvt_key_path
+  key_name                = var.ssh_key_pair_name
   user_data = each.value.ami == null ? null : base64encode(templatefile(
     "${path.module}/templates/linux_user_data.tpl",
     {

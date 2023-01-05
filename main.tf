@@ -148,28 +148,12 @@ module "eks" {
   node_iam_policies            = [module.storage.s3_policy]
   efs_security_group           = module.storage.efs_security_group
   update_kubeconfig_extra_args = var.update_kubeconfig_extra_args
+  eks_master_role_names        = var.eks_master_role_names
+  ssh_pvt_key_path             = local.ssh_pvt_key_path
+  bastion_user                 = local.bastion_user
+  bastion_public_ip            = try(module.bastion[0].public_ip, "")
 
   depends_on = [
     module.network
-  ]
-}
-
-data "aws_iam_role" "eks_master_roles" {
-  for_each = var.bastion != null ? toset(var.eks_master_role_names) : []
-  name     = each.key
-}
-
-module "k8s_setup" {
-  count                = var.bastion != null ? 1 : 0
-  source               = "./submodules/k8s"
-  ssh_pvt_key_path     = local.ssh_pvt_key_path
-  bastion_user         = local.bastion_user
-  bastion_public_ip    = try(module.bastion[0].public_ip, "")
-  eks_node_role_arns   = [for r in module.eks.eks_node_roles : r.arn]
-  eks_master_role_arns = [for r in concat(values(data.aws_iam_role.eks_master_roles), module.eks.eks_master_roles) : r.arn]
-  kubeconfig_path      = local.kubeconfig_path
-  depends_on = [
-    module.eks,
-    module.bastion
   ]
 }
