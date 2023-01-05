@@ -44,3 +44,13 @@ variable "calico_version" {
   description = "Calico operator version."
   default     = "v1.11.0"
 }
+
+variable "security_group_id" {
+  type        = string
+  description = "Security group id for eks cluster."
+}
+
+variable "subnets" {
+  type        = list(object({ subnet_id = string, az = string }))
+  description = "Subnets"
+}

@@ -105,6 +105,12 @@ resource "aws_eks_cluster" "this" {
   ]
 }
 
+resource "aws_eks_addon" "vpc_cni" {
+  cluster_name      = aws_eks_cluster.this.name
+  resolve_conflicts = "OVERWRITE"
+  addon_name        = "vpc-cni"
+}
+
 resource "aws_eks_addon" "this" {
   for_each          = toset(var.eks_cluster_addons)
   cluster_name      = aws_eks_cluster.this.name

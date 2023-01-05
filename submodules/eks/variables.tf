@@ -148,6 +148,15 @@ variable "private_subnets" {
   }
 }
 
+variable "internal_subnets" {
+  description = "List of Internal subnets IDs and AZ"
+  type        = list(object({ subnet_id = string, az = string }))
+  validation {
+    condition     = length(var.internal_subnets) >= 2
+    error_message = "EKS deployment needs at least 2 subnets. https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html."
+  }
+}
+
 variable "vpc_id" {
   type        = string
   description = "VPC ID."
@@ -166,8 +175,8 @@ variable "bastion_security_group_id" {
 
 variable "eks_cluster_addons" {
   type        = list(string)
-  description = "EKS cluster addons."
-  default     = ["vpc-cni", "kube-proxy", "coredns"]
+  description = "EKS cluster addons. vpc-cni is installed separately."
+  default     = ["kube-proxy", "coredns"]
 }
 
 variable "create_bastion_sg" {

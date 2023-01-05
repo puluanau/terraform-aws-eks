@@ -255,6 +255,12 @@ variable "private_subnets" {
   default     = null
 }
 
+variable "internal_subnets" {
+  type        = list(string)
+  description = "Optional list of internal subnet ids"
+  default     = null
+}
+
 variable "bastion" {
   type = object({
     ami           = optional(string, null) # default will use the latest 'amazon_linux_2' ami

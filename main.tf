@@ -39,6 +39,11 @@ data "aws_subnet" "private" {
   id    = var.private_subnets[count.index]
 }
 
+data "aws_subnet" "internal" {
+  count = var.vpc_id != null ? length(var.internal_subnets) : 0
+  id    = var.internal_subnets[count.index]
+}
+
 locals {
   # Get zones where ALL instance types are offered(intersection).
   zone_intersection_instance_offerings = setintersection([for k, v in data.aws_ec2_instance_type_offerings.nodes : toset(v.locations)]...)
@@ -114,9 +119,10 @@ module "network" {
 }
 
 locals {
-  vpc_id          = var.vpc_id != null ? var.vpc_id : module.network[0].vpc_id
-  public_subnets  = var.vpc_id != null ? [for s in data.aws_subnet.public : { subnet_id = s.id, az = s.availability_zone }] : module.network[0].public_subnets
-  private_subnets = var.vpc_id != null ? [for s in data.aws_subnet.private : { subnet_id = s.id, az = s.availability_zone }] : module.network[0].private_subnets
+  vpc_id           = var.vpc_id != null ? var.vpc_id : module.network[0].vpc_id
+  public_subnets   = var.vpc_id != null ? [for s in data.aws_subnet.public : { subnet_id = s.id, az = s.availability_zone }] : module.network[0].public_subnets
+  private_subnets  = var.vpc_id != null ? [for s in data.aws_subnet.private : { subnet_id = s.id, az = s.availability_zone }] : module.network[0].private_subnets
+  internal_subnets = var.vpc_id != null ? [for s in data.aws_subnet.internal : { subnet_id = s.id, az = s.availability_zone }] : module.network[0].internal_subnets
 }
 
 module "bastion" {
@@ -139,7 +145,8 @@ module "eks" {
   k8s_version                  = var.k8s_version
   vpc_id                       = local.vpc_id
   private_subnets              = local.private_subnets
-  ssh_pvt_key_path             = aws_key_pair.domino.key_name
+  internal_subnets             = local.internal_subnets
+  ssh_key_pair_name            = aws_key_pair.domino.key_name
   bastion_security_group_id    = try(module.bastion[0].security_group_id, "")
   create_bastion_sg            = var.bastion != null
   kubeconfig_path              = local.kubeconfig_path
