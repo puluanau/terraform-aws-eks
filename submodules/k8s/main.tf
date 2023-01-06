@@ -5,7 +5,7 @@ locals {
   k8s_pre_setup_sh_template = "k8s-pre-setup.sh.tftpl"
   aws_auth_filename         = "aws-auth.yaml"
   aws_auth_template         = "aws-auth.yaml.tftpl"
-  eniconfig_filename        = "eniconfig.yaml"
+  eniconfig_filename        = length(var.internal_subnets) != 0 ? "eniconfig.yaml" : ""
   eniconfig_template        = "eniconfig.yaml.tftpl"
   calico = {
     operator_url         = "https://raw.githubusercontent.com/aws/amazon-vpc-cni-k8s/${var.calico_version}/config/master/calico-operator.yaml"
@@ -22,7 +22,7 @@ locals {
         kubeconfig_path             = var.kubeconfig_path
         k8s_tunnel_port             = var.k8s_tunnel_port
         aws_auth_yaml               = basename(local.aws_auth_filename)
-        eniconfig_yaml              = basename(local.eniconfig_filename)
+        eniconfig_yaml              = local.eniconfig_filename != "" ? basename(local.eniconfig_filename) : ""
         calico_operator_url         = local.calico.operator_url
         calico_custom_resources_url = local.calico.custom_resources_url
         bastion_user                = var.bastion_user
@@ -53,14 +53,14 @@ locals {
       content = templatefile("${local.templates_dir}/${local.eniconfig_template}",
         {
           security_group_id = var.security_group_id
-          subnets           = var.subnets
+          subnets           = var.internal_subnets
       })
     }
   }
 }
 
 resource "local_file" "templates" {
-  for_each             = { for k, v in local.templates : k => v }
+  for_each             = { for k, v in local.templates : k => v if v.filename != "" }
   content              = each.value.content
   filename             = "${local.resources_directory}/${each.value.filename}"
   directory_permission = "0777"

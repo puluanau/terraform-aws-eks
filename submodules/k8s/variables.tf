@@ -50,7 +50,7 @@ variable "security_group_id" {
   description = "Security group id for eks cluster."
 }
 
-variable "subnets" {
+variable "internal_subnets" {
   type        = list(object({ subnet_id = string, az = string }))
-  description = "Subnets"
+  description = "Internal subnets to setup with vpc-cni"
 }

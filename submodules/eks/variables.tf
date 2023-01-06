@@ -152,7 +152,7 @@ variable "internal_subnets" {
   description = "List of Internal subnets IDs and AZ"
   type        = list(object({ subnet_id = string, az = string }))
   validation {
-    condition     = length(var.internal_subnets) >= 2
+    condition     = length(var.internal_subnets) != 1
     error_message = "EKS deployment needs at least 2 subnets. https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html."
   }
 }
