@@ -157,6 +157,19 @@ variable "internal_subnets" {
   }
 }
 
+variable "cidr" {
+  type        = string
+  default     = "10.0.0.0/16"
+  description = "The IPv4 CIDR block for the VPC."
+  validation {
+    condition = (
+      try(cidrhost(var.cidr, 0), null) == regex("^(.*)/", var.cidr)[0] &&
+      try(cidrnetmask(var.cidr), null) == "255.255.0.0"
+    )
+    error_message = "Argument base_cidr_block must be a valid CIDR block."
+  }
+}
+
 variable "internal_cidr" {
   type        = string
   default     = "100.64.0.0/16"

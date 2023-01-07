@@ -39,6 +39,14 @@ locals {
       type                     = "egress"
       source_security_group_id = aws_security_group.eks_nodes.id
     }
+    ingress_nodes_internal = {
+      description = "Private subnet access proxied from internal"
+      protocol    = "tcp"
+      from_port   = 1025
+      to_port     = 65535
+      type        = "ingress"
+      cidr_blocks = [var.cidr]
+    }
   }
 
   node_security_group_rules = {

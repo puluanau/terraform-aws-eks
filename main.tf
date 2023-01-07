@@ -146,6 +146,7 @@ module "eks" {
   vpc_id                       = local.vpc_id
   private_subnets              = local.private_subnets
   internal_subnets             = local.internal_subnets
+  cidr                         = var.cidr
   internal_cidr                = var.internal_cidr
   ssh_key_pair_name            = aws_key_pair.domino.key_name
   bastion_security_group_id    = try(module.bastion[0].security_group_id, "")
