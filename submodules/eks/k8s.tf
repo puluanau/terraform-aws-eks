@@ -13,7 +13,7 @@ module "k8s_setup" {
   eks_master_role_arns = [for r in concat(values(data.aws_iam_role.eks_master_roles), [aws_iam_role.eks_cluster]) : r.arn]
   kubeconfig_path      = var.kubeconfig_path
 
-  security_group_id = aws_eks_cluster.this.vpc_config[0].cluster_security_group_id
+  security_group_id = aws_security_group.eks_nodes.id
   internal_subnets  = var.internal_subnets
 
   depends_on = [aws_eks_addon.vpc_cni, null_resource.kubeconfig]
