@@ -119,10 +119,10 @@ module "network" {
 }
 
 locals {
-  vpc_id           = var.vpc_id != null ? var.vpc_id : module.network[0].vpc_id
-  public_subnets   = var.vpc_id != null ? [for s in data.aws_subnet.public : { subnet_id = s.id, az = s.availability_zone }] : module.network[0].public_subnets
-  private_subnets  = var.vpc_id != null ? [for s in data.aws_subnet.private : { subnet_id = s.id, az = s.availability_zone }] : module.network[0].private_subnets
-  pod_subnets      = var.vpc_id != null ? [for s in data.aws_subnet.pod : { subnet_id = s.id, az = s.availability_zone }] : module.network[0].pod_subnets
+  vpc_id          = var.vpc_id != null ? var.vpc_id : module.network[0].vpc_id
+  public_subnets  = var.vpc_id != null ? [for s in data.aws_subnet.public : { subnet_id = s.id, az = s.availability_zone }] : module.network[0].public_subnets
+  private_subnets = var.vpc_id != null ? [for s in data.aws_subnet.private : { subnet_id = s.id, az = s.availability_zone }] : module.network[0].private_subnets
+  pod_subnets     = var.vpc_id != null ? [for s in data.aws_subnet.pod : { subnet_id = s.id, az = s.availability_zone }] : module.network[0].pod_subnets
 }
 
 module "bastion" {

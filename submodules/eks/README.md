@@ -74,10 +74,10 @@
 | <a name="input_efs_security_group"></a> [efs\_security\_group](#input\_efs\_security\_group) | Security Group ID for EFS | `string` | n/a | yes |
 | <a name="input_eks_cluster_addons"></a> [eks\_cluster\_addons](#input\_eks\_cluster\_addons) | EKS cluster addons. vpc-cni is installed separately. | `list(string)` | <pre>[<br>  "kube-proxy",<br>  "coredns"<br>]</pre> | no |
 | <a name="input_eks_master_role_names"></a> [eks\_master\_role\_names](#input\_eks\_master\_role\_names) | IAM role names to be added as masters in eks | `list(string)` | `[]` | no |
-| <a name="input_internal_subnets"></a> [internal\_subnets](#input\_internal\_subnets) | List of Internal subnets IDs and AZ | `list(object({ subnet_id = string, az = string }))` | n/a | yes |
 | <a name="input_k8s_version"></a> [k8s\_version](#input\_k8s\_version) | EKS cluster k8s version. | `string` | n/a | yes |
 | <a name="input_kubeconfig_path"></a> [kubeconfig\_path](#input\_kubeconfig\_path) | Kubeconfig file path. | `string` | `"kubeconfig"` | no |
 | <a name="input_node_iam_policies"></a> [node\_iam\_policies](#input\_node\_iam\_policies) | Additional IAM Policy Arns for Nodes | `list(string)` | n/a | yes |
+| <a name="input_pod_subnets"></a> [pod\_subnets](#input\_pod\_subnets) | List of POD subnets IDs and AZ | `list(object({ subnet_id = string, az = string }))` | n/a | yes |
 | <a name="input_private_subnets"></a> [private\_subnets](#input\_private\_subnets) | List of Private subnets IDs and AZ | `list(object({ subnet_id = string, az = string }))` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | AWS region for the deployment | `string` | n/a | yes |
 | <a name="input_ssh_key_pair_name"></a> [ssh\_key\_pair\_name](#input\_ssh\_key\_pair\_name) | SSH key pair name. | `string` | n/a | yes |

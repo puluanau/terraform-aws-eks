@@ -99,7 +99,7 @@ aws s3 rb s3://"${AWS_TERRAFORM_REMOTE_STATE_BUCKET}" --force
 | [aws_ec2_instance_type_offerings.nodes](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ec2_instance_type_offerings) | data source |
 | [aws_iam_policy_document.route53](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_route53_zone.hosted](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
-| [aws_subnet.internal](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
+| [aws_subnet.pod](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
 | [aws_subnet.private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
 | [aws_subnet.public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
 | [tls_public_key.domino](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/data-sources/public_key) | data source |
@@ -116,12 +116,12 @@ aws s3 rb s3://"${AWS_TERRAFORM_REMOTE_STATE_BUCKET}" --force
 | <a name="input_deploy_id"></a> [deploy\_id](#input\_deploy\_id) | Domino Deployment ID. | `string` | `"domino-eks"` | no |
 | <a name="input_efs_access_point_path"></a> [efs\_access\_point\_path](#input\_efs\_access\_point\_path) | Filesystem path for efs. | `string` | `"/domino"` | no |
 | <a name="input_eks_master_role_names"></a> [eks\_master\_role\_names](#input\_eks\_master\_role\_names) | IAM role names to be added as masters in eks. | `list(string)` | `[]` | no |
-| <a name="input_internal_cidr"></a> [internal\_cidr](#input\_internal\_cidr) | The IPv4 CIDR block for the VPC. | `string` | `"100.64.0.0/16"` | no |
-| <a name="input_internal_cidr_network_bits"></a> [internal\_cidr\_network\_bits](#input\_internal\_cidr\_network\_bits) | Number of network bits to allocate to the private subnet. i.e /19 -> 8,192 IPs. | `number` | `19` | no |
-| <a name="input_internal_subnets"></a> [internal\_subnets](#input\_internal\_subnets) | Optional list of internal subnet ids | `list(string)` | `null` | no |
 | <a name="input_k8s_version"></a> [k8s\_version](#input\_k8s\_version) | EKS cluster k8s version. | `string` | `"1.24"` | no |
 | <a name="input_kubeconfig_path"></a> [kubeconfig\_path](#input\_kubeconfig\_path) | fully qualified path name to write the kubeconfig file | `string` | `""` | no |
 | <a name="input_number_of_azs"></a> [number\_of\_azs](#input\_number\_of\_azs) | Number of AZ to distribute the deployment, EKS needs at least 2. | `number` | `3` | no |
+| <a name="input_pod_cidr"></a> [pod\_cidr](#input\_pod\_cidr) | The IPv4 CIDR block for the VPC. | `string` | `"100.64.0.0/16"` | no |
+| <a name="input_pod_cidr_network_bits"></a> [pod\_cidr\_network\_bits](#input\_pod\_cidr\_network\_bits) | Number of network bits to allocate to the private subnet. i.e /19 -> 8,192 IPs. | `number` | `19` | no |
+| <a name="input_pod_subnets"></a> [pod\_subnets](#input\_pod\_subnets) | Optional list of pod subnet ids | `list(string)` | `null` | no |
 | <a name="input_private_cidr_network_bits"></a> [private\_cidr\_network\_bits](#input\_private\_cidr\_network\_bits) | Number of network bits to allocate to the private subnet. i.e /19 -> 8,192 IPs. | `number` | `19` | no |
 | <a name="input_private_subnets"></a> [private\_subnets](#input\_private\_subnets) | Optional list of private subnet ids | `list(string)` | `null` | no |
 | <a name="input_public_cidr_network_bits"></a> [public\_cidr\_network\_bits](#input\_public\_cidr\_network\_bits) | Number of network bits to allocate to the public subnet. i.e /27 -> 32 IPs. | `number` | `27` | no |
@@ -132,7 +132,7 @@ aws s3 rb s3://"${AWS_TERRAFORM_REMOTE_STATE_BUCKET}" --force
 | <a name="input_ssh_pvt_key_path"></a> [ssh\_pvt\_key\_path](#input\_ssh\_pvt\_key\_path) | SSH private key filepath. | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | Deployment tags. | `map(string)` | `{}` | no |
 | <a name="input_update_kubeconfig_extra_args"></a> [update\_kubeconfig\_extra\_args](#input\_update\_kubeconfig\_extra\_args) | Optional extra args when generating kubeconfig | `string` | `""` | no |
-| <a name="input_use_internal_cidr"></a> [use\_internal\_cidr](#input\_use\_internal\_cidr) | Use additional internal CIDR range (ie 100.64.0.0/16) for pod/service networking | `bool` | `true` | no |
+| <a name="input_use_pod_cidr"></a> [use\_pod\_cidr](#input\_use\_pod\_cidr) | Use additional pod CIDR range (ie 100.64.0.0/16) for pod/service networking | `bool` | `true` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | Optional VPC ID, it will bypass creation of such. public\_subnets and private\_subnets are also required. | `string` | `null` | no |
 
 ## Outputs
