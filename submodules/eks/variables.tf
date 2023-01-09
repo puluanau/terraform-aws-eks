@@ -182,6 +182,7 @@ variable "eks_cluster_addons" {
 variable "create_bastion_sg" {
   description = "Create bastion access rules toggle."
   type        = bool
+  default     = false
 }
 
 variable "node_iam_policies" {
