@@ -13,7 +13,7 @@ output "private_subnets" {
   value       = [for cidr, c in local.private_cidrs : { name = c.name, subnet_id = aws_subnet.private[cidr].id, az = c.az }]
 }
 
-output "internal_subnets" {
-  description = "List of internal subnet ID and AZ"
-  value       = [for cidr, c in local.internal_cidrs : { name = c.name, subnet_id = aws_subnet.internal[cidr].id, az = c.az }]
+output "pod_subnets" {
+  description = "List of pod subnet ID and AZ"
+  value       = [for cidr, c in local.pod_cidrs : { name = c.name, subnet_id = aws_subnet.pod[cidr].id, az = c.az }]
 }

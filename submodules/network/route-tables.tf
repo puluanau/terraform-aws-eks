@@ -39,14 +39,14 @@ resource "aws_route_table_association" "private" {
 }
 
 locals {
-  internal_public_map = var.use_internal_cidr ? zipmap(keys(local.internal_cidrs), keys(local.public_cidrs)) : {}
+  pod_public_map = var.use_pod_cidr ? zipmap(keys(local.pod_cidrs), keys(local.public_cidrs)) : {}
 }
 
-resource "aws_route_table" "internal" {
-  for_each = local.internal_cidrs
+resource "aws_route_table" "pod" {
+  for_each = local.pod_cidrs
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.ngw[local.internal_public_map[each.key]].id
+    nat_gateway_id = aws_nat_gateway.ngw[local.pod_public_map[each.key]].id
   }
   vpc_id = local.vpc_id
   tags = {
@@ -54,8 +54,8 @@ resource "aws_route_table" "internal" {
   }
 }
 
-resource "aws_route_table_association" "internal" {
-  for_each       = local.internal_cidrs
-  subnet_id      = aws_subnet.internal[each.key].id
-  route_table_id = aws_route_table.internal[each.key].id
+resource "aws_route_table_association" "pod" {
+  for_each       = local.pod_cidrs
+  subnet_id      = aws_subnet.pod[each.key].id
+  route_table_id = aws_route_table.pod[each.key].id
 }

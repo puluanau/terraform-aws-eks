@@ -5,7 +5,7 @@ locals {
   k8s_pre_setup_sh_template = "k8s-pre-setup.sh.tftpl"
   aws_auth_filename         = "aws-auth.yaml"
   aws_auth_template         = "aws-auth.yaml.tftpl"
-  eniconfig_filename        = length(var.internal_subnets) != 0 ? "eniconfig.yaml" : ""
+  eniconfig_filename        = length(var.pod_subnets) != 0 ? "eniconfig.yaml" : ""
   eniconfig_template        = "eniconfig.yaml.tftpl"
   calico = {
     operator_url         = "https://raw.githubusercontent.com/aws/amazon-vpc-cni-k8s/${var.calico_version}/config/master/calico-operator.yaml"
@@ -53,7 +53,7 @@ locals {
       content = templatefile("${local.templates_dir}/${local.eniconfig_template}",
         {
           security_group_id = var.security_group_id
-          subnets           = var.internal_subnets
+          subnets           = var.pod_subnets
       })
     }
   }

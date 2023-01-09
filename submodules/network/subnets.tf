@@ -17,11 +17,11 @@ locals {
     }
   }
 
-  ## Get the internal subnets by matching the mask and populating its params
-  internal_cidrs = { for i, cidr in var.internal_cidrs : cidr =>
+  ## Get the pod subnets by matching the mask and populating its params
+  pod_cidrs = { for i, cidr in var.pod_cidrs : cidr =>
     {
       "az"   = element(local.az, i)
-      "name" = "${var.deploy_id}-internal-${element(local.az, i)}"
+      "name" = "${var.deploy_id}-pod-${element(local.az, i)}"
     }
   }
 }
@@ -62,8 +62,8 @@ resource "aws_subnet" "private" {
   }
 }
 
-resource "aws_subnet" "internal" {
-  for_each = local.internal_cidrs
+resource "aws_subnet" "pod" {
+  for_each = local.pod_cidrs
 
   availability_zone = each.value.az
   vpc_id            = local.vpc_id
@@ -80,5 +80,5 @@ resource "aws_subnet" "internal" {
   }
 
   ## See https://github.com/hashicorp/terraform-provider-aws/issues/9592
-  depends_on = [aws_vpc_ipv4_cidr_block_association.internal_cidr[0]]
+  depends_on = [aws_vpc_ipv4_cidr_block_association.pod_cidr[0]]
 }

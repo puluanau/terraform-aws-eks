@@ -35,9 +35,9 @@ variable "private_cidrs" {
   description = "list of cidrs for the private subnets"
 }
 
-variable "internal_cidrs" {
+variable "pod_cidrs" {
   type        = list(string)
-  description = "list of cidrs for the internal subnets"
+  description = "list of cidrs for the pod subnets"
 }
 
 variable "cidr" {
@@ -53,22 +53,22 @@ variable "cidr" {
   }
 }
 
-variable "internal_cidr" {
+variable "pod_cidr" {
   type        = string
   default     = "100.64.0.0/16"
   description = "The IPv4 CIDR block for the VPC."
   validation {
     condition = (
-      try(cidrhost(var.internal_cidr, 0), null) == regex("^(.*)/", var.internal_cidr)[0] &&
-      try(cidrnetmask(var.internal_cidr), null) == "255.255.0.0"
+      try(cidrhost(var.pod_cidr, 0), null) == regex("^(.*)/", var.pod_cidr)[0] &&
+      try(cidrnetmask(var.pod_cidr), null) == "255.255.0.0"
     )
     error_message = "Argument cidr must be a valid CIDR block."
   }
 }
 
-variable "use_internal_cidr" {
+variable "use_pod_cidr" {
   type        = bool
-  description = "Use additional internal CIDR range (ie 100.64.0.0/16) for pod/service networking"
+  description = "Use additional pod CIDR range (ie 100.64.0.0/16) for pod/service networking"
   default     = true
 }
 

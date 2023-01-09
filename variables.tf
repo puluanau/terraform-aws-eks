@@ -82,7 +82,7 @@ variable "private_cidr_network_bits" {
   default     = 19
 }
 
-variable "internal_cidr_network_bits" {
+variable "pod_cidr_network_bits" {
   type        = number
   description = "Number of network bits to allocate to the private subnet. i.e /19 -> 8,192 IPs."
   default     = 19
@@ -212,22 +212,22 @@ variable "cidr" {
   }
 }
 
-variable "internal_cidr" {
+variable "pod_cidr" {
   type        = string
   default     = "100.64.0.0/16"
   description = "The IPv4 CIDR block for the VPC."
   validation {
     condition = (
-      try(cidrhost(var.internal_cidr, 0), null) == regex("^(.*)/", var.internal_cidr)[0] &&
-      try(cidrnetmask(var.internal_cidr), null) == "255.255.0.0"
+      try(cidrhost(var.pod_cidr, 0), null) == regex("^(.*)/", var.pod_cidr)[0] &&
+      try(cidrnetmask(var.pod_cidr), null) == "255.255.0.0"
     )
     error_message = "Argument base_cidr_block must be a valid CIDR block."
   }
 }
 
-variable "use_internal_cidr" {
+variable "use_pod_cidr" {
   type        = bool
-  description = "Use additional internal CIDR range (ie 100.64.0.0/16) for pod/service networking"
+  description = "Use additional pod CIDR range (ie 100.64.0.0/16) for pod/service networking"
   default     = true
 }
 
@@ -255,9 +255,9 @@ variable "private_subnets" {
   default     = null
 }
 
-variable "internal_subnets" {
+variable "pod_subnets" {
   type        = list(string)
-  description = "Optional list of internal subnet ids"
+  description = "Optional list of pod subnet ids"
   default     = null
 }
 
