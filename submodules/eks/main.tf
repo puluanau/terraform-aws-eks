@@ -242,14 +242,6 @@ locals {
       type        = "egress"
       self        = true
     }
-    inter_node_internal_traffic_out = {
-      description = "Node to internal subnet node pod/svc trafic out"
-      protocol    = "tcp"
-      from_port   = 1025
-      to_port     = 65535
-      type        = "egress"
-      cidr_blocks = [var.internal_cidr]
-    }
   }
 
   bastion_eks_security_group_rules = {
