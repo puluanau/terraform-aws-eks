@@ -39,7 +39,7 @@ resource "aws_route_table_association" "private" {
 }
 
 locals {
-  pod_public_map = var.use_pod_cidr ? zipmap(keys(local.pod_cidrs), keys(local.public_cidrs)) : {}
+  pod_public_map = var.pod_cidr != null ? zipmap(keys(local.pod_cidrs), keys(local.public_cidrs)) : {}
 }
 
 resource "aws_route_table" "pod" {

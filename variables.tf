@@ -218,17 +218,12 @@ variable "pod_cidr" {
   description = "The IPv4 CIDR block for the VPC."
   validation {
     condition = (
-      try(cidrhost(var.pod_cidr, 0), null) == regex("^(.*)/", var.pod_cidr)[0] &&
-      try(cidrnetmask(var.pod_cidr), null) == "255.255.0.0"
+      var.pod_cidr == null ||
+      (try(cidrhost(var.pod_cidr, 0), null) == try(regex("^(.*)/", var.pod_cidr)[0], null) &&
+      try(cidrnetmask(var.pod_cidr), null) == "255.255.0.0")
     )
     error_message = "Argument base_cidr_block must be a valid CIDR block."
   }
-}
-
-variable "use_pod_cidr" {
-  type        = bool
-  description = "Use additional pod CIDR range (ie 100.64.0.0/16) for pod/service networking"
-  default     = true
 }
 
 variable "eks_master_role_names" {

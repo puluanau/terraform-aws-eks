@@ -95,8 +95,8 @@ locals {
   ## Match the private subnet var to the list of cidr blocks
   private_cidr_blocks = slice(local.subnet_cidr_blocks, local.num_of_azs, length(local.subnet_cidr_blocks))
   ## Determine cidr blocks for pod network
-  base_pod_cidr_network_bits = tonumber(regex("[^/]*$", var.pod_cidr))
-  pod_cidr_blocks = var.use_pod_cidr == false ? [] : cidrsubnets(
+  base_pod_cidr_network_bits = var.pod_cidr != null ? tonumber(regex("[^/]*$", var.pod_cidr)) : ""
+  pod_cidr_blocks = var.pod_cidr == null ? [] : cidrsubnets(
     var.pod_cidr,
     [for n in range(0, local.num_of_azs) : var.pod_cidr_network_bits - local.base_pod_cidr_network_bits]...
   )
@@ -110,7 +110,6 @@ module "network" {
   region              = var.region
   cidr                = var.cidr
   pod_cidr            = var.pod_cidr
-  use_pod_cidr        = var.use_pod_cidr
   availability_zones  = local.azs_to_use
   public_cidrs        = local.public_cidr_blocks
   private_cidrs       = local.private_cidr_blocks
