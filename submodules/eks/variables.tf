@@ -148,14 +148,23 @@ variable "private_subnets" {
   }
 }
 
+variable "pod_subnets" {
+  description = "List of POD subnets IDs and AZ"
+  type        = list(object({ subnet_id = string, az = string }))
+  validation {
+    condition     = length(var.pod_subnets) != 1
+    error_message = "EKS deployment needs at least 2 subnets. https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html."
+  }
+}
+
 variable "vpc_id" {
   type        = string
   description = "VPC ID."
 }
 
-variable "ssh_pvt_key_path" {
+variable "ssh_key_pair_name" {
   type        = string
-  description = "SSH private key filepath."
+  description = "SSH key pair name."
 }
 
 variable "bastion_security_group_id" {
@@ -166,13 +175,14 @@ variable "bastion_security_group_id" {
 
 variable "eks_cluster_addons" {
   type        = list(string)
-  description = "EKS cluster addons."
-  default     = ["vpc-cni", "kube-proxy", "coredns"]
+  description = "EKS cluster addons. vpc-cni is installed separately."
+  default     = ["kube-proxy", "coredns"]
 }
 
 variable "create_bastion_sg" {
   description = "Create bastion access rules toggle."
   type        = bool
+  default     = false
 }
 
 variable "node_iam_policies" {
@@ -183,4 +193,28 @@ variable "node_iam_policies" {
 variable "efs_security_group" {
   description = "Security Group ID for EFS"
   type        = string
+}
+
+variable "eks_master_role_names" {
+  type        = list(string)
+  description = "IAM role names to be added as masters in eks"
+  default     = []
+}
+
+variable "ssh_pvt_key_path" {
+  type        = string
+  description = "Path to SSH private key"
+  default     = ""
+}
+
+variable "bastion_user" {
+  type        = string
+  description = "Username for bastion instance"
+  default     = ""
+}
+
+variable "bastion_public_ip" {
+  type        = string
+  description = "Public IP of bastion instance"
+  default     = ""
 }

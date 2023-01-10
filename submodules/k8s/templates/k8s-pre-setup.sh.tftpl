@@ -1,5 +1,7 @@
 #! /usr/bin/env bash -ex
 
+set -ex
+
 RED="\e[31m"
 GREEN="\e[32m"
 EC="\e[0m"
@@ -10,6 +12,7 @@ main() {
   open_ssh_tunnel_to_k8s_api
   check_kubeconfig
   set_k8s_auth
+  set_eniconfig
   install_calico
 }
 

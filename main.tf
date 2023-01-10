@@ -39,6 +39,11 @@ data "aws_subnet" "private" {
   id    = var.private_subnets[count.index]
 }
 
+data "aws_subnet" "pod" {
+  count = var.vpc_id != null ? length(var.pod_subnets) : 0
+  id    = var.pod_subnets[count.index]
+}
+
 locals {
   # Get zones where ALL instance types are offered(intersection).
   zone_intersection_instance_offerings = setintersection([for k, v in data.aws_ec2_instance_type_offerings.nodes : toset(v.locations)]...)
@@ -89,6 +94,12 @@ locals {
   public_cidr_blocks = slice(local.subnet_cidr_blocks, 0, local.num_of_azs)
   ## Match the private subnet var to the list of cidr blocks
   private_cidr_blocks = slice(local.subnet_cidr_blocks, local.num_of_azs, length(local.subnet_cidr_blocks))
+  ## Determine cidr blocks for pod network
+  base_pod_cidr_network_bits = tonumber(regex("[^/]*$", var.pod_cidr))
+  pod_cidr_blocks = !var.use_pod_cidr ? [] : cidrsubnets(
+    var.pod_cidr,
+    [for n in range(0, local.num_of_azs) : var.pod_cidr_network_bits - local.base_pod_cidr_network_bits]...
+  )
 }
 
 module "network" {
@@ -98,9 +109,12 @@ module "network" {
   deploy_id           = var.deploy_id
   region              = var.region
   cidr                = var.cidr
+  pod_cidr            = var.pod_cidr
+  use_pod_cidr        = var.use_pod_cidr
   availability_zones  = local.azs_to_use
   public_cidrs        = local.public_cidr_blocks
   private_cidrs       = local.private_cidr_blocks
+  pod_cidrs           = local.pod_cidr_blocks
   flow_log_bucket_arn = { arn = module.storage.s3_buckets["monitoring"].arn }
 }
 
@@ -108,6 +122,7 @@ locals {
   vpc_id          = var.vpc_id != null ? var.vpc_id : module.network[0].vpc_id
   public_subnets  = var.vpc_id != null ? [for s in data.aws_subnet.public : { subnet_id = s.id, az = s.availability_zone }] : module.network[0].public_subnets
   private_subnets = var.vpc_id != null ? [for s in data.aws_subnet.private : { subnet_id = s.id, az = s.availability_zone }] : module.network[0].private_subnets
+  pod_subnets     = var.vpc_id != null ? [for s in data.aws_subnet.pod : { subnet_id = s.id, az = s.availability_zone }] : module.network[0].pod_subnets
 }
 
 module "bastion" {
@@ -130,7 +145,8 @@ module "eks" {
   k8s_version                  = var.k8s_version
   vpc_id                       = local.vpc_id
   private_subnets              = local.private_subnets
-  ssh_pvt_key_path             = aws_key_pair.domino.key_name
+  pod_subnets                  = local.pod_subnets
+  ssh_key_pair_name            = aws_key_pair.domino.key_name
   bastion_security_group_id    = try(module.bastion[0].security_group_id, "")
   create_bastion_sg            = var.bastion != null
   kubeconfig_path              = local.kubeconfig_path
@@ -139,28 +155,12 @@ module "eks" {
   node_iam_policies            = [module.storage.s3_policy]
   efs_security_group           = module.storage.efs_security_group
   update_kubeconfig_extra_args = var.update_kubeconfig_extra_args
+  eks_master_role_names        = var.eks_master_role_names
+  ssh_pvt_key_path             = local.ssh_pvt_key_path
+  bastion_user                 = local.bastion_user
+  bastion_public_ip            = try(module.bastion[0].public_ip, "")
 
   depends_on = [
     module.network
-  ]
-}
-
-data "aws_iam_role" "eks_master_roles" {
-  for_each = var.bastion != null ? toset(var.eks_master_role_names) : []
-  name     = each.key
-}
-
-module "k8s_setup" {
-  count                = var.bastion != null ? 1 : 0
-  source               = "./submodules/k8s"
-  ssh_pvt_key_path     = local.ssh_pvt_key_path
-  bastion_user         = local.bastion_user
-  bastion_public_ip    = try(module.bastion[0].public_ip, "")
-  eks_node_role_arns   = [for r in module.eks.eks_node_roles : r.arn]
-  eks_master_role_arns = [for r in concat(values(data.aws_iam_role.eks_master_roles), module.eks.eks_master_roles) : r.arn]
-  kubeconfig_path      = local.kubeconfig_path
-  depends_on = [
-    module.eks,
-    module.bastion
   ]
 }

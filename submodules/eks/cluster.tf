@@ -46,7 +46,7 @@ resource "aws_security_group" "eks_cluster" {
 
   lifecycle {
     create_before_destroy = true
-    ignore_changes = [description, name]
+    ignore_changes        = [description, name]
   }
   tags = {
     "Name"                                            = "${local.eks_cluster_name}-eks-cluster"
@@ -103,6 +103,12 @@ resource "aws_eks_cluster" "this" {
     aws_security_group_rule.node,
     aws_cloudwatch_log_group.eks_cluster
   ]
+}
+
+resource "aws_eks_addon" "vpc_cni" {
+  cluster_name      = aws_eks_cluster.this.name
+  resolve_conflicts = "OVERWRITE"
+  addon_name        = "vpc-cni"
 }
 
 resource "aws_eks_addon" "this" {

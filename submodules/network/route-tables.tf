@@ -37,3 +37,25 @@ resource "aws_route_table_association" "private" {
   subnet_id      = aws_subnet.private[each.key].id
   route_table_id = aws_route_table.private[each.key].id
 }
+
+locals {
+  pod_public_map = var.use_pod_cidr ? zipmap(keys(local.pod_cidrs), keys(local.public_cidrs)) : {}
+}
+
+resource "aws_route_table" "pod" {
+  for_each = local.pod_cidrs
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.ngw[local.pod_public_map[each.key]].id
+  }
+  vpc_id = local.vpc_id
+  tags = {
+    "Name" = each.value.name,
+  }
+}
+
+resource "aws_route_table_association" "pod" {
+  for_each       = local.pod_cidrs
+  subnet_id      = aws_subnet.pod[each.key].id
+  route_table_id = aws_route_table.pod[each.key].id
+}
