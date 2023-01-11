@@ -42,6 +42,14 @@ locals {
   }
 
   node_security_group_rules = {
+    egress_all = {
+      description = "Allow all"
+      protocol    = "all"
+      from_port   = 0
+      to_port     = 0
+      type        = "egress"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
     ingress_cluster_15017 = {
       description                   = "Cluster API to node groups 15017, istio"
       protocol                      = "tcp"
@@ -56,14 +64,6 @@ locals {
       from_port                     = 9443
       to_port                       = 9443
       type                          = "ingress"
-      source_cluster_security_group = true
-    }
-    egress_cluster_443 = {
-      description                   = "Node groups to cluster API 443"
-      protocol                      = "tcp"
-      from_port                     = 443
-      to_port                       = 443
-      type                          = "egress"
       source_cluster_security_group = true
     }
     ingress_cluster_443 = {
@@ -90,28 +90,12 @@ locals {
       type                          = "ingress"
       source_cluster_security_group = true
     }
-    egress_cluster_coredns_tcp = {
-      description                   = "Cluster to node CoreDNS TCP"
-      protocol                      = "tcp"
-      from_port                     = 53
-      to_port                       = 53
-      type                          = "egress"
-      source_cluster_security_group = true
-    }
     ingress_cluster_coredns_udp = {
       description                   = "Cluster to node CoreDNS UDP"
       protocol                      = "udp"
       from_port                     = 53
       to_port                       = 53
       type                          = "ingress"
-      source_cluster_security_group = true
-    }
-    egress_cluster_coredns_udp = {
-      description                   = "Cluster to node CoreDNS UDP"
-      protocol                      = "udp"
-      from_port                     = 53
-      to_port                       = 53
-      type                          = "egress"
       source_cluster_security_group = true
     }
     ingress_self_coredns_tcp = {
@@ -122,14 +106,6 @@ locals {
       type        = "ingress"
       self        = true
     }
-    egress_self_coredns_tcp = {
-      description = "Node to node CoreDNS"
-      protocol    = "tcp"
-      from_port   = 53
-      to_port     = 53
-      type        = "egress"
-      self        = true
-    }
     ingress_self_coredns_udp = {
       description = "Node to node CoreDNS"
       protocol    = "udp"
@@ -137,62 +113,6 @@ locals {
       to_port     = 53
       type        = "ingress"
       self        = true
-    }
-    egress_self_coredns_udp = {
-      description = "Node to node CoreDNS"
-      protocol    = "udp"
-      from_port   = 53
-      to_port     = 53
-      type        = "egress"
-      self        = true
-    }
-    egress_https = {
-      description = "Egress all HTTPS to internet"
-      protocol    = "tcp"
-      from_port   = 443
-      to_port     = 443
-      type        = "egress"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-    egress_http = {
-      description = "Egress all HTTP to internet"
-      protocol    = "tcp"
-      from_port   = 80
-      to_port     = 80
-      type        = "egress"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-    egress_ntp_tcp = {
-      description = "Egress NTP/TCP to internet"
-      protocol    = "tcp"
-      from_port   = 123
-      to_port     = 123
-      type        = "egress"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-    egress_ntp_udp = {
-      description = "Egress NTP/UDP to internet"
-      protocol    = "udp"
-      from_port   = 123
-      to_port     = 123
-      type        = "egress"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-    teleport_3024 = {
-      description = "Access to Teleport"
-      protocol    = "tcp"
-      from_port   = 3024
-      to_port     = 3024
-      type        = "egress"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-    efs_2049 = {
-      description = "Access to EFS"
-      protocol    = "tcp"
-      from_port   = 2049
-      to_port     = 2049
-      type        = "egress"
-      cidr_blocks = ["0.0.0.0/0"]
     }
     inter_node_traffic_in_80 = {
       description = "Node to node http traffic"
@@ -202,28 +122,12 @@ locals {
       type        = "ingress"
       self        = true
     }
-    inter_node_traffic_out_80 = {
-      description = "Node to node http traffic"
-      protocol    = "tcp"
-      from_port   = 80
-      to_port     = 80
-      type        = "egress"
-      self        = true
-    }
     inter_node_traffic_in_443 = {
       description = "Node to node https traffic"
       protocol    = "tcp"
       from_port   = 443
       to_port     = 443
       type        = "ingress"
-      self        = true
-    }
-    inter_node_traffic_out_443 = {
-      description = "Node to node https traffic"
-      protocol    = "tcp"
-      from_port   = 443
-      to_port     = 443
-      type        = "egress"
       self        = true
     }
     inter_node_traffic_in = {
