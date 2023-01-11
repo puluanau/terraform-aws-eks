@@ -1,5 +1,7 @@
 # terraform-aws-eks
 
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/dominodatalab/terraform-aws-eks/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/dominodatalab/terraform-aws-eks/tree/main)
+
 ## Create SSH Key pair
 ### Prerequisites
 * Host with `ssh-keygen` installed
