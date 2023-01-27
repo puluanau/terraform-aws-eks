@@ -154,6 +154,7 @@ module "eks" {
   additional_node_groups       = var.additional_node_groups
   node_iam_policies            = [module.storage.s3_policy]
   efs_security_group           = module.storage.efs_security_group
+  external_security_group      = module.external.external_security_group
   update_kubeconfig_extra_args = var.update_kubeconfig_extra_args
   eks_master_role_names        = var.eks_master_role_names
   ssh_pvt_key_path             = local.ssh_pvt_key_path
@@ -163,4 +164,12 @@ module "eks" {
   depends_on = [
     module.network
   ]
+}
+
+module "external" {
+  source             = "./submodules/external"
+  vpc_id             = local.vpc_id
+  deploy_id          = var.deploy_id
+  subnet_ids         = [for s in local.private_subnets : s.subnet_id]
+  availability_zones = local.azs_to_use
 }

@@ -58,6 +58,46 @@ resource "aws_security_group_rule" "efs" {
   source_security_group_id = aws_security_group.eks_nodes.id
 }
 
+resource "aws_security_group_rule" "external_rds" {
+  security_group_id        = var.external_security_group
+  protocol                 = "tcp"
+  from_port                = 5432
+  to_port                  = 5432
+  type                     = "ingress"
+  description              = "RDS access"
+  source_security_group_id = aws_security_group.eks_nodes.id
+}
+
+resource "aws_security_group_rule" "external_https" {
+  security_group_id        = var.external_security_group
+  protocol                 = "tcp"
+  from_port                = 443
+  to_port                  = 443
+  type                     = "ingress"
+  description              = "OpenSearch / Prometheus access"
+  source_security_group_id = aws_security_group.eks_nodes.id
+}
+
+resource "aws_security_group_rule" "external_docdb" {
+  security_group_id        = var.external_security_group
+  protocol                 = "tcp"
+  from_port                = 27017
+  to_port                  = 27017
+  type                     = "ingress"
+  description              = "DocumentDB access"
+  source_security_group_id = aws_security_group.eks_nodes.id
+}
+
+resource "aws_security_group_rule" "external_elasticache" {
+  security_group_id        = var.external_security_group
+  protocol                 = "tcp"
+  from_port                = 6379
+  to_port                  = 6379
+  type                     = "ingress"
+  description              = "ElastiCache access"
+  source_security_group_id = aws_security_group.eks_nodes.id
+}
+
 locals {
   node_groups = merge(var.additional_node_groups, var.default_node_groups)
   node_groups_per_zone = flatten([

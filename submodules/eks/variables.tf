@@ -195,6 +195,11 @@ variable "efs_security_group" {
   type        = string
 }
 
+variable "external_security_group" {
+  description = "Security Group ID for external services"
+  type        = string
+}
+
 variable "eks_master_role_names" {
   type        = list(string)
   description = "IAM role names to be added as masters in eks"

@@ -26,9 +26,9 @@
         "source": "./..",
         "deploy_id": "${var.deploy_id}",
         "region": "${var.region}",
-        "number_of_azs": 2,
+        "number_of_azs": 3,
         "k8s_version": "${var.k8s_version}",
-        "route53_hosted_zone_name": "deploys-delta.domino.tech",
+        "route53_hosted_zone_name": "infra-team-sandbox.domino.tech",
         "eks_master_role_names": [
           "okta-poweruser",
           "okta-fulladmin"
