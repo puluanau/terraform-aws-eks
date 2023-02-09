@@ -155,7 +155,9 @@ locals {
   node_groups = {
     for name, ng in
     merge(var.additional_node_groups, var.default_node_groups) :
-    name => merge(ng, { gpu = anytrue([for itype in ng.instance_types : length(data.aws_ec2_instance_type.all[itype].gpus) > 0]) })
+    name => merge(ng, {
+      gpu = ng.gpu != null ? ng.gpu : anytrue([for itype in ng.instance_types : length(data.aws_ec2_instance_type.all[itype].gpus) > 0]),
+    })
   }
 }
 
