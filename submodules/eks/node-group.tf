@@ -1,3 +1,20 @@
+# Validating zone offerings.
+
+# Check the zones where the instance types are being offered
+data "aws_ec2_instance_type_offerings" "nodes" {
+  for_each = {
+    for name, ng in var.node_groups :
+    name => ng.instance_types
+  }
+
+  filter {
+    name   = "instance-type"
+    values = each.value
+  }
+
+  location_type = "availability-zone-id"
+}
+
 ## EKS Nodes
 data "aws_iam_policy_document" "eks_nodes" {
   statement {
@@ -69,7 +86,7 @@ locals {
         sb_name    = sb_name
         subnet     = sb
         node_group = ng
-      }
+      } if contains(ng.availability_zone_ids, sb.az_id)
     ]
   ])
   node_groups_by_name = { for ngz in local.node_groups_per_zone : "${ngz.ng_name}-${ngz.sb_name}" => ngz }
@@ -131,6 +148,17 @@ resource "aws_launch_template" "node_groups" {
     aws_iam_role_policy_attachment.aws_eks_nodes,
     aws_iam_role_policy_attachment.custom_eks_nodes,
   ]
+
+  lifecycle {
+    precondition {
+      condition     = length(setsubtract(each.value.availability_zone_ids, data.aws_ec2_instance_type_offerings.nodes[each.key].locations)) == 0
+      error_message = <<-EOM
+        Instance type(s) ${jsonencode(each.value.instance_types)} for node group ${format("%q", each.key)} are not available in all the given zones:
+        given = ${jsonencode(each.value.availability_zone_ids)}
+        available = ${jsonencode(data.aws_ec2_instance_type_offerings.nodes[each.key].locations)}
+      EOM
+    }
+  }
 }
 
 data "aws_ssm_parameter" "eks_ami_release_version" {
