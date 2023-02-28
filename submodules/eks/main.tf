@@ -131,19 +131,19 @@ locals {
       self        = true
     }
     inter_node_traffic_in = {
-      description = "Node to node pod/svc trafic in"
+      description = "Node to node pod/svc traffic in"
       protocol    = "tcp"
       from_port   = 1025
       to_port     = 65535
       type        = "ingress"
       self        = true
     }
-    inter_node_traffic_out = {
-      description = "Node to node pod/svc trafic out"
-      protocol    = "tcp"
-      from_port   = 1025
-      to_port     = 65535
-      type        = "egress"
+    inter_node_traffic_wireguard = {
+      description = "Node to node pod/svc Wireguard traffic"
+      protocol    = "udp"
+      from_port   = 51871
+      to_port     = 51871
+      type        = "ingress"
       self        = true
     }
   }
