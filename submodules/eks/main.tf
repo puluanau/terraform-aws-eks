@@ -146,6 +146,22 @@ locals {
       type        = "ingress"
       self        = true
     }
+    inter_node_esp = {
+      description = "Node to node ESP"
+      protocol    = 50
+      from_port   = -1
+      to_port     = -1
+      type        = "ingress"
+      self        = true
+    }
+    inter_node_ipsec = {
+      description = "Node to node pod/svc IPSec traffic"
+      protocol    = "tcp"
+      from_port   = 500
+      to_port     = 500
+      type        = "ingress"
+      self        = true
+    }
   }
 
   bastion_eks_security_group_rules = {
