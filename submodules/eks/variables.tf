@@ -85,7 +85,7 @@ variable "ssh_key_pair_name" {
 variable "bastion_security_group_id" {
   type        = string
   description = "Bastion security group id."
-  default     = ""
+  default     = null
 }
 
 variable "eks_cluster_addons" {
@@ -131,7 +131,7 @@ variable "bastion_user" {
 variable "bastion_public_ip" {
   type        = string
   description = "Public IP of bastion instance"
-  default     = ""
+  default     = null
 }
 
 variable "secrets_kms_key" {
@@ -150,4 +150,29 @@ variable "eks_custom_role_maps" {
   type        = list(object({ rolearn = string, username = string, groups = list(string) }))
   description = "Custom role maps for aws auth configmap"
   default     = []
+}
+
+
+variable "eks_public_access" {
+  type = object({
+    enabled = optional(bool, false)
+    cidrs   = optional(list(string), [])
+  })
+  description = "EKS API endpoint public access configuration"
+  nullable    = false
+  default     = { enabled = false }
+
+  validation {
+    condition     = var.eks_public_access.enabled ? length(var.eks_public_access.cidrs) > 0 : true
+    error_message = "eks_public_access.cidrs must be configured when public access is enabled"
+  }
+
+  validation {
+    condition = !var.eks_public_access.enabled ? true : alltrue([
+      for cidr in var.eks_public_access.cidrs :
+      try(cidrhost(cidr, 0), null) == regex("^(.*)/", cidr)[0] &&
+      try(cidrnetmask(cidr), null) != null
+    ])
+    error_message = "All elements in eks_public_access.cidrs list must be valid CIDR blocks"
+  }
 }
