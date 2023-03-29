@@ -7,7 +7,7 @@ data "aws_iam_policy_document" "service_account_assume_role_policy" {
     condition {
       test     = "StringEquals"
       variable = "${replace(var.oidc_provider_url, "https://", "")}:sub"
-      values   = ["system:serviceaccount:${var.service_account_namespace}:${var.service_account_name}"]
+      values   = ["system:serviceaccount:${var.irsa_service_account_namespace}:${var.irsa_service_account_name}"]
     }
 
     principals {
@@ -19,7 +19,7 @@ data "aws_iam_policy_document" "service_account_assume_role_policy" {
 
 resource "aws_iam_role" "service_account" {
   count              = var.irsa_enabled ? 1 : 0
-  name               = "${var.deploy_id}-${var.service_account_name}"
+  name               = "${var.deploy_id}-${var.irsa_service_account_name}"
   assume_role_policy = data.aws_iam_policy_document.service_account_assume_role_policy[0].json
 }
 

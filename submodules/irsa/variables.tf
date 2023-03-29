@@ -29,12 +29,12 @@ variable "oidc_provider_url" {
   type        = string
 }
 
-variable "service_account_namespace" {
+variable "irsa_service_account_namespace" {
   description = "Namespace of the service account to attach to the IRSA IAM role."
   type        = string
 }
 
-variable "service_account_name" {
+variable "irsa_service_account_name" {
   description = "Name of the service account to attach to the IRSA IAM role."
   type        = string
 }

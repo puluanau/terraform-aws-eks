@@ -52,3 +52,8 @@ output "container_registry" {
   description = "ECR base registry URL"
   value       = module.storage.container_registry
 }
+
+output "irsa_role_arn" {
+  description = "ARN of the IAM Role attached to the service account."
+  value       = var.irsa_enabled ? module.irsa.role_arn : null
+}

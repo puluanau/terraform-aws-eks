@@ -180,12 +180,12 @@ module "eks" {
 }
 
 module "irsa" {
-  source                    = "./submodules/irsa"
-  deploy_id                 = var.deploy_id
-  irsa_enabled              = var.irsa_enabled
-  irsa_iam_policy           = module.storage.irsa_iam_policy
-  oidc_provider_arn         = module.eks.oidc_provider_arn
-  oidc_provider_url         = module.eks.oidc_provider_url
-  service_account_namespace = var.service_account_namespace
-  service_account_name      = var.service_account_name
+  source                         = "./submodules/irsa"
+  deploy_id                      = var.deploy_id
+  irsa_enabled                   = var.irsa_enabled
+  irsa_iam_policy                = module.storage.irsa_iam_policy
+  irsa_service_account_namespace = var.irsa_service_account_namespace
+  irsa_service_account_name      = var.irsa_service_account_name
+  oidc_provider_arn              = module.eks.oidc_provider_arn
+  oidc_provider_url              = module.eks.oidc_provider_url
 }
