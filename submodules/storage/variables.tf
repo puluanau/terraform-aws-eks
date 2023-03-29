@@ -92,3 +92,9 @@ variable "efs_backup_delete_after" {
   description = "Delete backup data after this many days"
   default     = 125
 }
+
+variable "irsa_enabled" {
+  description = "IAM Roles for Service Accounts enabled."
+  type        = bool
+  default     = false
+}

@@ -54,6 +54,7 @@ module "storage" {
   efs_backup_schedule            = var.efs_backup_schedule
   efs_backup_cold_storage_after  = var.efs_backup_cold_storage_after
   efs_backup_delete_after        = var.efs_backup_delete_after
+  irsa_enabled                   = var.irsa_enabled
 }
 
 locals {
@@ -170,8 +171,20 @@ module "eks" {
   node_groups_kms_key          = local.kms_key_arn
   eks_custom_role_maps         = var.eks_custom_role_maps
   eks_public_access            = var.eks_public_access
+  irsa_enabled                 = var.irsa_enabled
 
   depends_on = [
     module.network
   ]
+}
+
+module "irsa" {
+  source                    = "./submodules/irsa"
+  deploy_id                 = var.deploy_id
+  irsa_enabled              = var.irsa_enabled
+  irsa_iam_policy           = module.storage.irsa_iam_policy
+  oidc_provider_arn         = module.eks.oidc_provider_arn
+  oidc_provider_url         = module.eks.oidc_provider_url
+  service_account_namespace = var.service_account_namespace
+  service_account_name      = var.service_account_name
 }

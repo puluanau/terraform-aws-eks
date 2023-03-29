@@ -344,3 +344,19 @@ variable "eks_public_access" {
   description = "EKS API endpoint public access configuration"
   default     = null
 }
+
+variable "irsa_enabled" {
+  description = "IAM Roles for Service Accounts enabled."
+  type        = bool
+  default     = false
+}
+
+variable "service_account_namespace" {
+  description = "Namespace of the service account to attach to the IRSA IAM role."
+  type        = string
+}
+
+variable "service_account_name" {
+  description = "Name of the service account to attach to the IRSA IAM role."
+  type        = string
+}

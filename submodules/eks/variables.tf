@@ -176,3 +176,9 @@ variable "eks_public_access" {
     error_message = "All elements in eks_public_access.cidrs list must be valid CIDR blocks"
   }
 }
+
+variable "irsa_enabled" {
+  description = "IAM Roles for Service Accounts enabled."
+  type        = bool
+  default     = false
+}

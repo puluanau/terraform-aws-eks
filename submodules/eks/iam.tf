@@ -228,3 +228,16 @@ resource "aws_iam_role_policy_attachment" "custom_eks_nodes" {
   policy_arn = element(local.custom_node_policies, count.index)
   role       = aws_iam_role.eks_nodes.name
 }
+
+data "tls_certificate" "cluster_tls_certificate" {
+  count = var.irsa_enabled ? 1 : 0
+  url   = aws_eks_cluster.this.identity[0].oidc[0].issuer
+}
+
+resource "aws_iam_openid_connect_provider" "cluster_oidc_provider" {
+  count           = var.irsa_enabled ? 1 : 0
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = data.tls_certificate.cluster_tls_certificate.certificates[*].sha1_fingerprint
+  url             = data.tls_certificate.cluster_tls_certificate.url
+  depends_on      = [aws_eks_cluster.this]
+}
