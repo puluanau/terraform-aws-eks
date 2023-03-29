@@ -9,7 +9,7 @@ variable "deploy_id" {
 }
 
 variable "irsa_enabled" {
-  description = "IAM Roles for Service Accounts enabled." 
+  description = "IAM Roles for Service Accounts enabled."
   type        = bool
   default     = false
 }

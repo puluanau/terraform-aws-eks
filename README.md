@@ -87,6 +87,7 @@ aws s3 rb s3://"${AWS_TERRAFORM_REMOTE_STATE_BUCKET}" --force
 |------|--------|---------|
 | <a name="module_bastion"></a> [bastion](#module\_bastion) | ./submodules/bastion | n/a |
 | <a name="module_eks"></a> [eks](#module\_eks) | ./submodules/eks | n/a |
+| <a name="module_irsa"></a> [irsa](#module\_irsa) | ./submodules/irsa | n/a |
 | <a name="module_network"></a> [network](#module\_network) | ./submodules/network | n/a |
 | <a name="module_storage"></a> [storage](#module\_storage) | ./submodules/storage | n/a |
 
@@ -131,6 +132,7 @@ aws s3 rb s3://"${AWS_TERRAFORM_REMOTE_STATE_BUCKET}" --force
 | <a name="input_eks_custom_role_maps"></a> [eks\_custom\_role\_maps](#input\_eks\_custom\_role\_maps) | Custom role maps for aws auth configmap | `list(object({ rolearn = string, username = string, groups = list(string) }))` | `[]` | no |
 | <a name="input_eks_master_role_names"></a> [eks\_master\_role\_names](#input\_eks\_master\_role\_names) | IAM role names to be added as masters in eks. | `list(string)` | `[]` | no |
 | <a name="input_eks_public_access"></a> [eks\_public\_access](#input\_eks\_public\_access) | EKS API endpoint public access configuration | <pre>object({<br>    enabled = optional(bool, false)<br>    cidrs   = optional(list(string), [])<br>  })</pre> | `null` | no |
+| <a name="input_irsa_enabled"></a> [irsa\_enabled](#input\_irsa\_enabled) | IAM Roles for Service Accounts enabled. | `bool` | `false` | no |
 | <a name="input_k8s_version"></a> [k8s\_version](#input\_k8s\_version) | EKS cluster k8s version. | `string` | `"1.25"` | no |
 | <a name="input_kms_key_id"></a> [kms\_key\_id](#input\_kms\_key\_id) | if use\_kms is set, use the specified KMS key | `string` | `null` | no |
 | <a name="input_kubeconfig_path"></a> [kubeconfig\_path](#input\_kubeconfig\_path) | fully qualified path name to write the kubeconfig file | `string` | `""` | no |
@@ -144,6 +146,8 @@ aws s3 rb s3://"${AWS_TERRAFORM_REMOTE_STATE_BUCKET}" --force
 | <a name="input_region"></a> [region](#input\_region) | AWS region for the deployment | `string` | n/a | yes |
 | <a name="input_route53_hosted_zone_name"></a> [route53\_hosted\_zone\_name](#input\_route53\_hosted\_zone\_name) | Optional hosted zone for External DNSone. | `string` | `""` | no |
 | <a name="input_s3_force_destroy_on_deletion"></a> [s3\_force\_destroy\_on\_deletion](#input\_s3\_force\_destroy\_on\_deletion) | Toogle to allow recursive deletion of all objects in the s3 buckets. if 'false' terraform will NOT be able to delete non-empty buckets | `bool` | `false` | no |
+| <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | Name of the service account to attach to the IRSA IAM role. | `string` | n/a | yes |
+| <a name="input_service_account_namespace"></a> [service\_account\_namespace](#input\_service\_account\_namespace) | Namespace of the service account to attach to the IRSA IAM role. | `string` | n/a | yes |
 | <a name="input_ssh_pvt_key_path"></a> [ssh\_pvt\_key\_path](#input\_ssh\_pvt\_key\_path) | SSH private key filepath. | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | Deployment tags. | `map(string)` | `{}` | no |
 | <a name="input_update_kubeconfig_extra_args"></a> [update\_kubeconfig\_extra\_args](#input\_update\_kubeconfig\_extra\_args) | Optional extra args when generating kubeconfig | `string` | `""` | no |

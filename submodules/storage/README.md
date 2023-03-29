@@ -31,6 +31,7 @@ No modules.
 | [aws_efs_mount_target.eks](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_mount_target) | resource |
 | [aws_iam_policy.ecr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.s3_irsa](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.efs_backup_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_s3_bucket.backups](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket.blobs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
@@ -55,6 +56,7 @@ No modules.
 | [aws_iam_policy_document.monitoring](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.registry](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.s3_irsa](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_partition.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/partition) | data source |
 
 ## Inputs
@@ -72,6 +74,7 @@ No modules.
 | <a name="input_efs_backup_vault_force_destroy"></a> [efs\_backup\_vault\_force\_destroy](#input\_efs\_backup\_vault\_force\_destroy) | Toggle to allow automatic destruction of all backups when destroying. | `bool` | `false` | no |
 | <a name="input_efs_backup_vault_kms_key"></a> [efs\_backup\_vault\_kms\_key](#input\_efs\_backup\_vault\_kms\_key) | if set, use specified key for EFS backup vault | `string` | `null` | no |
 | <a name="input_efs_kms_key"></a> [efs\_kms\_key](#input\_efs\_kms\_key) | if set, use specified key for EFS | `string` | `null` | no |
+| <a name="input_irsa_enabled"></a> [irsa\_enabled](#input\_irsa\_enabled) | IAM Roles for Service Accounts enabled. | `bool` | `false` | no |
 | <a name="input_s3_force_destroy_on_deletion"></a> [s3\_force\_destroy\_on\_deletion](#input\_s3\_force\_destroy\_on\_deletion) | Toogle to allow recursive deletion of all objects in the s3 buckets. if 'false' terraform will NOT be able to delete non-empty buckets | `bool` | `false` | no |
 | <a name="input_s3_kms_key"></a> [s3\_kms\_key](#input\_s3\_kms\_key) | if set, use specified key for S3 buckets | `string` | `null` | no |
 | <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | List of Subnets IDs to create EFS mount targets | `list(string)` | n/a | yes |
@@ -86,5 +89,6 @@ No modules.
 | <a name="output_efs_file_system"></a> [efs\_file\_system](#output\_efs\_file\_system) | efs file system |
 | <a name="output_efs_security_group"></a> [efs\_security\_group](#output\_efs\_security\_group) | EFS security group id |
 | <a name="output_iam_policies"></a> [iam\_policies](#output\_iam\_policies) | IAM Policy ARNs |
+| <a name="output_irsa_iam_policy"></a> [irsa\_iam\_policy](#output\_irsa\_iam\_policy) | IRSA IAM Policy ARN |
 | <a name="output_s3_buckets"></a> [s3\_buckets](#output\_s3\_buckets) | S3 buckets name and arn |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

@@ -23,7 +23,7 @@ output "iam_policies" {
 
 output "irsa_iam_policy" {
   description = "IRSA IAM Policy ARN"
-  value       = var.irsa_enabled ? aws_iam_policy.s3_irsa.arn : null
+  value       = var.irsa_enabled ? aws_iam_policy.s3_irsa[0].arn : null
 }
 
 output "efs_security_group" {

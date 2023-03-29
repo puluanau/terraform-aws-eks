@@ -25,10 +25,10 @@ output "eks_master_roles" {
 
 output "oidc_provider_arn" {
   description = "Cluster IAM OIDC Provider ARN."
-  value       = var.irsa_enabled ? aws_iam_openid_connect_provider.oidc_provider.arn : null
+  value       = var.irsa_enabled ? aws_iam_openid_connect_provider.cluster_oidc_provider[0].arn : null
 }
 
 output "oidc_provider_url" {
   description = "Cluster IAM OIDC Provider URL."
-  value       = var.irsa_enabled ? aws_iam_openid_connect_provider.oidc_provider.url : null
+  value       = var.irsa_enabled ? aws_iam_openid_connect_provider.cluster_oidc_provider[0].url : null
 }

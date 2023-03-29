@@ -62,10 +62,10 @@ resource "aws_iam_policy" "s3" {
 }
 
 resource "aws_iam_policy" "s3_irsa" {
-  count   = var.irsa_enabled ? 1 : 0
-  name    = "${var.deploy_id}-S3-irsa"
-  path    = "/"
-  policy  = data.aws_iam_policy_document.s3_irsa.json
+  count  = var.irsa_enabled ? 1 : 0
+  name   = "${var.deploy_id}-S3-irsa"
+  path   = "/"
+  policy = data.aws_iam_policy_document.s3_irsa[0].json
 }
 
 data "aws_iam_policy_document" "ecr" {
