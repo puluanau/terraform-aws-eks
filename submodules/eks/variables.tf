@@ -134,6 +134,11 @@ variable "bastion_public_ip" {
   default     = null
 }
 
+variable "ssm_log_group_name" {
+  type        = string
+  description = "CW log group to send the SSM session logs to"
+}
+
 variable "secrets_kms_key" {
   type        = string
   description = "if set, use specified key for the EKS cluster secrets"

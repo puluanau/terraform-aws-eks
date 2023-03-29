@@ -57,6 +57,7 @@
 | [aws_iam_policy_document.eks_nodes](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.kms_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.snapshot](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.ssm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_role.eks_master_roles](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_role) | data source |
 | [aws_partition.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/partition) | data source |
 | [aws_ssm_parameter.eks_ami_release_version](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
@@ -87,6 +88,7 @@
 | <a name="input_secrets_kms_key"></a> [secrets\_kms\_key](#input\_secrets\_kms\_key) | if set, use specified key for the EKS cluster secrets | `string` | `null` | no |
 | <a name="input_ssh_key_pair_name"></a> [ssh\_key\_pair\_name](#input\_ssh\_key\_pair\_name) | SSH key pair name. | `string` | n/a | yes |
 | <a name="input_ssh_pvt_key_path"></a> [ssh\_pvt\_key\_path](#input\_ssh\_pvt\_key\_path) | Path to SSH private key | `string` | `""` | no |
+| <a name="input_ssm_log_group_name"></a> [ssm\_log\_group\_name](#input\_ssm\_log\_group\_name) | CW log group to send the SSM session logs to | `string` | n/a | yes |
 | <a name="input_update_kubeconfig_extra_args"></a> [update\_kubeconfig\_extra\_args](#input\_update\_kubeconfig\_extra\_args) | Optional extra args when generating kubeconfig | `string` | `""` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID. | `string` | n/a | yes |
 
