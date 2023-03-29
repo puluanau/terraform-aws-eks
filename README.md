@@ -149,6 +149,7 @@ aws s3 rb s3://"${AWS_TERRAFORM_REMOTE_STATE_BUCKET}" --force
 | <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | Name of the service account to attach to the IRSA IAM role. | `string` | n/a | yes |
 | <a name="input_service_account_namespace"></a> [service\_account\_namespace](#input\_service\_account\_namespace) | Namespace of the service account to attach to the IRSA IAM role. | `string` | n/a | yes |
 | <a name="input_ssh_pvt_key_path"></a> [ssh\_pvt\_key\_path](#input\_ssh\_pvt\_key\_path) | SSH private key filepath. | `string` | n/a | yes |
+| <a name="input_ssm_log_group_name"></a> [ssm\_log\_group\_name](#input\_ssm\_log\_group\_name) | CW log group to send the SSM session logs to | `string` | `"session-manager"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Deployment tags. | `map(string)` | `{}` | no |
 | <a name="input_update_kubeconfig_extra_args"></a> [update\_kubeconfig\_extra\_args](#input\_update\_kubeconfig\_extra\_args) | Optional extra args when generating kubeconfig | `string` | `""` | no |
 | <a name="input_use_kms"></a> [use\_kms](#input\_use\_kms) | if set, use either the specified KMS key or a Domino-generated one | `bool` | `false` | no |

@@ -191,11 +191,41 @@ data "aws_iam_policy_document" "snapshot" {
   }
 }
 
+data "aws_iam_policy_document" "ssm" {
+  statement {
+    effect    = "Allow"
+    resources = ["arn:aws:logs:*:${local.aws_account_id}:log-group:${var.ssm_log_group_name}:*"]
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "logs:DescribeLogStreams"
+    ]
+  }
+
+  statement {
+    effect    = "Allow"
+    resources = ["*"]
+    actions = [
+      "logs:DescribeLogGroups"
+    ]
+  }
+
+  statement {
+    effect    = "Allow"
+    resources = ["*"]
+
+    actions = [
+      "kms:GenerateDataKey",
+    ]
+  }
+}
+
 data "aws_iam_policy_document" "custom_eks_node_policy" {
   source_policy_documents = [
     data.aws_iam_policy_document.autoscaler.json,
     data.aws_iam_policy_document.ebs_csi.json,
-    data.aws_iam_policy_document.snapshot.json
+    data.aws_iam_policy_document.snapshot.json,
+    data.aws_iam_policy_document.ssm.json
   ]
 }
 
