@@ -1,3 +1,13 @@
+variable "region" {
+  type        = string
+  description = "AWS region for the deployment"
+  nullable    = false
+  validation {
+    condition     = can(regex("^([a-z]{2}-[a-z]+-[0-9])$", var.region))
+    error_message = "The provided region must follow the format of AWS region names, e.g., us-west-2."
+  }
+}
+
 variable "deploy_id" {
   type        = string
   description = "Domino Deployment ID."
@@ -16,21 +26,10 @@ variable "deploy_id" {
   }
 }
 
-variable "region" {
-  type        = string
-  description = "AWS region for the deployment"
-}
-
-variable "update_kubeconfig_extra_args" {
-  type        = string
-  description = "Optional extra args when generating kubeconfig"
-  default     = ""
-}
-
 variable "route53_hosted_zone_name" {
   type        = string
   description = "Optional hosted zone for External DNSone."
-  default     = ""
+  default     = null
 }
 
 variable "tags" {
@@ -39,28 +38,56 @@ variable "tags" {
   default     = {}
 }
 
-variable "k8s_version" {
+variable "ssh_pvt_key_path" {
   type        = string
-  description = "EKS cluster k8s version."
-  default     = "1.25"
+  description = "SSH private key filepath."
+  validation {
+    condition     = fileexists(var.ssh_pvt_key_path)
+    error_message = "Private key does not exist. Please provide the right path or generate a key with the following command: ssh-keygen -q -P '' -t rsa -b 4096 -m PEM -f domino.pem"
+  }
 }
 
-variable "public_cidr_network_bits" {
-  type        = number
-  description = "Number of network bits to allocate to the public subnet. i.e /27 -> 32 IPs."
-  default     = 27
-}
+variable "eks" {
+  description = <<EOF
+    k8s_version = "EKS cluster k8s version."
+    kubeconfig = {
+      extra_args = "Optional extra args when generating kubeconfig."
+      path       = "Fully qualified path name to write the kubeconfig file."
+    }
+    public_access = {
+      enabled = "Enable EKS API public endpoint."
+      cidrs   = "List of CIDR ranges permitted for accessing the EKS public endpoint."
+    }
+    "Custom role maps for aws auth configmap"
+    custom_role_maps = {
+      rolearn = string
+      username = string
+      groups = list(string)
+    }
+    master_role_names = "IAM role names to be added as masters in eks."
+    cluster_addons = "EKS cluster addons. vpc-cni is installed separately."
+  EOF
 
-variable "private_cidr_network_bits" {
-  type        = number
-  description = "Number of network bits to allocate to the private subnet. i.e /19 -> 8,192 IPs."
-  default     = 19
-}
+  type = object({
+    k8s_version = optional(string, "1.25")
+    kubeconfig = optional(object({
+      extra_args = optional(string, "")
+      path       = optional(string)
+    }), {})
+    public_access = optional(object({
+      enabled = optional(bool, false)
+      cidrs   = optional(list(string), [])
+    }), {})
+    custom_role_maps = optional(list(object({
+      rolearn  = string
+      username = string
+      groups   = list(string)
+    })), [])
+    master_role_names = optional(list(string), [])
+    cluster_addons    = optional(list(string), [])
+  })
 
-variable "pod_cidr_network_bits" {
-  type        = number
-  description = "Number of network bits to allocate to the private subnet. i.e /19 -> 8,192 IPs."
-  default     = 19
+  default = {}
 }
 
 variable "default_node_groups" {
@@ -80,17 +107,19 @@ variable "default_node_groups" {
           labels = optional(map(string), {
             "dominodatalab.com/node-pool" = "default"
           })
-          taints = optional(list(object({ key = string, value = optional(string), effect = string })), [])
-          tags   = optional(map(string), {})
-          gpu    = optional(bool, null)
-          volume = optional(object(
-            {
-              size = optional(number, 1000)
-              type = optional(string, "gp3")
-            }),
-            {
-              size = 1000
-              type = "gp3"
+          taints = optional(list(object({
+            key    = string
+            value  = optional(string)
+            effect = string
+          })), [])
+          tags = optional(map(string), {})
+          gpu  = optional(bool, null)
+          volume = optional(object({
+            size = optional(number, 1000)
+            type = optional(string, "gp3")
+            }), {
+            size = 1000
+            type = "gp3"
             }
           )
       }),
@@ -107,17 +136,19 @@ variable "default_node_groups" {
           labels = optional(map(string), {
             "dominodatalab.com/node-pool" = "platform"
           })
-          taints = optional(list(object({ key = string, value = optional(string), effect = string })), [])
-          tags   = optional(map(string), {})
-          gpu    = optional(bool, null)
-          volume = optional(object(
-            {
-              size = optional(number, 100)
-              type = optional(string, "gp3")
-            }),
-            {
-              size = 100
-              type = "gp3"
+          taints = optional(list(object({
+            key    = string
+            value  = optional(string)
+            effect = string
+          })), [])
+          tags = optional(map(string), {})
+          gpu  = optional(bool, null)
+          volume = optional(object({
+            size = optional(number, 100)
+            type = optional(string, "gp3")
+            }), {
+            size = 100
+            type = "gp3"
             }
           )
       }),
@@ -135,19 +166,24 @@ variable "default_node_groups" {
             "dominodatalab.com/node-pool" = "default-gpu"
             "nvidia.com/gpu"              = true
           })
-          taints = optional(list(object({ key = string, value = optional(string), effect = string })), [
-            { key = "nvidia.com/gpu", value = "true", effect = "NO_SCHEDULE" }
+          taints = optional(list(object({
+            key    = string
+            value  = optional(string)
+            effect = string
+            })), [{
+            key    = "nvidia.com/gpu"
+            value  = "true"
+            effect = "NO_SCHEDULE"
+            }
           ])
           tags = optional(map(string), {})
           gpu  = optional(bool, null)
-          volume = optional(object(
-            {
-              size = optional(number, 1000)
-              type = optional(string, "gp3")
-            }),
-            {
-              size = 1000
-              type = "gp3"
+          volume = optional(object({
+            size = optional(number, 1000)
+            type = optional(string, "gp3")
+            }), {
+            size = 1000
+            type = "gp3"
             }
           )
       })
@@ -166,9 +202,13 @@ variable "additional_node_groups" {
     desired_per_az        = number
     availability_zone_ids = list(string)
     labels                = map(string)
-    taints                = optional(list(object({ key = string, value = optional(string), effect = string })), [])
-    tags                  = optional(map(string), {})
-    gpu                   = optional(bool, null)
+    taints = optional(list(object({
+      key    = string
+      value  = optional(string)
+      effect = string
+    })), [])
+    tags = optional(map(string), {})
+    gpu  = optional(bool, null)
     volume = object({
       size = string
       type = string
@@ -177,163 +217,118 @@ variable "additional_node_groups" {
   default = {}
 }
 
-variable "cidr" {
-  type        = string
-  default     = "10.0.0.0/16"
-  description = "The IPv4 CIDR block for the VPC."
-  validation {
-    condition = (
-      try(cidrhost(var.cidr, 0), null) == regex("^(.*)/", var.cidr)[0] &&
-      try(cidrnetmask(var.cidr), null) == "255.255.0.0"
-    )
-    error_message = "Argument base_cidr_block must be a valid CIDR block."
-  }
-}
+variable "network" {
+  description = <<EOF
+    vpc = {
+      id = Existing vpc id, it will bypass creation by this module.
+      subnets = {
+        private = Existing private subnets.
+        public  = Existing public subnets.
+        pod     = Existing pod subnets.
+      }), {})
+    }), {})
+    network_bits = {
+      public  = Number of network bits to allocate to the public subnet. i.e /27 -> 32 IPs.
+      private = Number of network bits to allocate to the private subnet. i.e /19 -> 8,192 IPs.
+      pod     = Number of network bits to allocate to the private subnet. i.e /19 -> 8,192 IPs.
+    }
+    cidrs = {
+      vpc     = The IPv4 CIDR block for the VPC.
+      pod     = The IPv4 CIDR block for the Pod subnets.
+    }
+    use_pod_cidr = Use additional pod CIDR range (ie 100.64.0.0/16) for pod networking.
+  EOF
 
-variable "pod_cidr" {
-  type        = string
-  default     = "100.64.0.0/16"
-  description = "The IPv4 CIDR block for the VPC."
-  validation {
-    condition = (
-      try(cidrhost(var.pod_cidr, 0), null) == regex("^(.*)/", var.pod_cidr)[0] &&
-      try(cidrnetmask(var.pod_cidr), null) == "255.255.0.0"
-    )
-    error_message = "Argument base_cidr_block must be a valid CIDR block."
-  }
-}
+  type = object({
+    vpc = optional(object({
+      id = optional(string, null)
+      subnets = optional(object({
+        private = optional(list(string), [])
+        public  = optional(list(string), [])
+        pod     = optional(list(string), [])
+      }), {})
+    }), {})
+    network_bits = optional(object({
+      public  = optional(number, 27)
+      private = optional(number, 19)
+      pod     = optional(number, 19)
+      }
+    ), {})
+    cidrs = optional(object({
+      vpc = optional(string, "10.0.0.0/16")
+      pod = optional(string, "100.64.0.0/16")
+    }), {})
+    use_pod_cidr = optional(bool, true)
+  })
 
-variable "use_pod_cidr" {
-  type        = bool
-  description = "Use additional pod CIDR range (ie 100.64.0.0/16) for pod/service networking"
-  default     = true
-}
-
-variable "eks_master_role_names" {
-  type        = list(string)
-  description = "IAM role names to be added as masters in eks."
-  default     = []
-}
-
-variable "vpc_id" {
-  type        = string
-  description = "Optional VPC ID, it will bypass creation of such, public_subnets and private_subnets are also required."
-  default     = null
-}
-
-variable "public_subnets" {
-  type        = list(string)
-  description = "Optional list of public subnet ids"
-  default     = null
-}
-
-variable "private_subnets" {
-  type        = list(string)
-  description = "Optional list of private subnet ids"
-  default     = null
-}
-
-variable "pod_subnets" {
-  type        = list(string)
-  description = "Optional list of pod subnet ids"
-  default     = null
+  default = {}
 }
 
 variable "bastion" {
+  description = <<EOF
+    ami                      = Ami id. Defaults to latest 'amazon_linux_2' ami.
+    instance_type            = Instance type.
+    authorized_ssh_ip_ranges = List of CIDR ranges permitted for the bastion ssh access.
+    username                 = Bastion user.
+    install_binaries         = Toggle to install required Domino binaries in the bastion.
+  EOF
+
   type = object({
-    ami                      = optional(string, null) # default will use the latest 'amazon_linux_2' ami
+    ami_id                   = optional(string, null) # default will use the latest 'amazon_linux_2' ami
     instance_type            = optional(string, "t2.micro")
     authorized_ssh_ip_ranges = optional(list(string), ["0.0.0.0/0"])
-    username                 = optional(string, null)
+    username                 = optional(string, "ec2-user")
     install_binaries         = optional(bool, false)
   })
-  description = "if specifed, a bastion is created with the specified details"
-  default     = null
+
+  default = null
 }
 
-variable "efs_access_point_path" {
-  type        = string
-  description = "Filesystem path for efs."
-  default     = "/domino"
-}
-
-variable "ssh_pvt_key_path" {
-  type        = string
-  description = "SSH private key filepath."
-  validation {
-    condition     = fileexists(var.ssh_pvt_key_path)
-    error_message = "Private key does not exist. Please provide the right path or generate a key with the following command: ssh-keygen -q -P '' -t rsa -b 4096 -m PEM -f domino.pem"
+variable "storage" {
+  description = <<EOF
+    storage = {
+      efs = {
+        access_point_path = Filesystem path for efs.
+        backup_vault = {
+          create        = Create backup vault for EFS toggle.
+          force_destroy = Toggle to allow automatic destruction of all backups when destroying.
+          backup = {
+            schedule           = Cron-style schedule for EFS backup vault (default: once a day at 12pm).
+            cold_storage_after = Move backup data to cold storage after this many days.
+            delete_after       = Delete backup data after this many days.
+          }
+        }
+      }
+      s3 = {
+        force_destroy_on_deletion = Toogle to allow recursive deletion of all objects in the s3 buckets. if 'false' terraform will NOT be able to delete non-empty buckets.
+      }
+      ecr = {
+        force_destroy_on_deletion = Toogle to allow recursive deletion of all objects in the ECR repositories. if 'false' terraform will NOT be able to delete non-empty repositories.
+      }
+    }
   }
-}
-
-variable "s3_force_destroy_on_deletion" {
-  description = "Toogle to allow recursive deletion of all objects in the s3 buckets. if 'false' terraform will NOT be able to delete non-empty buckets"
-  type        = bool
-  default     = false
-}
-
-variable "ecr_force_destroy_on_deletion" {
-  description = "Toogle to allow recursive deletion of all objects in the ECR repositories. if 'false' terraform will NOT be able to delete non-empty repositories"
-  type        = bool
-  default     = false
-}
-
-variable "kms_key_id" {
-  description = "if use_kms is set, use the specified KMS key"
-  type        = string
-  default     = null
-  validation {
-    condition     = var.kms_key_id == null ? true : length(var.kms_key_id) > 0
-    error_message = "KMS key ID must be null or set to a non-empty string"
-  }
-}
-
-variable "use_kms" {
-  description = "if set, use either the specified KMS key or a Domino-generated one"
-  type        = bool
-  default     = false
-}
-
-variable "kubeconfig_path" {
-  description = "fully qualified path name to write the kubeconfig file"
-  type        = string
-  default     = ""
-}
-
-variable "create_efs_backup_vault" {
-  description = "Create backup vault for EFS toggle."
-  type        = bool
-  default     = true
-}
-
-variable "efs_backup_vault_force_destroy" {
-  description = "Toggle to allow automatic destruction of all backups when destroying."
-  type        = bool
-  default     = false
-}
-
-variable "efs_backup_schedule" {
-  type        = string
-  description = "Cron-style schedule for EFS backup vault (default: once a day at 12pm)"
-  default     = "0 12 * * ? *"
-}
-
-variable "efs_backup_cold_storage_after" {
-  type        = number
-  description = "Move backup data to cold storage after this many days"
-  default     = 35
-}
-
-variable "efs_backup_delete_after" {
-  type        = number
-  description = "Delete backup data after this many days"
-  default     = 125
-}
-
-variable "eks_custom_role_maps" {
-  type        = list(object({ rolearn = string, username = string, groups = list(string) }))
-  description = "Custom role maps for aws auth configmap"
-  default     = []
+  EOF
+  type = object({
+    efs = optional(object({
+      access_point_path = optional(string, "/domino")
+      backup_vault = optional(object({
+        create        = optional(bool, true)
+        force_destroy = optional(bool, false)
+        backup = optional(object({
+          schedule           = optional(string, "0 12 * * ? *")
+          cold_storage_after = optional(number, 35)
+          delete_after       = optional(number, 125)
+        }), {})
+      }), {})
+    }), {})
+    s3 = optional(object({
+      force_destroy_on_deletion = optional(bool, true)
+    }), {})
+    ecr = optional(object({
+      force_destroy_on_deletion = optional(bool, true)
+    }), {})
+  })
+  default = {}
 }
 
 variable "ssm_log_group_name" {
@@ -342,11 +337,26 @@ variable "ssm_log_group_name" {
   default     = "session-manager"
 }
 
-variable "eks_public_access" {
+variable "kms" {
+  description = <<EOF
+    enabled = "Toggle,if set use either the specified KMS key_id or a Domino-generated one"
+    key_id  = optional(string, null)
+  EOF
+
   type = object({
     enabled = optional(bool, false)
-    cidrs   = optional(list(string), [])
+    key_id  = optional(string, null)
   })
-  description = "EKS API endpoint public access configuration"
-  default     = null
+
+  validation {
+    condition     = var.kms.enabled && var.kms.key_id != null ? length(var.kms.key_id) > 0 : true
+    error_message = "KMS key ID must be null or set to a non-empty string, when var.kms.enabled is."
+  }
+
+  validation {
+    condition     = var.kms.key_id != null ? var.kms.enabled : true
+    error_message = "var.kms.enabled must be true if var.kms.key_id is provided."
+  }
+
+  default = {}
 }

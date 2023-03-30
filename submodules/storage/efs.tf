@@ -3,7 +3,7 @@ resource "aws_efs_file_system" "eks" {
   performance_mode                = "generalPurpose"
   provisioned_throughput_in_mibps = "0"
   throughput_mode                 = "bursting"
-  kms_key_id                      = var.efs_kms_key
+  kms_key_id                      = local.kms_key_arn
 
   tags = {
     "Name" = var.deploy_id
@@ -13,7 +13,7 @@ resource "aws_efs_file_system" "eks" {
 resource "aws_security_group" "efs" {
   name        = "${var.deploy_id}-efs"
   description = "EFS security group"
-  vpc_id      = var.vpc_id
+  vpc_id      = var.network_info.vpc_id
 
   lifecycle {
     create_before_destroy = true
@@ -24,10 +24,10 @@ resource "aws_security_group" "efs" {
 }
 
 resource "aws_efs_mount_target" "eks" {
-  count           = length(var.subnet_ids)
+  count           = length(local.private_subnet_ids)
   file_system_id  = aws_efs_file_system.eks.id
   security_groups = [aws_security_group.efs.id]
-  subnet_id       = element(var.subnet_ids, count.index)
+  subnet_id       = element(local.private_subnet_ids, count.index)
 }
 
 resource "aws_efs_access_point" "eks" {
@@ -45,6 +45,6 @@ resource "aws_efs_access_point" "eks" {
       permissions = "777"
     }
 
-    path = var.efs_access_point_path
+    path = var.storage.efs.access_point_path
   }
 }
