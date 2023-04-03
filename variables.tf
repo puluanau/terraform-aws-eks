@@ -43,7 +43,7 @@ variable "ssh_pvt_key_path" {
   description = "SSH private key filepath."
   validation {
     condition     = fileexists(var.ssh_pvt_key_path)
-    error_message = "Private key does not exist. Please provide the right path or generate a key with the following command: ssh-keygen -q -P '' -t rsa -b 4096 -m PEM -f domino.pem"
+    error_message = "Private key does not exist. Please provide the right path or generate a key with the following command: ssh-keygen -q -P '' -t rsa -b 4096 -m PEM -f domino.pem && chmod 400 domino.pem"
   }
 }
 
@@ -66,6 +66,8 @@ variable "eks" {
     }
     master_role_names = "IAM role names to be added as masters in eks."
     cluster_addons = "EKS cluster addons. vpc-cni is installed separately."
+    ssm_log_group_name = "CloudWatch log group to send the SSM session logs to."
+  }
   EOF
 
   type = object({
@@ -83,8 +85,9 @@ variable "eks" {
       username = string
       groups   = list(string)
     })), [])
-    master_role_names = optional(list(string), [])
-    cluster_addons    = optional(list(string), [])
+    master_role_names  = optional(list(string), [])
+    cluster_addons     = optional(list(string), [])
+    ssm_log_group_name = optional(string, "session-manager")
   })
 
   default = {}
@@ -274,6 +277,7 @@ variable "bastion" {
   EOF
 
   type = object({
+    enabled                  = optional(bool, true)
     ami_id                   = optional(string, null) # default will use the latest 'amazon_linux_2' ami
     instance_type            = optional(string, "t2.micro")
     authorized_ssh_ip_ranges = optional(list(string), ["0.0.0.0/0"])
@@ -331,12 +335,6 @@ variable "storage" {
   default = {}
 }
 
-variable "ssm_log_group_name" {
-  type        = string
-  description = "CW log group to send the SSM session logs to"
-  default     = "session-manager"
-}
-
 variable "kms" {
   description = <<EOF
     enabled = "Toggle,if set use either the specified KMS key_id or a Domino-generated one"
@@ -344,7 +342,7 @@ variable "kms" {
   EOF
 
   type = object({
-    enabled = optional(bool, false)
+    enabled = optional(bool, true)
     key_id  = optional(string, null)
   })
 
