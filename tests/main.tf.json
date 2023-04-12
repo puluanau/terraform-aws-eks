@@ -68,8 +68,8 @@
           }
         },
         "irsa_enabled": true,
-        "irsa_service_account_namespace": "domino-platform",
-        "irsa_service_account_name": "nucleus"
+        "platform_namespace": "domino-platform",
+        "compute_namespace": "domino-compute"
       }
     }
   ],
