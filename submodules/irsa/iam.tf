@@ -64,7 +64,7 @@ data "aws_iam_policy_document" "service_account_assume_role_policy" {
 
 resource "aws_iam_role" "service_account" {
   count              = var.irsa_enabled ? 1 : 0
-  name               = "${var.deploy_id}-${var.irsa_service_account_name}"
+  name               = "${var.deploy_id}-app-s3"
   assume_role_policy = data.aws_iam_policy_document.service_account_assume_role_policy[0].json
 }
 

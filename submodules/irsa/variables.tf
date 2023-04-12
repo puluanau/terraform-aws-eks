@@ -29,12 +29,12 @@ variable "oidc_provider_url" {
   type        = string
 }
 
-variable "irsa_service_account_namespace" {
-  description = "Namespace of the service account to attach to the IRSA IAM role."
+variable "compute_namespace" {
+  description = "EKS cluster compute namespace"
   type        = string
 }
 
-variable "irsa_service_account_name" {
-  description = "Name of the service account to attach to the IRSA IAM role."
+variable "platform_namespace" {
+  description = "EKS cluster platform namespace"
   type        = string
 }
