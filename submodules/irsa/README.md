@@ -1,4 +1,3 @@
-Does this get auto-generated?
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
