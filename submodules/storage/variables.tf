@@ -8,89 +8,113 @@ variable "deploy_id" {
   }
 }
 
-
-variable "efs_access_point_path" {
-  type        = string
-  description = "Filesystem path for efs."
-  default     = "/domino"
-
+variable "kms_info" {
+  description = <<EOF
+    key_id  = KMS key id.
+    key_arn = KMS key arn.
+  EOF
+  type = object({
+    key_id  = string
+    key_arn = string
+  })
 }
 
-variable "subnet_ids" {
-  type        = list(string)
-  description = "List of Subnets IDs to create EFS mount targets"
+variable "storage" {
+  description = <<EOF
+    storage = {
+      efs = {
+        access_point_path = Filesystem path for efs.
+        backup_vault = {
+          create        = Create backup vault for EFS toggle.
+          force_destroy = Toggle to allow automatic destruction of all backups when destroying.
+          backup = {
+            schedule           = Cron-style schedule for EFS backup vault (default: once a day at 12pm).
+            cold_storage_after = Move backup data to cold storage after this many days.
+            delete_after       = Delete backup data after this many days.
+          }
+        }
+      }
+      s3 = {
+        force_destroy_on_deletion = Toogle to allow recursive deletion of all objects in the s3 buckets. if 'false' terraform will NOT be able to delete non-empty buckets.
+      }
+      ecr = {
+        force_destroy_on_deletion = Toogle to allow recursive deletion of all objects in the ECR repositories. if 'false' terraform will NOT be able to delete non-empty repositories.
+      }
+    }
+  }
+  EOF
+  type = object({
+    efs = optional(object({
+      access_point_path = optional(string)
+      backup_vault = optional(object({
+        create        = optional(bool)
+        force_destroy = optional(bool)
+        backup = optional(object({
+          schedule           = optional(string)
+          cold_storage_after = optional(number)
+          delete_after       = optional(number)
+        }))
+      }))
+    }))
+    s3 = optional(object({
+      force_destroy_on_deletion = optional(bool)
+    }))
+    ecr = optional(object({
+      force_destroy_on_deletion = optional(bool)
+    }))
+  })
 }
 
-variable "vpc_id" {
-  description = "VPC ID"
-  type        = string
-
-}
-
-variable "s3_force_destroy_on_deletion" {
-  description = "Toogle to allow recursive deletion of all objects in the s3 buckets. if 'false' terraform will NOT be able to delete non-empty buckets"
-  type        = bool
-  default     = false
-}
-
-variable "ecr_force_destroy_on_deletion" {
-  description = "Toogle to allow recursive deletion of all objects in the ECR repositories. if 'false' terraform will NOT be able to delete non-empty repositories"
-  type        = bool
-  default     = false
-}
-
-variable "s3_kms_key" {
-  description = "if set, use specified key for S3 buckets"
-  type        = string
-  default     = null
-}
-
-variable "ecr_kms_key" {
-  description = "if set, use specified key for ECR repositories"
-  type        = string
-  default     = null
-}
-
-variable "efs_kms_key" {
-  description = "if set, use specified key for EFS"
-  type        = string
-  default     = null
-}
-
-variable "efs_backup_vault_kms_key" {
-  description = "if set, use specified key for EFS backup vault"
-  type        = string
-  default     = null
-}
-
-variable "create_efs_backup_vault" {
-  description = "Create backup vault for EFS toggle."
-  type        = bool
-  default     = true
-}
-
-variable "efs_backup_vault_force_destroy" {
-  description = "Toggle to allow automatic destruction of all backups when destroying."
-  type        = bool
-  default     = false
-}
-
-variable "efs_backup_schedule" {
-  type        = string
-  description = "Cron-style schedule for EFS backup vault (default: once a day at 12pm)"
-  default     = "0 12 * * ? *"
-}
-
-variable "efs_backup_cold_storage_after" {
-  type        = number
-  description = "Move backup data to cold storage after this many days"
-  default     = 35
-}
-
-variable "efs_backup_delete_after" {
-  type        = number
-  description = "Delete backup data after this many days"
-  default     = 125
+variable "network_info" {
+  description = <<EOF
+    id = VPC ID.
+    subnets = {
+      public = List of public Subnets.
+      [{
+        name = Subnet name.
+        subnet_id = Subnet ud
+        az = Subnet availability_zone
+        az_id = Subnet availability_zone_id
+      }]
+      private = List of private Subnets.
+      [{
+        name = Subnet name.
+        subnet_id = Subnet ud
+        az = Subnet availability_zone
+        az_id = Subnet availability_zone_id
+      }]
+      pod = List of pod Subnets.
+      [{
+        name = Subnet name.
+        subnet_id = Subnet ud
+        az = Subnet availability_zone
+        az_id = Subnet availability_zone_id
+      }]
+    }
+  EOF
+  type = object({
+    vpc_id = string
+    subnets = object({
+      public = optional(list(object({
+        name      = string
+        subnet_id = string
+        az        = string
+        az_id     = string
+      })), [])
+      private = list(object({
+        name      = string
+        subnet_id = string
+        az        = string
+        az_id     = string
+      }))
+      pod = optional(list(object({
+        name      = string
+        subnet_id = string
+        az        = string
+        az_id     = string
+      })), [])
+    })
+  })
 }
 
 variable "irsa_enabled" {

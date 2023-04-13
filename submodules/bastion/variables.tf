@@ -3,79 +3,111 @@ variable "deploy_id" {
   description = "Domino Deployment ID"
 }
 
-variable "ami_id" {
-  description = "AMI ID for the bastion EC2 instance, otherwise we will use the latest 'amazon_linux_2' ami."
-  type        = string
-  default     = null
-}
-
-variable "instance_type" {
-  description = "the bastion's instance type, if null, t2.micro is used"
-  type        = string
-  default     = null
-}
-
 variable "region" {
   description = "AWS region for the deployment"
   type        = string
+  nullable    = false
+  validation {
+    condition     = can(regex("^([a-z]{2}-[a-z]+-[0-9])$", var.region))
+    error_message = "The provided region must follow the format of AWS region names, e.g., us-west-2."
+  }
 }
 
-variable "vpc_id" {
-  description = "VPC ID."
-  type        = string
+variable "network_info" {
+  description = <<EOF
+    id = VPC ID.
+    subnets = {
+      public = List of public Subnets.
+      [{
+        name = Subnet name.
+        subnet_id = Subnet ud
+        az = Subnet availability_zone
+        az_id = Subnet availability_zone_id
+      }]
+      private = List of private Subnets.
+      [{
+        name = Subnet name.
+        subnet_id = Subnet ud
+        az = Subnet availability_zone
+        az_id = Subnet availability_zone_id
+      }]
+      pod = List of pod Subnets.
+      [{
+        name = Subnet name.
+        subnet_id = Subnet ud
+        az = Subnet availability_zone
+        az_id = Subnet availability_zone_id
+      }]
+    }
+  EOF
+  type = object({
+    vpc_id = string
+    subnets = object({
+      public = list(object({
+        name      = string
+        subnet_id = string
+        az        = string
+        az_id     = string
+      }))
+      private = optional(list(object({
+        name      = string
+        subnet_id = string
+        az        = string
+        az_id     = string
+      })), [])
+      pod = optional(list(object({
+        name      = string
+        subnet_id = string
+        az        = string
+        az_id     = string
+      })), [])
+    })
+  })
 }
 
-variable "ssh_pvt_key_path" {
-  description = "SSH private key filepath."
-  type        = string
+variable "kms_info" {
+  description = <<EOF
+    key_id  = KMS key id.
+    key_arn = KMS key arn.
+  EOF
+  type = object({
+    key_id  = string
+    key_arn = string
+  })
 }
 
-variable "ssh_key_pair_name" {
-  description = "AWS key_pair name."
-  type        = string
-}
+variable "bastion" {
+  description = <<EOF
+    enabled                  = Create bastion host.
+    ami                      = Ami id. Defaults to latest 'amazon_linux_2' ami.
+    instance_type            = Instance type.
+    authorized_ssh_ip_ranges = List of CIDR ranges permitted for the bastion ssh access.
+    username                 = Bastion user.
+    install_binaries         = Toggle to install required Domino binaries in the bastion.
+  EOF
 
-variable "public_subnet_id" {
-  description = "Public subnet to create bastion host in."
-  type        = string
-}
-
-variable "security_group_rules" {
-  description = "Bastion host security group rules."
-  type = map(object({
-    protocol                 = string
-    from_port                = string
-    to_port                  = string
-    type                     = string
-    description              = string
-    cidr_blocks              = list(string)
-    source_security_group_id = string
-  }))
-
-  default = {}
-}
-
-variable "kms_key" {
-  type        = string
-  description = "if set, use specified key for EBS volumes"
-  default     = null
-}
-
-variable "install_binaries" {
-  type        = bool
-  description = "Install binaries on bastion host"
-  default     = false
+  type = object({
+    enabled                  = bool
+    ami_id                   = optional(string) # default will use the latest 'amazon_linux_2' ami
+    instance_type            = optional(string)
+    authorized_ssh_ip_ranges = optional(list(string))
+    username                 = optional(string)
+    install_binaries         = optional(bool)
+  })
 }
 
 variable "k8s_version" {
   type        = string
   description = "K8s version used to download/install the kubectl binary"
-  default     = "1.25"
 }
 
-variable "bastion_user" {
-  type        = string
-  description = "ec2 instance user."
-  default     = "ec2-user"
-  nullable    = false
+variable "ssh_key" {
+  description = <<EOF
+    path          = SSH private key filepath.
+    key_pair_name = AWS key_pair name.
+  EOF
+  type = object({
+    path          = string
+    key_pair_name = string
+  })
 }

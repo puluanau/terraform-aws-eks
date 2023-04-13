@@ -31,7 +31,6 @@ No modules.
 | [aws_efs_mount_target.eks](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_mount_target) | resource |
 | [aws_iam_policy.ecr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.s3_irsa](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.efs_backup_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_s3_bucket.backups](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket.blobs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
@@ -56,39 +55,20 @@ No modules.
 | [aws_iam_policy_document.monitoring](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.registry](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.s3_irsa](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_partition.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/partition) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_create_efs_backup_vault"></a> [create\_efs\_backup\_vault](#input\_create\_efs\_backup\_vault) | Create backup vault for EFS toggle. | `bool` | `true` | no |
 | <a name="input_deploy_id"></a> [deploy\_id](#input\_deploy\_id) | Domino Deployment ID | `string` | n/a | yes |
-| <a name="input_ecr_force_destroy_on_deletion"></a> [ecr\_force\_destroy\_on\_deletion](#input\_ecr\_force\_destroy\_on\_deletion) | Toogle to allow recursive deletion of all objects in the ECR repositories. if 'false' terraform will NOT be able to delete non-empty repositories | `bool` | `false` | no |
-| <a name="input_ecr_kms_key"></a> [ecr\_kms\_key](#input\_ecr\_kms\_key) | if set, use specified key for ECR repositories | `string` | `null` | no |
-| <a name="input_efs_access_point_path"></a> [efs\_access\_point\_path](#input\_efs\_access\_point\_path) | Filesystem path for efs. | `string` | `"/domino"` | no |
-| <a name="input_efs_backup_cold_storage_after"></a> [efs\_backup\_cold\_storage\_after](#input\_efs\_backup\_cold\_storage\_after) | Move backup data to cold storage after this many days | `number` | `35` | no |
-| <a name="input_efs_backup_delete_after"></a> [efs\_backup\_delete\_after](#input\_efs\_backup\_delete\_after) | Delete backup data after this many days | `number` | `125` | no |
-| <a name="input_efs_backup_schedule"></a> [efs\_backup\_schedule](#input\_efs\_backup\_schedule) | Cron-style schedule for EFS backup vault (default: once a day at 12pm) | `string` | `"0 12 * * ? *"` | no |
-| <a name="input_efs_backup_vault_force_destroy"></a> [efs\_backup\_vault\_force\_destroy](#input\_efs\_backup\_vault\_force\_destroy) | Toggle to allow automatic destruction of all backups when destroying. | `bool` | `false` | no |
-| <a name="input_efs_backup_vault_kms_key"></a> [efs\_backup\_vault\_kms\_key](#input\_efs\_backup\_vault\_kms\_key) | if set, use specified key for EFS backup vault | `string` | `null` | no |
-| <a name="input_efs_kms_key"></a> [efs\_kms\_key](#input\_efs\_kms\_key) | if set, use specified key for EFS | `string` | `null` | no |
-| <a name="input_irsa_enabled"></a> [irsa\_enabled](#input\_irsa\_enabled) | IAM Roles for Service Accounts enabled. | `bool` | `false` | no |
-| <a name="input_s3_force_destroy_on_deletion"></a> [s3\_force\_destroy\_on\_deletion](#input\_s3\_force\_destroy\_on\_deletion) | Toogle to allow recursive deletion of all objects in the s3 buckets. if 'false' terraform will NOT be able to delete non-empty buckets | `bool` | `false` | no |
-| <a name="input_s3_kms_key"></a> [s3\_kms\_key](#input\_s3\_kms\_key) | if set, use specified key for S3 buckets | `string` | `null` | no |
-| <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | List of Subnets IDs to create EFS mount targets | `list(string)` | n/a | yes |
-| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID | `string` | n/a | yes |
+| <a name="input_kms_info"></a> [kms\_info](#input\_kms\_info) | key\_id  = KMS key id.<br>    key\_arn = KMS key arn. | <pre>object({<br>    key_id  = string<br>    key_arn = string<br>  })</pre> | n/a | yes |
+| <a name="input_network_info"></a> [network\_info](#input\_network\_info) | id = VPC ID.<br>    subnets = {<br>      public = List of public Subnets.<br>      [{<br>        name = Subnet name.<br>        subnet\_id = Subnet ud<br>        az = Subnet availability\_zone<br>        az\_id = Subnet availability\_zone\_id<br>      }]<br>      private = List of private Subnets.<br>      [{<br>        name = Subnet name.<br>        subnet\_id = Subnet ud<br>        az = Subnet availability\_zone<br>        az\_id = Subnet availability\_zone\_id<br>      }]<br>      pod = List of pod Subnets.<br>      [{<br>        name = Subnet name.<br>        subnet\_id = Subnet ud<br>        az = Subnet availability\_zone<br>        az\_id = Subnet availability\_zone\_id<br>      }]<br>    } | <pre>object({<br>    vpc_id = string<br>    subnets = object({<br>      public = optional(list(object({<br>        name      = string<br>        subnet_id = string<br>        az        = string<br>        az_id     = string<br>      })), [])<br>      private = list(object({<br>        name      = string<br>        subnet_id = string<br>        az        = string<br>        az_id     = string<br>      }))<br>      pod = optional(list(object({<br>        name      = string<br>        subnet_id = string<br>        az        = string<br>        az_id     = string<br>      })), [])<br>    })<br>  })</pre> | n/a | yes |
+| <a name="input_storage"></a> [storage](#input\_storage) | storage = {<br>      efs = {<br>        access\_point\_path = Filesystem path for efs.<br>        backup\_vault = {<br>          create        = Create backup vault for EFS toggle.<br>          force\_destroy = Toggle to allow automatic destruction of all backups when destroying.<br>          backup = {<br>            schedule           = Cron-style schedule for EFS backup vault (default: once a day at 12pm).<br>            cold\_storage\_after = Move backup data to cold storage after this many days.<br>            delete\_after       = Delete backup data after this many days.<br>          }<br>        }<br>      }<br>      s3 = {<br>        force\_destroy\_on\_deletion = Toogle to allow recursive deletion of all objects in the s3 buckets. if 'false' terraform will NOT be able to delete non-empty buckets.<br>      }<br>      ecr = {<br>        force\_destroy\_on\_deletion = Toogle to allow recursive deletion of all objects in the ECR repositories. if 'false' terraform will NOT be able to delete non-empty repositories.<br>      }<br>    }<br>  } | <pre>object({<br>    efs = optional(object({<br>      access_point_path = optional(string)<br>      backup_vault = optional(object({<br>        create        = optional(bool)<br>        force_destroy = optional(bool)<br>        backup = optional(object({<br>          schedule           = optional(string)<br>          cold_storage_after = optional(number)<br>          delete_after       = optional(number)<br>        }))<br>      }))<br>    }))<br>    s3 = optional(object({<br>      force_destroy_on_deletion = optional(bool)<br>    }))<br>    ecr = optional(object({<br>      force_destroy_on_deletion = optional(bool)<br>    }))<br>  })</pre> | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_container_registry"></a> [container\_registry](#output\_container\_registry) | ECR base registry URL |
-| <a name="output_efs_access_point"></a> [efs\_access\_point](#output\_efs\_access\_point) | efs access point |
-| <a name="output_efs_file_system"></a> [efs\_file\_system](#output\_efs\_file\_system) | efs file system |
-| <a name="output_efs_security_group"></a> [efs\_security\_group](#output\_efs\_security\_group) | EFS security group id |
-| <a name="output_iam_policies"></a> [iam\_policies](#output\_iam\_policies) | IAM Policy ARNs |
-| <a name="output_irsa_iam_policy"></a> [irsa\_iam\_policy](#output\_irsa\_iam\_policy) | IRSA IAM Policy ARN |
-| <a name="output_s3_buckets"></a> [s3\_buckets](#output\_s3\_buckets) | S3 buckets name and arn |
+| <a name="output_info"></a> [info](#output\_info) | efs = {<br>      access\_point      = EFS access point.<br>      file\_system       = EFS file\_system.<br>      security\_group\_id = EFS security group id.<br>    }<br>    s3 = {<br>      buckets        = "S3 buckets name and arn"<br>      iam\_policy\_arn = S3 IAM Policy ARN.<br>    }<br>    ecr = {<br>      container\_registry = ECR base registry URL. Grab the base AWS account ECR URL and add the deploy\_id. Domino will append /environment and /model.<br>      iam\_policy\_arn     = ECR IAM Policy ARN.<br>    } |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
