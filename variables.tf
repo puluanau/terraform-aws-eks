@@ -369,9 +369,11 @@ variable "irsa_enabled" {
 variable "compute_namespace" {
   description = "EKS cluster compute namespace"
   type        = string
+  default     = ""
 }
 
 variable "platform_namespace" {
   description = "EKS cluster platform namespace"
   type        = string
+  default     = ""
 }
