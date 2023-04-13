@@ -8,6 +8,7 @@
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.0 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | >= 3.1.0 |
+| <a name="requirement_tls"></a> [tls](#requirement\_tls) | >= 4.0 |
 
 ## Providers
 
@@ -15,6 +16,7 @@
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.0 |
 | <a name="provider_null"></a> [null](#provider\_null) | >= 3.1.0 |
+| <a name="provider_tls"></a> [tls](#provider\_tls) | >= 4.0 |
 
 ## Modules
 
@@ -33,6 +35,7 @@
 | [aws_eks_addon.vpc_cni](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_addon) | resource |
 | [aws_eks_cluster.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_cluster) | resource |
 | [aws_eks_node_group.node_groups](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_node_group) | resource |
+| [aws_iam_openid_connect_provider.cluster_oidc_provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_openid_connect_provider) | resource |
 | [aws_iam_policy.custom_eks_node_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.eks_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.eks_nodes](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
@@ -62,6 +65,7 @@
 | [aws_partition.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/partition) | data source |
 | [aws_ssm_parameter.eks_ami_release_version](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
 | [aws_ssm_parameter.eks_gpu_ami_release_version](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
+| [tls_certificate.cluster_tls_certificate](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/data-sources/certificate) | data source |
 
 ## Inputs
 
@@ -71,6 +75,7 @@
 | <a name="input_deploy_id"></a> [deploy\_id](#input\_deploy\_id) | Domino Deployment ID | `string` | n/a | yes |
 | <a name="input_efs_security_group"></a> [efs\_security\_group](#input\_efs\_security\_group) | Security Group ID for EFS | `string` | n/a | yes |
 | <a name="input_eks"></a> [eks](#input\_eks) | k8s\_version = EKS cluster k8s version.<br>    kubeconfig = {<br>      extra\_args = Optional extra args when generating kubeconfig.<br>      path       = Fully qualified path name to write the kubeconfig file. Defaults to '<current working directory>/kubeconfig'<br>    }<br>    public\_access = {<br>      enabled = Enable EKS API public endpoint.<br>      cidrs   = List of CIDR ranges permitted for accessing the EKS public endpoint.<br>    }<br>    List of Custom role maps for aws auth configmap<br>    custom\_role\_maps = [{<br>      rolearn = string<br>      username = string<br>      groups = list(string)<br>    }]<br>    master\_role\_names = IAM role names to be added as masters in EKS.<br>    cluster\_addons = EKS cluster addons. vpc-cni is installed separately.<br>    ssm\_log\_group\_name = "CloudWatch log group to send the SSM session logs to." | <pre>object({<br>    k8s_version = optional(string)<br>    kubeconfig = optional(object({<br>      extra_args = optional(string)<br>      path       = optional(string)<br>    }))<br>    public_access = optional(object({<br>      enabled = optional(bool)<br>      cidrs   = optional(list(string))<br>    }))<br>    custom_role_maps = optional(list(object({<br>      rolearn  = string<br>      username = string<br>      groups   = list(string)<br>    })))<br>    master_role_names  = optional(list(string))<br>    cluster_addons     = optional(list(string))<br>    ssm_log_group_name = optional(string)<br>  })</pre> | n/a | yes |
+| <a name="input_irsa_enabled"></a> [irsa\_enabled](#input\_irsa\_enabled) | IAM Roles for Service Accounts enabled. | `bool` | `false` | no |
 | <a name="input_kms_info"></a> [kms\_info](#input\_kms\_info) | key\_id  = KMS key id.<br>    key\_arn = KMS key arn. | <pre>object({<br>    key_id  = string<br>    key_arn = string<br>  })</pre> | n/a | yes |
 | <a name="input_network_info"></a> [network\_info](#input\_network\_info) | id = VPC ID.<br>    subnets = {<br>      public = List of public Subnets.<br>      [{<br>        name = Subnet name.<br>        subnet\_id = Subnet ud<br>        az = Subnet availability\_zone<br>        az\_id = Subnet availability\_zone\_id<br>      }]<br>      private = List of private Subnets.<br>      [{<br>        name = Subnet name.<br>        subnet\_id = Subnet ud<br>        az = Subnet availability\_zone<br>        az\_id = Subnet availability\_zone\_id<br>      }]<br>      pod = List of pod Subnets.<br>      [{<br>        name = Subnet name.<br>        subnet\_id = Subnet ud<br>        az = Subnet availability\_zone<br>        az\_id = Subnet availability\_zone\_id<br>      }]<br>    } | <pre>object({<br>    vpc_id = string<br>    subnets = object({<br>      public = list(object({<br>        name      = string<br>        subnet_id = string<br>        az        = string<br>        az_id     = string<br>      }))<br>      private = list(object({<br>        name      = string<br>        subnet_id = string<br>        az        = string<br>        az_id     = string<br>      }))<br>      pod = list(object({<br>        name      = string<br>        subnet_id = string<br>        az        = string<br>        az_id     = string<br>      }))<br>    })<br>  })</pre> | n/a | yes |
 | <a name="input_node_groups"></a> [node\_groups](#input\_node\_groups) | EKS managed node groups definition. | <pre>map(object({<br>    ami                   = optional(string, null)<br>    bootstrap_extra_args  = optional(string, "")<br>    instance_types        = list(string)<br>    spot                  = optional(bool, false)<br>    min_per_az            = number<br>    max_per_az            = number<br>    desired_per_az        = number<br>    availability_zone_ids = list(string)<br>    labels                = map(string)<br>    taints                = optional(list(object({ key = string, value = optional(string), effect = string })), [])<br>    tags                  = optional(map(string), {})<br>    instance_tags         = optional(map(string), {})<br>    gpu                   = optional(bool, false)<br>    volume = object({<br>      size = string<br>      type = string<br>    })<br>  }))</pre> | n/a | yes |
@@ -83,4 +88,6 @@
 | Name | Description |
 |------|-------------|
 | <a name="output_info"></a> [info](#output\_info) | EKS information |
+| <a name="output_oidc_provider_arn"></a> [oidc\_provider\_arn](#output\_oidc\_provider\_arn) | Cluster IAM OIDC Provider ARN. |
+| <a name="output_oidc_provider_url"></a> [oidc\_provider\_url](#output\_oidc\_provider\_url) | Cluster IAM OIDC Provider URL. |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
