@@ -10,6 +10,11 @@ variable "install_calico" {
   default     = false
 }
 
+variable "template_prefix" {
+  type        = string
+  description = "Prefix used to render template files"
+}
+
 variable "calico_version" {
   type        = string
   description = "Calico operator version."

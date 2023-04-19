@@ -65,7 +65,7 @@ locals {
 resource "local_file" "templates" {
   for_each             = { for k, v in local.templates : k => v if v.filename != "" }
   content              = each.value.content
-  filename             = "${local.resources_directory}/${each.value.filename}"
+  filename             = "${local.resources_directory}/${var.template_prefix}-${each.value.filename}"
   directory_permission = "0777"
   file_permission      = "0744"
 }

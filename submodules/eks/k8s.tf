@@ -2,6 +2,7 @@ module "k8s_setup" {
   count = var.bastion_info != null || var.eks.public_access.enabled ? 1 : 0
 
   source        = "../k8s"
+  template_prefix = "k8s_setup"
   ssh_key       = var.ssh_key
   bastion_info  = var.bastion_info
   network_info  = var.network_info
@@ -15,6 +16,7 @@ module "calico_setup" {
   count = var.bastion_info != null || var.eks.public_access.enabled ? 1 : 0
 
   source         = "../k8s"
+  template_prefix = "calico_setup"
   ssh_key        = var.ssh_key
   bastion_info   = var.bastion_info
   network_info   = var.network_info
