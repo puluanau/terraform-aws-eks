@@ -4,13 +4,13 @@ resource "random_integer" "port" {
 }
 
 locals {
-  k8s_functions_sh_filename = "k8s-functions.sh"
+  k8s_functions_sh_filename = "${var.template_prefix}-k8s-functions.sh"
   k8s_functions_sh_template = "k8s-functions.sh.tftpl"
-  k8s_pre_setup_sh_filename = "k8s-pre-setup.sh"
+  k8s_pre_setup_sh_filename = "${var.template_prefix}-k8s-pre-setup.sh"
   k8s_pre_setup_sh_template = "k8s-pre-setup.sh.tftpl"
-  aws_auth_filename         = "aws-auth.yaml"
+  aws_auth_filename         = "${var.template_prefix}-aws-auth.yaml"
   aws_auth_template         = "aws-auth.yaml.tftpl"
-  eniconfig_filename        = length(var.network_info.subnets.pod) != 0 ? "eniconfig.yaml" : ""
+  eniconfig_filename        = length(var.network_info.subnets.pod) != 0 ? "${var.template_prefix}-eniconfig.yaml" : ""
   eniconfig_template        = "eniconfig.yaml.tftpl"
   resources_directory       = path.cwd
   templates_dir             = "${path.module}/templates"
@@ -65,7 +65,7 @@ locals {
 resource "local_file" "templates" {
   for_each             = { for k, v in local.templates : k => v if v.filename != "" }
   content              = each.value.content
-  filename             = "${local.resources_directory}/${var.template_prefix}-${each.value.filename}"
+  filename             = "${local.resources_directory}/${each.value.filename}"
   directory_permission = "0777"
   file_permission      = "0744"
 }
