@@ -64,10 +64,7 @@
             "labels": { "dominodatalab.com/node-pool": "other-az" },
             "volume": { "size": 100, "type": "gp3" }
           }
-        },
-        "irsa_enabled": true,
-        "platform_namespace": "domino-platform",
-        "compute_namespace": "domino-compute"
+        }
       }
     }
   ],
