@@ -22,7 +22,7 @@ resource "null_resource" "run_k8s_pre_setup" {
   }
 
   provisioner "local-exec" {
-    command     = "pwd; ls -alh; ${module.k8s_setup[0].filename} set_k8s_auth set_eniconfig"
+    command     = "./${module.k8s_setup[0].filename} set_k8s_auth set_eniconfig"
     interpreter = ["bash", "-c"]
     working_dir = module.k8s_setup[0].resources_directory
   }
@@ -38,7 +38,7 @@ resource "null_resource" "calico_setup" {
   }
 
   provisioner "local-exec" {
-    command     = "${module.k8s_setup[0].filename} install_calico"
+    command     = "./${module.k8s_setup[0].filename} install_calico"
     interpreter = ["bash", "-c"]
     working_dir = module.k8s_setup[0].resources_directory
   }
