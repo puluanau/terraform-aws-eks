@@ -35,8 +35,6 @@ locals {
       filename = local.k8s_pre_setup_sh_filename
       content = templatefile("${local.templates_dir}/${local.k8s_pre_setup_sh_template}", {
         k8s_functions_sh_filename = local.k8s_functions_sh_filename
-        cluster_setup             = var.cluster_setup
-        install_calico            = var.install_calico
       })
     }
 
@@ -70,21 +68,6 @@ resource "local_file" "templates" {
   file_permission      = "0744"
 }
 
-resource "null_resource" "run_k8s_pre_setup" {
-  triggers = {
-    k8s_presetup_hash     = md5(local_file.templates["k8s_presetup"].content)
-    k8s_functions_sh_hash = md5(local_file.templates["k8s_functions_sh"].content)
-    aws_auth_hash         = md5(local_file.templates["aws_auth"].content)
-    eni_config_hash       = try(md5(local_file.templates["eni_config"].content), "none")
-  }
-
-  provisioner "local-exec" {
-    command     = basename(local_file.templates["k8s_presetup"].filename)
-    interpreter = ["bash"]
-    working_dir = local.resources_directory
-  }
-
-  depends_on = [
-    local_file.templates,
-  ]
+locals {
+    change_hash = "${md5(local_file.templates["k8s_presetup"].content)}-${md5(local_file.templates["k8s_functions_sh"].content)}-${md5(local_file.templates["aws_auth"].content)}-${try(md5(local_file.templates["eni_config"].content), "none")}"
 }

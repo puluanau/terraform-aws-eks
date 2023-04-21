@@ -1,25 +1,47 @@
+locals {
+  run_setup = var.bastion_info != null || var.eks.public_access.enabled ? 1 : 0
+}
+
 module "k8s_setup" {
-  count = var.bastion_info != null || var.eks.public_access.enabled ? 1 : 0
+  count = local.run_setup
 
   source        = "../k8s"
   ssh_key       = var.ssh_key
   bastion_info  = var.bastion_info
   network_info  = var.network_info
   eks_info      = local.eks_info
-  cluster_setup = true
 
   depends_on = [aws_eks_addon.vpc_cni, null_resource.kubeconfig]
 }
 
-module "calico_setup" {
-  count = var.bastion_info != null || var.eks.public_access.enabled ? 1 : 0
+resource "null_resource" "run_k8s_pre_setup" {
+  count = local.run_setup
 
-  source         = "../k8s"
-  ssh_key        = var.ssh_key
-  bastion_info   = var.bastion_info
-  network_info   = var.network_info
-  eks_info       = local.eks_info
-  install_calico = true
+  triggers = {
+    change_hash = module.k8s_setup[0].change_hash
+  }
 
-  depends_on = [aws_eks_node_group.node_groups, module.k8s_setup]
+  provisioner "local-exec" {
+    command     = "${module.k8s_setup[0].filename} set_k8s_auth set_eniconfig"
+    interpreter = ["bash", "-c"]
+    working_dir = module.k8s_setup[0].resources_directory
+  }
+
+  depends_on = [module.k8s_setup]
+}
+
+resource "null_resource" "calico_setup" {
+  count = local.run_setup
+
+  triggers = {
+    change_hash = module.k8s_setup[0].change_hash
+  }
+
+  provisioner "local-exec" {
+    command     = "${module.k8s_setup[0].filename} install_calico"
+    interpreter = ["bash", "-c"]
+    working_dir = module.k8s_setup[0].resources_directory
+  }
+
+  depends_on = [aws_eks_node_group.node_groups, null_resource.run_k8s_pre_setup]
 }
