@@ -22,7 +22,7 @@ resource "null_resource" "run_k8s_pre_setup" {
   }
 
   provisioner "local-exec" {
-    command     = "${module.k8s_setup[0].filename} set_k8s_auth set_eniconfig"
+    command     = "pwd; ls -alh; ${module.k8s_setup[0].filename} set_k8s_auth set_eniconfig"
     interpreter = ["bash", "-c"]
     working_dir = module.k8s_setup[0].resources_directory
   }
