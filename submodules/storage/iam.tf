@@ -27,7 +27,7 @@ data "aws_iam_policy_document" "s3" {
 }
 
 data "aws_iam_policy_document" "s3_irsa" {
-  count = var.irsa_enabled ? 1 : 0
+  count = var.irsa.enabled ? 1 : 0
   statement {
     effect    = "Allow"
     resources = [for b in local.s3_buckets : b.arn if !b.is_eks_node_bucket]
@@ -62,7 +62,7 @@ resource "aws_iam_policy" "s3" {
 }
 
 resource "aws_iam_policy" "s3_irsa" {
-  count  = var.irsa_enabled ? 1 : 0
+  count  = var.irsa.enabled ? 1 : 0
   name   = "${var.deploy_id}-S3-irsa"
   path   = "/"
   policy = data.aws_iam_policy_document.s3_irsa[0].json

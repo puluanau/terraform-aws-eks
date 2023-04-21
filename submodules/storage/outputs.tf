@@ -14,7 +14,8 @@ output "info" {
       iam_policy_arn     = ECR IAM Policy ARN.
     }
     irsa = {
-      irsa_iam_policy = IRSA IAM Policy ARN
+      iam_policy_arn = IRSA IAM Policy ARN
+      iam_role_name = IAM Role name
     }
   EOF
   value = {
@@ -35,7 +36,8 @@ output "info" {
       iam_policy_arn     = aws_iam_policy.ecr.arn
     }
     irsa = {
-      irsa_iam_policy = var.irsa_enabled ? aws_iam_policy.s3_irsa[0].arn : null
+      iam_policy_arn = var.irsa.enabled ? aws_iam_policy.s3_irsa[0].arn : null
+      iam_role_name  = "${var.deploy_id}-app-s3"
     }
   }
 }

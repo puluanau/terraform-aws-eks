@@ -178,6 +178,13 @@ locals {
         ]
       )
       custom_roles = var.eks.custom_role_maps
+      oidc = {
+        arn = try(aws_iam_openid_connect_provider.oidc_provider[0].arn, null)
+        url = try(aws_iam_openid_connect_provider.oidc_provider[0].url, null)
+      }
+      irsa = {
+        namespace_service_accounts = var.eks.irsa.namespace_service_accounts
+      }
     }
     nodes = {
       security_group_id = aws_security_group.eks_nodes.id

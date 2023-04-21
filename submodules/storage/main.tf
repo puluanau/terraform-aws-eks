@@ -19,14 +19,14 @@ locals {
       id                 = aws_s3_bucket.blobs.id
       policy_json        = data.aws_iam_policy_document.blobs.json
       arn                = aws_s3_bucket.blobs.arn
-      is_eks_node_bucket = !var.irsa_enabled
+      is_eks_node_bucket = !var.irsa.enabled
     }
     logs = {
       bucket_name        = aws_s3_bucket.logs.bucket
       id                 = aws_s3_bucket.logs.id
       policy_json        = data.aws_iam_policy_document.logs.json
       arn                = aws_s3_bucket.logs.arn
-      is_eks_node_bucket = !var.irsa_enabled
+      is_eks_node_bucket = !var.irsa.enabled
     }
     monitoring = {
       bucket_name        = aws_s3_bucket.monitoring.bucket

@@ -28,6 +28,22 @@
           "enabled": true,
           "install_binaries": true
         },
+        "eks": {
+          "k8s_version": "${var.k8s_version}",
+          "master_role_names": ["okta-poweruser", "okta-fulladmin"],
+          "irsa": {
+            "enabled": true,
+            "namespace_service_accounts": [
+              "domino-platform:nucleus",
+              "domino-compute:run-*",
+              "domino-platform:mlflow",
+              "domino-platform:fluentd"
+            ]
+          }
+        },
+        "kms": {
+          "enabled": true
+        },
         "ssh_pvt_key_path": "domino.pem",
         "tags": "${var.tags}",
         "default_node_groups": {
@@ -88,7 +104,8 @@
         "type": "map(string)",
         "description": "Deployment tags.",
         "default": {
-          "deploy": "test"
+          "deploy": "test",
+          "deploy_id": "dominotfeks"
         }
       }
     },

@@ -34,5 +34,5 @@ output "eks" {
 
 output "irsa_role_arn" {
   description = "ARN of the IAM Role attached to the service account."
-  value       = var.irsa_enabled ? module.irsa.role_arn : null
+  value       = try(module.irsa.role_arn, null)
 }

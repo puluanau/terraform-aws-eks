@@ -8,33 +8,78 @@ variable "deploy_id" {
   }
 }
 
-variable "irsa_enabled" {
-  description = "IAM Roles for Service Accounts enabled."
-  type        = bool
-  default     = false
+variable "storage_info" {
+  description = "Storage info."
+  type        = any
 }
 
-variable "irsa_iam_policy" {
-  description = "IAM Policy ARN for IRSA Role."
-  type        = string
-}
-
-variable "oidc_provider_arn" {
-  description = "ARN of the EKS cluster's EKS provider."
-  type        = string
-}
-
-variable "oidc_provider_url" {
-  description = "URL of the EKS cluster's EKS provider."
-  type        = string
-}
-
-variable "compute_namespace" {
-  description = "EKS cluster compute namespace"
-  type        = string
-}
-
-variable "platform_namespace" {
-  description = "EKS cluster platform namespace"
-  type        = string
+variable "eks_info" {
+  description = <<EOF
+    cluster = {
+      arn               = EKS Cluster arn.
+      security_group_id = EKS Cluster security group id.
+      endpoint          = EKS Cluster API endpoint.
+      roles             = Default IAM Roles associated with the EKS cluster. {
+        name = string
+        arn = string
+      }
+      custom_roles      = Custom IAM Roles associated with the EKS cluster. {
+        rolearn  = string
+        username = string
+        groups   = list(string)
+      }
+      oidc = {
+        arn = OIDC provider ARN.
+        url = OIDC provider url.
+      }
+      irsa = {
+        namespace_service_accounts = List of ns sa.
+      }
+    }
+    nodes = {
+      security_group_id = EKS Nodes security group id.
+      roles = IAM Roles associated with the EKS Nodes.{
+        name = string
+        arn  = string
+      }
+    }
+    kubeconfig = Kubeconfig details.{
+      path       = string
+      extra_args = string
+    }
+  EOF
+  type = object({
+    cluster = object({
+      arn               = string
+      security_group_id = string
+      endpoint          = string
+      roles = list(object({
+        name = string
+        arn  = string
+      }))
+      custom_roles = list(object({
+        rolearn  = string
+        username = string
+        groups   = list(string)
+      }))
+      oidc = object({
+        arn = string
+        url = string
+      })
+      irsa = object({
+        namespace_service_accounts = list(string)
+      })
+    })
+    nodes = object({
+      security_group_id = string
+      roles = list(object({
+        name = string
+        arn  = string
+      }))
+    })
+    kubeconfig = object({
+      path       = string
+      extra_args = string
+    })
+  })
 }

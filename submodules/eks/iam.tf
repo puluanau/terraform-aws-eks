@@ -258,15 +258,20 @@ resource "aws_iam_role_policy_attachment" "custom_eks_nodes" {
   role       = aws_iam_role.eks_nodes.name
 }
 
-data "tls_certificate" "cluster_tls_certificate" {
-  count = var.irsa_enabled ? 1 : 0
-  url   = aws_eks_cluster.this.identity[0].oidc[0].issuer
-}
 
-resource "aws_iam_openid_connect_provider" "cluster_oidc_provider" {
-  count           = var.irsa_enabled ? 1 : 0
-  client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = data.tls_certificate.cluster_tls_certificate[0].certificates[*].sha1_fingerprint
-  url             = data.tls_certificate.cluster_tls_certificate[0].url
-  depends_on      = [aws_eks_cluster.this]
+resource "aws_eks_identity_provider_config" "this" {
+  for_each = { for idp in var.eks.identity_providers : idp.identity_provider_config_name => idp }
+
+  cluster_name = aws_eks_cluster.this.name
+
+  oidc {
+    client_id                     = each.value.client_id
+    groups_claim                  = lookup(each.value, "groups_claim", null)
+    groups_prefix                 = lookup(each.value, "groups_prefix", null)
+    identity_provider_config_name = try(each.value.identity_provider_config_name, each.key)
+    issuer_url                    = try(each.value.issuer_url, aws_eks_cluster.this.identity[0].oidc[0].issuer)
+    required_claims               = lookup(each.value, "required_claims", null)
+    username_claim                = lookup(each.value, "username_claim", null)
+    username_prefix               = lookup(each.value, "username_prefix", null)
+  }
 }

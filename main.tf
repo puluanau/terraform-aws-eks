@@ -15,7 +15,7 @@ module "storage" {
   network_info = module.network.info
   kms_info     = local.kms_info
   storage      = var.storage
-  irsa_enabled = var.irsa_enabled
+  irsa         = var.eks.irsa
 }
 
 locals {
@@ -86,7 +86,6 @@ module "eks" {
   network_info       = module.network.info
   kms_info           = local.kms_info
   bastion_info       = local.bastion_info
-  irsa_enabled       = var.irsa_enabled
 
   depends_on = [
     module.network
@@ -94,12 +93,9 @@ module "eks" {
 }
 
 module "irsa" {
-  source             = "./submodules/irsa"
-  deploy_id          = var.deploy_id
-  irsa_enabled       = var.irsa_enabled
-  irsa_iam_policy    = module.storage.info.irsa.irsa_iam_policy
-  compute_namespace  = var.compute_namespace
-  platform_namespace = var.platform_namespace
-  oidc_provider_arn  = module.eks.oidc_provider_arn
-  oidc_provider_url  = module.eks.oidc_provider_url
+  count        = var.eks.irsa.enabled ? 1 : 0
+  source       = "./submodules/irsa"
+  deploy_id    = var.deploy_id
+  eks_info     = module.eks.info
+  storage_info = module.storage.info
 }

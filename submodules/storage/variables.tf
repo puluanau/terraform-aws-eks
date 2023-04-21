@@ -117,8 +117,10 @@ variable "network_info" {
   })
 }
 
-variable "irsa_enabled" {
-  description = "IAM Roles for Service Accounts enabled."
-  type        = bool
-  default     = false
+variable "irsa" {
+  description = "IRSA object."
+  type = object({
+    enabled                    = bool
+    namespace_service_accounts = list(string)
+  })
 }
