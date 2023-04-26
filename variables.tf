@@ -110,7 +110,7 @@ variable "eks" {
   })
 
   validation {
-    condition     = var.eks.irsa.enabled && length(var.eks.irsa.namespace_service_accounts) > 0
+    condition     = !var.eks.irsa.enabled || length(var.eks.irsa.namespace_service_accounts) > 0
     error_message = "IRSA is enabled but a list of namespaced service accounts was not provided."
   }
   default = {}
