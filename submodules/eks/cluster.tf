@@ -28,7 +28,6 @@ data "aws_iam_policy_document" "kms_key" {
 }
 
 resource "aws_kms_key" "eks_cluster" {
-  count                    = local.kms_key_arn == null ? 1 : 0
   customer_master_key_spec = "SYMMETRIC_DEFAULT"
   enable_key_rotation      = true
   is_enabled               = true
@@ -80,7 +79,7 @@ resource "aws_eks_cluster" "this" {
 
   encryption_config {
     provider {
-      key_arn = local.kms_key_arn == null ? aws_kms_key.eks_cluster[0].arn : local.kms_key_arn
+      key_arn = local.kms_key_arn == null ? aws_kms_key.eks_cluster.arn : local.kms_key_arn
     }
 
     resources = ["secrets"]
