@@ -129,7 +129,7 @@ variable "bastion_info" {
 
 variable "kms_enabled" {
   description = "If KMS keys are enabled. If so, prevents applying KMS to EBS volumes. EKS still requires it."
-  type       = bool
+  type        = bool
 }
 
 variable "kms_info" {
