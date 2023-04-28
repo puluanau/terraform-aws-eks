@@ -127,6 +127,11 @@ variable "bastion_info" {
   })
 }
 
+variable "kms_enabled" {
+  description = "If KMS keys are enabled. If so, prevents applying KMS to EBS volumes. EKS still requires it."
+  type       = bool
+}
+
 variable "kms_info" {
   description = <<EOF
     key_id  = KMS key id.
@@ -137,7 +142,6 @@ variable "kms_info" {
     key_arn = string
   })
 }
-
 
 variable "eks" {
   description = <<EOF

@@ -84,6 +84,7 @@ module "eks" {
   eks                = var.eks
   network_info       = module.network.info
   kms_info           = local.kms_info
+  kms_enabled        = var.kms.enabled
   bastion_info       = local.bastion_info
 
   depends_on = [
