@@ -6,7 +6,7 @@ locals {
     key_id  = local.kms_key.id
     key_arn = local.kms_key.arn
   } : null
-  bastion_info = var.bastion.enabled ? try(module.bastion[0].info, null) : null
+  bastion_info = try(module.bastion[0].info, null)
 }
 
 module "storage" {
