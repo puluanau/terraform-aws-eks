@@ -5,6 +5,7 @@ locals {
   kms_info = {
     key_id  = local.kms_key.id
     key_arn = local.kms_key.arn
+    enabled = var.kms.enabled
   }
   bastion_info = var.bastion.enabled ? module.bastion[0].info : null
 }
@@ -13,7 +14,7 @@ module "storage" {
   source       = "./submodules/storage"
   deploy_id    = var.deploy_id
   network_info = module.network.info
-  kms_info     = var.kms.enabled ? local.kms_info : null
+  kms_info     = local.kms_info
   storage      = var.storage
 }
 
@@ -62,7 +63,7 @@ module "bastion" {
   deploy_id    = var.deploy_id
   region       = var.region
   ssh_key      = local.ssh_key
-  kms_info     = var.kms.enabled ? local.kms_info : null
+  kms_info     = local.kms_info
   k8s_version  = var.eks.k8s_version
   network_info = module.network.info
   bastion      = var.bastion
@@ -84,7 +85,6 @@ module "eks" {
   eks                = var.eks
   network_info       = module.network.info
   kms_info           = local.kms_info
-  kms_enabled        = var.kms.enabled
   bastion_info       = local.bastion_info
 
   depends_on = [
