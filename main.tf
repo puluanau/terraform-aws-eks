@@ -30,6 +30,11 @@ locals {
 }
 
 
+moved {
+  from = module.eks.module.network[0]
+  to   = module.eks.module.network
+}
+
 module "network" {
   source              = "./submodules/network"
   deploy_id           = var.deploy_id
