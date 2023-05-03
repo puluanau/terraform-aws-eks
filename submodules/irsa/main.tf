@@ -10,6 +10,23 @@ locals {
   }]
 }
 
+data "aws_iam_policy_document" "kms" {
+  statement {
+    effect    = "Allow"
+    resources = ["*"]
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey*",
+      "kms:CreateGrant"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "kms" {
+  name   = "${var.deploy_id}-kms-irsa"
+  policy = data.aws_iam_policy_document.kms.json
+}
+
 data "aws_iam_policy_document" "this" {
   for_each = { for op in local.oidc_providers : op.role_name => op }
 
@@ -41,8 +58,13 @@ resource "aws_iam_role" "this" {
   assume_role_policy = data.aws_iam_policy_document.this[each.key].json
 }
 
-resource "aws_iam_role_policy_attachment" "this" {
+resource "aws_iam_role_policy_attachment" "s3" {
   for_each   = { for op in local.oidc_providers : op.role_name => op }
   policy_arn = each.value.iam_policy_arn
+  role       = aws_iam_role.this[each.key].name
+}
+resource "aws_iam_role_policy_attachment" "kms" {
+  for_each   = { for op in local.oidc_providers : op.role_name => op }
+  policy_arn = aws_iam_policy.kms.arn
   role       = aws_iam_role.this[each.key].name
 }
