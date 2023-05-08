@@ -72,6 +72,21 @@ resource "aws_eks_cluster" "this" {
   }
 }
 
+data "tls_certificate" "cluster_tls_certificate" {
+  count = var.eks.irsa.enabled ? 1 : 0
+
+  url = aws_eks_cluster.this.identity[0].oidc[0].issuer
+}
+
+resource "aws_iam_openid_connect_provider" "oidc_provider" {
+  count = var.eks.irsa.enabled ? 1 : 0
+
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = data.tls_certificate.cluster_tls_certificate[0].certificates[*].sha1_fingerprint
+  url             = data.tls_certificate.cluster_tls_certificate[0].url
+}
+
+
 resource "aws_eks_addon" "vpc_cni" {
   cluster_name      = aws_eks_cluster.this.name
   resolve_conflicts = "OVERWRITE"

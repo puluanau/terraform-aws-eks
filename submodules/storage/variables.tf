@@ -118,3 +118,11 @@ variable "network_info" {
     })
   })
 }
+
+variable "irsa" {
+  description = "IRSA object."
+  type = object({
+    enabled                    = bool
+    namespace_service_accounts = list(string)
+  })
+}

@@ -17,6 +17,7 @@ module "storage" {
   network_info = module.network.info
   kms_info     = local.kms_info
   storage      = var.storage
+  irsa         = var.eks.irsa
 }
 
 locals {
@@ -96,4 +97,12 @@ module "eks" {
   depends_on = [
     module.network
   ]
+}
+
+module "irsa" {
+  count        = var.eks.irsa.enabled ? 1 : 0
+  source       = "./submodules/irsa"
+  deploy_id    = var.deploy_id
+  eks_info     = module.eks.info
+  storage_info = module.storage.info
 }

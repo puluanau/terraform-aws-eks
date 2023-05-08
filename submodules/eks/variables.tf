@@ -180,6 +180,20 @@ variable "eks" {
     master_role_names  = optional(list(string))
     cluster_addons     = optional(list(string))
     ssm_log_group_name = optional(string)
+    identity_providers = optional(list(object({
+      client_id                     = string
+      groups_claim                  = string
+      groups_prefix                 = string
+      identity_provider_config_name = string
+      issuer_url                    = string
+      required_claims               = string
+      username_claim                = string
+      username_prefix               = string
+    })), [])
+    irsa = optional(object({
+      enabled                    = bool
+      namespace_service_accounts = list(string)
+    }))
   })
 
   validation {
