@@ -36,5 +36,5 @@ No modules.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_roles"></a> [roles](#output\_roles) | IRSA IAM Role ARN. |
+| <a name="output_roles"></a> [roles](#output\_roles) | Map of IRSA IAM Role Name/ARN. |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
