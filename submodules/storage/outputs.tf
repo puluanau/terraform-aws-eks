@@ -36,8 +36,8 @@ output "info" {
       iam_policy_arn     = aws_iam_policy.ecr.arn
     }
     irsa = {
-      iam_policy_arn = var.irsa.enabled ? aws_iam_policy.s3_irsa[0].arn : null
-      iam_role_name  = "${var.deploy_id}-irsa"
+      iam_policy_arn = try(aws_iam_policy.s3_irsa[0].arn, null)
+      iam_role_name  = try(aws_iam_policy.s3_irsa[0].name, null)
     }
   }
 }
