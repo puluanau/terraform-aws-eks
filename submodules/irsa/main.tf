@@ -49,7 +49,7 @@ resource "aws_iam_role" "this" {
 }
 
 resource "aws_iam_role_policy_attachment" "this" {
-  count = length(local.policy_attachments)
+  count      = length(local.policy_attachments)
   policy_arn = local.policy_attachments[count.index].iam_policy_arn
   role       = aws_iam_role.this[local.policy_attachments[count.index].role_name].name
 }
