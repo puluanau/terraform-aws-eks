@@ -43,14 +43,14 @@ resource "aws_iam_role" "this" {
 }
 
 resource "aws_iam_role_policy_attachment" "this" {
-  for_each = flatten([for op in local.oidc_providers : [
+  for_each = toset(flatten([for op in local.oidc_providers : [
     for iam_policy_arn in op.iam_policy_arns : {
       role_name      = op.role_name
       iam_policy_arn = iam_policy_arn
     }
-  ]])
-  policy_arn = each.iam_policy_arn
-  role       = aws_iam_role.this[each.role_name].name
+  ]]))
+  policy_arn = each.value.iam_policy_arn
+  role       = aws_iam_role.this[each.value.role_name].name
 }
 
 locals {

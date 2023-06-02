@@ -34,5 +34,5 @@ output "eks" {
 
 output "irsa" {
   description = "IRSA details."
-  value       = module.irsa.info
+  value       = try(module.irsa.info[0], null)
 }
