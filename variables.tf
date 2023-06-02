@@ -132,7 +132,10 @@ variable "eks" {
   }
 
   validation {
-    condition     = !var.eks.irsa.enabled || length(var.eks.irsa.role_name) > 0
+    condition = try(
+      !var.eks.irsa.enabled || length(var.eks.irsa.role_name) > 0, # condition passes if irsa is disabled or the role name is populated.
+      true
+    )
     error_message = "IRSA is enabled but a role name was not provided."
   }
   default = {}
