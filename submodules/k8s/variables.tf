@@ -85,6 +85,7 @@ variable "network_info" {
 variable "eks_info" {
   description = <<EOF
     cluster = {
+      version           = K8s version.
       arn               = EKS Cluster arn.
       security_group_id = EKS Cluster security group id.
       endpoint          = EKS Cluster API endpoint.
@@ -101,9 +102,6 @@ variable "eks_info" {
         arn = OIDC provider ARN.
         url = OIDC provider url.
       }
-      irsa = {
-        namespace_service_accounts = List of ns sa.
-      }
     }
     nodes = {
       security_group_id = EKS Nodes security group id.
@@ -119,6 +117,7 @@ variable "eks_info" {
   EOF
   type = object({
     cluster = object({
+      version           = string
       arn               = string
       security_group_id = string
       endpoint          = string
@@ -134,9 +133,6 @@ variable "eks_info" {
       oidc = object({
         arn = string
         url = string
-      })
-      irsa = object({
-        namespace_service_accounts = list(string)
       })
     })
     nodes = object({

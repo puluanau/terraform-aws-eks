@@ -4,6 +4,12 @@ resource "aws_backup_vault" "efs" {
 
   force_destroy = var.storage.efs.backup_vault.force_destroy
   kms_key_arn   = local.kms_key_arn
+
+  lifecycle {
+    ignore_changes = [
+      kms_key_arn,
+    ]
+  }
 }
 
 resource "aws_backup_plan" "efs" {
@@ -23,8 +29,14 @@ resource "aws_backup_plan" "efs" {
   }
 }
 
+data "aws_iam_policy" "aws_backup_role_policy" {
+  count = var.storage.efs.backup_vault.create ? 1 : 0
+  name  = "AWSBackupServiceRolePolicyForBackup"
+}
+
 resource "aws_iam_role" "efs_backup_role" {
   count = var.storage.efs.backup_vault.create ? 1 : 0
+  name  = "${var.deploy_id}-efs-backup"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -38,6 +50,12 @@ resource "aws_iam_role" "efs_backup_role" {
       },
     ]
   })
+}
+
+resource "aws_iam_role_policy_attachment" "efs_backup_role_attach" {
+  count      = var.storage.efs.backup_vault.create ? 1 : 0
+  role       = aws_iam_role.efs_backup_role[0].name
+  policy_arn = data.aws_iam_policy.aws_backup_role_policy[0].arn
 }
 
 resource "aws_backup_selection" "efs" {

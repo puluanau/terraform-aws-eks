@@ -3,8 +3,8 @@ variable "region" {
   description = "AWS region for the deployment"
   nullable    = false
   validation {
-    condition     = can(regex("^([a-z]{2}-[a-z]+-[0-9])$", var.region))
-    error_message = "The provided region must follow the format of AWS region names, e.g., us-west-2."
+    condition     = can(regex("(us(-gov)?|ap|ca|cn|eu|sa|me|af)-(central|(north|south)?(east|west)?)-[0-9]", var.region))
+    error_message = "The provided region must follow the format of AWS region names, e.g., us-west-2, us-gov-west-1."
   }
 }
 
@@ -66,7 +66,9 @@ variable "eks" {
     }
     master_role_names = "IAM role names to be added as masters in eks."
     cluster_addons = "EKS cluster addons. vpc-cni is installed separately."
+    vpc_cni = Configuration for AWS VPC CNI
     ssm_log_group_name = "CloudWatch log group to send the SSM session logs to."
+    identity_providers = "Configuration for IDP(Identity Provider)."
     irsa = {
       enabled                    = Enable IAM Roles for Service Accounts.
       namespace_service_accounts = List of namespace service accounts, i.e: ["domino-platform:nucleus","domino-compute:run-*","domino-platform:mlflow","domino-platform:fluentd"]
@@ -93,6 +95,19 @@ variable "eks" {
     master_role_names  = optional(list(string), [])
     cluster_addons     = optional(list(string), ["kube-proxy", "coredns"])
     ssm_log_group_name = optional(string, "session-manager")
+    vpc_cni = optional(object({
+      prefix_delegation = optional(bool)
+    }))
+    identity_providers = optional(list(object({
+      client_id                     = string
+      groups_claim                  = optional(string, null)
+      groups_prefix                 = optional(string, null)
+      identity_provider_config_name = string
+      issuer_url                    = optional(string, null)
+      required_claims               = optional(string, null)
+      username_claim                = optional(string, null)
+      username_prefix               = optional(string, null)
+    })), [])
     identity_providers = optional(list(object({
       client_id                     = string
       groups_claim                  = optional(string, null)
@@ -310,7 +325,7 @@ variable "bastion" {
   type = object({
     enabled                  = optional(bool, true)
     ami_id                   = optional(string, null) # default will use the latest 'amazon_linux_2' ami
-    instance_type            = optional(string, "t2.micro")
+    instance_type            = optional(string, "t3.micro")
     authorized_ssh_ip_ranges = optional(list(string), ["0.0.0.0/0"])
     username                 = optional(string, "ec2-user")
     install_binaries         = optional(bool, false)

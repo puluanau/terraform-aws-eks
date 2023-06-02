@@ -8,8 +8,8 @@ variable "region" {
   type        = string
   nullable    = false
   validation {
-    condition     = can(regex("^([a-z]{2}-[a-z]+-[0-9])$", var.region))
-    error_message = "The provided region must follow the format of AWS region names, e.g., us-west-2."
+    condition     = can(regex("(us(-gov)?|ap|ca|cn|eu|sa|me|af)-(central|(north|south)?(east|west)?)-[0-9]", var.region))
+    error_message = "The provided region must follow the format of AWS region names, e.g., us-west-2, us-gov-west-1."
   }
 }
 
@@ -69,10 +69,12 @@ variable "kms_info" {
   description = <<EOF
     key_id  = KMS key id.
     key_arn = KMS key arn.
+    enabled = KMS key is enabled
   EOF
   type = object({
     key_id  = string
     key_arn = string
+    enabled = bool
   })
 }
 

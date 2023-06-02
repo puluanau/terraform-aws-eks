@@ -1,44 +1,3 @@
-## EKS key, kept for existing legacy clusters. Setting use_kms is preferred.
-data "aws_iam_policy_document" "kms_key" {
-  statement {
-    actions = [
-      "kms:Create*",
-      "kms:Describe*",
-      "kms:Enable*",
-      "kms:List*",
-      "kms:Put*",
-      "kms:Update*",
-      "kms:Revoke*",
-      "kms:Disable*",
-      "kms:Get*",
-      "kms:Delete*",
-      "kms:ScheduleKeyDeletion",
-      "kms:CancelKeyDeletion",
-      "kms:GenerateDataKey",
-      "kms:TagResource",
-      "kms:UntagResource"
-    ]
-    resources = ["*"]
-    effect    = "Allow"
-    principals {
-      type        = "AWS"
-      identifiers = ["arn:${data.aws_partition.current.partition}:iam::${local.aws_account_id}:root"]
-    }
-  }
-}
-
-resource "aws_kms_key" "eks_cluster" {
-  customer_master_key_spec = "SYMMETRIC_DEFAULT"
-  enable_key_rotation      = true
-  is_enabled               = true
-  key_usage                = "ENCRYPT_DECRYPT"
-  multi_region             = false
-  policy                   = data.aws_iam_policy_document.kms_key.json
-  tags = {
-    "Name" = "${local.eks_cluster_name}-eks-cluster"
-  }
-}
-
 resource "aws_security_group" "eks_cluster" {
   name        = "${local.eks_cluster_name}-cluster"
   description = "EKS cluster security group"
@@ -73,6 +32,8 @@ resource "aws_cloudwatch_log_group" "eks_cluster" {
 }
 
 resource "aws_eks_cluster" "this" {
+  provider = aws.eks
+
   name                      = local.eks_cluster_name
   role_arn                  = aws_iam_role.eks_cluster.arn
   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
@@ -80,7 +41,7 @@ resource "aws_eks_cluster" "this" {
 
   encryption_config {
     provider {
-      key_arn = local.kms_key_arn == null ? aws_kms_key.eks_cluster.arn : local.kms_key_arn
+      key_arn = local.kms_key_arn
     }
 
     resources = ["secrets"]
@@ -105,34 +66,43 @@ resource "aws_eks_cluster" "this" {
     aws_security_group_rule.node,
     aws_cloudwatch_log_group.eks_cluster
   ]
+
+  lifecycle {
+    ignore_changes = [
+      encryption_config,
+    ]
+  }
 }
 
 data "tls_certificate" "cluster_tls_certificate" {
-  count = var.eks.irsa.enabled ? 1 : 0
-
   url = aws_eks_cluster.this.identity[0].oidc[0].issuer
 }
 
 resource "aws_iam_openid_connect_provider" "oidc_provider" {
-  count = var.eks.irsa.enabled ? 1 : 0
-
   client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = data.tls_certificate.cluster_tls_certificate[0].certificates[*].sha1_fingerprint
-  url             = data.tls_certificate.cluster_tls_certificate[0].url
+  thumbprint_list = data.tls_certificate.cluster_tls_certificate.certificates[*].sha1_fingerprint
+  url             = data.tls_certificate.cluster_tls_certificate.url
 }
 
-
 resource "aws_eks_addon" "vpc_cni" {
-  cluster_name      = aws_eks_cluster.this.name
-  resolve_conflicts = "OVERWRITE"
-  addon_name        = "vpc-cni"
+  cluster_name                = aws_eks_cluster.this.name
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+  addon_name                  = "vpc-cni"
+  configuration_values = jsonencode({
+    env = merge(
+      {},
+      try(var.eks.vpc_cni.prefix_delegation, false) ? { ENABLE_PREFIX_DELEGATION = "true" } : {}
+    )
+  })
 }
 
 resource "aws_eks_addon" "this" {
-  for_each          = toset(var.eks.cluster_addons)
-  cluster_name      = aws_eks_cluster.this.name
-  resolve_conflicts = "OVERWRITE"
-  addon_name        = each.key
+  for_each                    = toset(var.eks.cluster_addons)
+  cluster_name                = aws_eks_cluster.this.name
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+  addon_name                  = each.key
 
   depends_on = [
     aws_eks_node_group.node_groups,
@@ -151,7 +121,7 @@ resource "null_resource" "kubeconfig" {
         kubectl config --kubeconfig ${self.triggers.kubeconfig_file} delete-cluster ${self.triggers.cluster_name}
         kubectl config --kubeconfig ${self.triggers.kubeconfig_file} delete-context ${self.triggers.cluster_name}
       else
-        rm -f ${self.triggers.kubeconfig_file}
+        rm -f ${self.triggers.kubeconfig_file} "${self.triggers.kubeconfig_file}-proxy" || true
       fi
     EOT
   }

@@ -13,8 +13,8 @@ variable "region" {
   description = "AWS region for the deployment"
   nullable    = false
   validation {
-    condition     = can(regex("^([a-z]{2}-[a-z]+-[0-9])$", var.region))
-    error_message = "The provided region must follow the format of AWS region names, e.g., us-west-2."
+    condition     = can(regex("(us(-gov)?|ap|ca|cn|eu|sa|me|af)-(central|(north|south)?(east|west)?)-[0-9]", var.region))
+    error_message = "The provided region must follow the format of AWS region names, e.g., us-west-2, us-gov-west-1."
   }
 }
 
@@ -131,13 +131,14 @@ variable "kms_info" {
   description = <<EOF
     key_id  = KMS key id.
     key_arn = KMS key arn.
+    enabled = KMS key is enabled
   EOF
   type = object({
     key_id  = string
     key_arn = string
+    enabled = bool
   })
 }
-
 
 variable "eks" {
   description = <<EOF
@@ -159,6 +160,8 @@ variable "eks" {
     master_role_names = IAM role names to be added as masters in EKS.
     cluster_addons = EKS cluster addons. vpc-cni is installed separately.
     ssm_log_group_name = "CloudWatch log group to send the SSM session logs to."
+    vpc_cni = Configuration for AWS VPC CNI
+    identity_providers = "Configuration for IDP(Identity Provider)."
   EOF
 
   type = object({
@@ -179,15 +182,18 @@ variable "eks" {
     master_role_names  = optional(list(string))
     cluster_addons     = optional(list(string))
     ssm_log_group_name = optional(string)
+    vpc_cni = optional(object({
+      prefix_delegation = optional(bool)
+    }))
     identity_providers = optional(list(object({
       client_id                     = string
-      groups_claim                  = string
-      groups_prefix                 = string
+      groups_claim                  = optional(string, null)
+      groups_prefix                 = optional(string, null)
       identity_provider_config_name = string
-      issuer_url                    = string
-      required_claims               = string
-      username_claim                = string
-      username_prefix               = string
+      issuer_url                    = optional(string, null)
+      required_claims               = optional(string, null)
+      username_claim                = optional(string, null)
+      username_prefix               = optional(string, null)
     })), [])
     irsa = optional(object({
       enabled                    = bool

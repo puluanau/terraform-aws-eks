@@ -139,7 +139,7 @@ resource "aws_instance" "bastion" {
   get_password_data                    = false
   hibernation                          = false
   instance_initiated_shutdown_behavior = "stop"
-  instance_type                        = var.bastion.instance_type != null ? var.bastion.instance_type : "t2.micro"
+  instance_type                        = var.bastion.instance_type != null ? var.bastion.instance_type : "t3.micro"
   key_name                             = var.ssh_key.key_pair_name
 
   metadata_options {
@@ -156,10 +156,11 @@ resource "aws_instance" "bastion" {
     throughput            = "125"
     volume_size           = "40"
     volume_type           = "gp3"
-    kms_key_id            = try(var.kms_info.key_arn, null)
+    kms_key_id            = var.kms_info.enabled ? var.kms_info.key_arn : null
     tags = merge(data.aws_default_tags.this.tags, {
       "Name" = "${var.deploy_id}-bastion"
     })
+
   }
 
   source_dest_check = true
@@ -172,6 +173,7 @@ resource "aws_instance" "bastion" {
   lifecycle {
     ignore_changes = [
       root_block_device[0].tags,
+      root_block_device[0].kms_key_id,
     ]
   }
 }
@@ -179,7 +181,7 @@ resource "aws_instance" "bastion" {
 resource "aws_eip" "bastion" {
   instance             = aws_instance.bastion.id
   network_border_group = var.region
-  vpc                  = true
+  domain               = "vpc"
 }
 
 resource "aws_eip_association" "bastion" {

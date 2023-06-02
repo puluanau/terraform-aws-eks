@@ -1,11 +1,20 @@
 data "aws_iam_policy_document" "eks_cluster" {
   statement {
-    sid     = "EKSClusterAssumeRole"
+    sid     = "EKSClusterAssumeRoleService"
     actions = ["sts:AssumeRole"]
 
     principals {
       type        = "Service"
       identifiers = ["eks.${local.dns_suffix}"]
+    }
+  }
+  statement {
+    sid     = "EKSClusterAssumeRoleUser"
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${local.aws_account_id}:root"]
     }
   }
 }
@@ -193,7 +202,7 @@ data "aws_iam_policy_document" "snapshot" {
 data "aws_iam_policy_document" "ssm" {
   statement {
     effect    = "Allow"
-    resources = ["arn:aws:logs:*:${local.aws_account_id}:log-group:${var.eks.ssm_log_group_name}:*"]
+    resources = ["arn:${data.aws_partition.current.partition}:logs:*:${local.aws_account_id}:log-group:${var.eks.ssm_log_group_name}:*"]
     actions = [
       "logs:CreateLogStream",
       "logs:PutLogEvents",
@@ -268,8 +277,8 @@ resource "aws_eks_identity_provider_config" "this" {
     client_id                     = each.value.client_id
     groups_claim                  = lookup(each.value, "groups_claim", null)
     groups_prefix                 = lookup(each.value, "groups_prefix", null)
-    identity_provider_config_name = try(each.value.identity_provider_config_name, each.key)
-    issuer_url                    = try(each.value.issuer_url, aws_eks_cluster.this.identity[0].oidc[0].issuer)
+    identity_provider_config_name = each.value.identity_provider_config_name
+    issuer_url                    = try(each.value.issuer_url, aws_iam_openid_connect_provider.oidc_provider.url)
     required_claims               = lookup(each.value, "required_claims", null)
     username_claim                = lookup(each.value, "username_claim", null)
     username_prefix               = lookup(each.value, "username_prefix", null)

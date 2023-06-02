@@ -1,9 +1,11 @@
+data "aws_partition" "current" {}
+data "aws_caller_identity" "aws_account" {}
+
 locals {
   aws_account_id = data.aws_caller_identity.aws_account.account_id
 }
 
 data "aws_iam_policy_document" "kms_key_global" {
-  count = local.create_kms_key
   statement {
     actions = [
       "kms:Create*",
@@ -53,32 +55,20 @@ data "aws_iam_policy_document" "kms_key_global" {
   }
 }
 
-locals {
-  create_kms_key = var.kms.key_id == null ? 1 : 0
-  provided_key   = var.kms.key_id != null ? 1 : 0
-}
-
-resource "aws_kms_key" "domino" {
-  count                    = local.create_kms_key
-  description              = "KMS key to secure data for Domino"
+resource "aws_kms_key" "custom" {
+  description              = "Custom KMS key to secure data for Domino"
   customer_master_key_spec = "SYMMETRIC_DEFAULT"
   enable_key_rotation      = true
   is_enabled               = true
   key_usage                = "ENCRYPT_DECRYPT"
   multi_region             = false
-  policy                   = data.aws_iam_policy_document.kms_key_global[0].json
+  policy                   = data.aws_iam_policy_document.kms_key_global.json
   tags = {
     "Name" = var.deploy_id
   }
 }
 
-resource "aws_kms_alias" "domino" {
-  count         = local.create_kms_key
-  name          = "alias/${var.deploy_id}"
-  target_key_id = aws_kms_key.domino[0].key_id
-}
-
-data "aws_kms_key" "key" {
-  count  = local.provided_key
-  key_id = var.kms.key_id
+resource "aws_kms_alias" "custom" {
+  name          = "alias/${var.deploy_id}-custom"
+  target_key_id = aws_kms_key.custom.key_id
 }
