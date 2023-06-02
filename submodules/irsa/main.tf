@@ -2,7 +2,7 @@ locals {
   eks_irsa_context = {
     provider_arn               = var.eks_info.cluster.oidc.arn
     provider_url               = var.eks_info.cluster.oidc.url
-    role_name                  = var.eks.irsa.role_name
+    role_name                  = var.eks_info.cluster.irsa.role_name
     iam_policy_arns            = [var.eks_info.cluster.irsa.kms_policy_arn, var.storage_info.irsa.iam_policy_arn]
     namespace_service_accounts = var.eks_info.cluster.irsa.namespace_service_accounts
   }
@@ -51,4 +51,10 @@ resource "aws_iam_role_policy_attachment" "this" {
   ]])
   policy_arn = each.iam_policy_arn
   role       = aws_iam_role.this[each.role_name].name
+}
+
+locals {
+  irsa_info = {
+    eks_irsa_role = aws_iam_role.this[local.eks_irsa_context.role_name]
+  }
 }
