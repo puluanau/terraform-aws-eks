@@ -9,6 +9,12 @@ locals {
   oidc_providers = [
     local.eks_irsa_context
   ]
+  policy_attachments = flatten([for op in local.oidc_providers : [
+    for iam_policy_arn in op.iam_policy_arns : {
+      role_name      = op.role_name
+      iam_policy_arn = iam_policy_arn
+    }
+  ]])
 }
 
 data "aws_iam_policy_document" "this" {
@@ -43,14 +49,9 @@ resource "aws_iam_role" "this" {
 }
 
 resource "aws_iam_role_policy_attachment" "this" {
-  for_each = toset(flatten([for op in local.oidc_providers : [
-    for iam_policy_arn in op.iam_policy_arns : {
-      role_name      = op.role_name
-      iam_policy_arn = iam_policy_arn
-    }
-  ]]))
-  policy_arn = each.value.iam_policy_arn
-  role       = aws_iam_role.this[each.value.role_name].name
+  count = length(local.policy_attachments)
+  policy_arn = local.policy_attachments[count.index].iam_policy_arn
+  role       = aws_iam_role.this[local.policy_attachments[count.index].role_name].name
 }
 
 locals {
