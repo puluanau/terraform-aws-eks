@@ -192,6 +192,7 @@ variable "eks" {
     irsa = optional(object({
       enabled                    = bool
       namespace_service_accounts = list(string)
+      role_name                  = optional(string)
     }))
   })
 

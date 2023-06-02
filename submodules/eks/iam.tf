@@ -275,3 +275,22 @@ resource "aws_eks_identity_provider_config" "this" {
     username_prefix               = lookup(each.value, "username_prefix", null)
   }
 }
+
+data "aws_iam_policy_document" "kms" {
+  count = var.eks.irsa.enabled ? 1 : 0
+  statement {
+    effect    = "Allow"
+    resources = ["*"]
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey*",
+      "kms:CreateGrant"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "kms" {
+  count  = var.eks.irsa.enabled ? 1 : 0
+  name   = "${var.deploy_id}-kms-irsa"
+  policy = data.aws_iam_policy_document.kms[0].json
+}

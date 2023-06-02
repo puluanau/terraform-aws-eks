@@ -31,3 +31,8 @@ output "eks" {
   description = "EKS details."
   value       = module.eks.info
 }
+
+output "irsa" {
+  description = "IRSA details."
+  value       = module.irsa.info
+}

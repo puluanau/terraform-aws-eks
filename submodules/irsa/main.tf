@@ -1,30 +1,14 @@
-
 locals {
-  oidc_providers = [
-    {
-      provider_arn               = var.eks_info.cluster.oidc.arn
-      provider_url               = var.eks_info.cluster.oidc.url
-      role_name                  = var.storage_info.irsa.iam_role_name
-      iam_policy_arn             = var.storage_info.irsa.iam_policy_arn
-      namespace_service_accounts = var.eks_info.cluster.irsa.namespace_service_accounts
-  }]
-}
-
-data "aws_iam_policy_document" "kms" {
-  statement {
-    effect    = "Allow"
-    resources = ["*"]
-    actions = [
-      "kms:Decrypt",
-      "kms:GenerateDataKey*",
-      "kms:CreateGrant"
-    ]
+  eks_irsa_context = {
+    provider_arn               = var.eks_info.cluster.oidc.arn
+    provider_url               = var.eks_info.cluster.oidc.url
+    role_name                  = var.eks.irsa.role_name
+    iam_policy_arns            = [var.eks_info.cluster.irsa.kms_policy_arn, var.storage_info.irsa.iam_policy_arn]
+    namespace_service_accounts = var.eks_info.cluster.irsa.namespace_service_accounts
   }
-}
-
-resource "aws_iam_policy" "kms" {
-  name   = "${var.deploy_id}-kms-irsa"
-  policy = data.aws_iam_policy_document.kms.json
+  oidc_providers = [
+    local.eks_irsa_context
+  ]
 }
 
 data "aws_iam_policy_document" "this" {
@@ -58,13 +42,13 @@ resource "aws_iam_role" "this" {
   assume_role_policy = data.aws_iam_policy_document.this[each.key].json
 }
 
-resource "aws_iam_role_policy_attachment" "s3" {
-  for_each   = { for op in local.oidc_providers : op.role_name => op }
-  policy_arn = each.value.iam_policy_arn
-  role       = aws_iam_role.this[each.key].name
-}
-resource "aws_iam_role_policy_attachment" "kms" {
-  for_each   = { for op in local.oidc_providers : op.role_name => op }
-  policy_arn = aws_iam_policy.kms.arn
-  role       = aws_iam_role.this[each.key].name
+resource "aws_iam_role_policy_attachment" "this" {
+  for_each = flatten([for op in local.oidc_providers : [
+    for iam_policy_arn in op.iam_policy_arns : {
+      role_name      = op.role_name
+      iam_policy_arn = iam_policy_arn
+    }
+  ]])
+  policy_arn = each.iam_policy_arn
+  role       = aws_iam_role.this[each.role_name].name
 }

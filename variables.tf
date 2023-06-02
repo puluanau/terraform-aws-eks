@@ -70,6 +70,7 @@ variable "eks" {
     irsa = {
       enabled                    = Enable IAM Roles for Service Accounts.
       namespace_service_accounts = List of namespace service accounts, i.e: ["domino-platform:nucleus","domino-compute:run-*","domino-platform:mlflow","domino-platform:fluentd"]
+      role_name                  = Name of the eks irsa app role.
     }
   }
   EOF
@@ -105,6 +106,7 @@ variable "eks" {
     irsa = optional(object({
       enabled                    = optional(bool, false)
       namespace_service_accounts = optional(list(string), [])
+      role_name                  = optional(string, null)
     }), {})
 
   })
@@ -112,6 +114,11 @@ variable "eks" {
   validation {
     condition     = !var.eks.irsa.enabled || length(var.eks.irsa.namespace_service_accounts) > 0
     error_message = "IRSA is enabled but a list of namespaced service accounts was not provided."
+  }
+
+  validation {
+    condition     = !var.eks.irsa.enabled || length(var.eks.irsa.role_name) > 0
+    error_message = "IRSA is enabled but a role name was not provided."
   }
   default = {}
 }

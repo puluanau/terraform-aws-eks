@@ -34,6 +34,8 @@ variable "eks_info" {
       }
       irsa = {
         namespace_service_accounts = List of ns sa.
+        role_name = Name of the eks irsa app role.
+        kms_policy_arn = ARN of the iam policy that gives the eks irsa role access to KMS.
       }
     }
     nodes = {
@@ -68,6 +70,8 @@ variable "eks_info" {
       })
       irsa = object({
         namespace_service_accounts = list(string)
+        role_name                  = optional(string, null)
+        kms_policy_arn             = optional(string, null)
       })
     })
     nodes = object({
