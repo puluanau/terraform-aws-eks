@@ -40,7 +40,7 @@ locals {
     costs = {
       bucket_name = aws_s3_bucket.costs.bucket
       id          = aws_s3_bucket.costs.id
-      policy_json = data.aws_iam_policy_document.costsjson
+      policy_json = data.aws_iam_policy_document.costs.json
       arn         = aws_s3_bucket.costs.arn
     }
   }
