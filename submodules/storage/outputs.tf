@@ -15,7 +15,6 @@ output "info" {
     }
     irsa = {
       iam_policy_arn = IRSA IAM Policy ARN
-      iam_role_name = IAM Role name
     }
   EOF
   value = {
@@ -37,7 +36,6 @@ output "info" {
     }
     irsa = {
       iam_policy_arn = try(aws_iam_policy.s3_irsa[0].arn, null)
-      iam_role_name  = try(aws_iam_policy.s3_irsa[0].name, null)
     }
   }
 }
