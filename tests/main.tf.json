@@ -39,7 +39,7 @@
               "domino-platform:mlflow",
               "domino-platform:fluentd"
             ],
-            "role_name": "${var.deploy_id}-eks-irsa-role"
+            "role_name": "${var.deploy_id}-eks-irsa"
           }
         },
         "kms": {
