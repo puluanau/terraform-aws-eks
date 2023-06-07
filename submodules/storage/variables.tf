@@ -118,3 +118,10 @@ variable "network_info" {
     })
   })
 }
+
+variable "irsa" {
+  description = "IRSA object."
+  type = object({
+    enabled = bool
+  })
+}

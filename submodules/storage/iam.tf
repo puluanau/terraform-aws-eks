@@ -1,7 +1,7 @@
 data "aws_iam_policy_document" "s3" {
   statement {
     effect    = "Allow"
-    resources = [for b in local.s3_buckets : b.arn]
+    resources = [for b in local.s3_buckets : b.arn if !b.is_irsa_bucket]
 
     actions = [
       "s3:ListBucket",
@@ -14,7 +14,36 @@ data "aws_iam_policy_document" "s3" {
     sid    = ""
     effect = "Allow"
 
-    resources = [for b in local.s3_buckets : "${b.arn}/*"]
+    resources = [for b in local.s3_buckets : "${b.arn}/*" if !b.is_irsa_bucket]
+
+    actions = [
+      "s3:PutObject",
+      "s3:GetObject",
+      "s3:DeleteObject",
+      "s3:ListMultipartUploadParts",
+      "s3:AbortMultipartUpload",
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "s3_irsa" {
+  count = var.irsa.enabled ? 1 : 0
+  statement {
+    effect    = "Allow"
+    resources = [for b in local.s3_buckets : b.arn if b.is_irsa_bucket]
+
+    actions = [
+      "s3:ListBucket",
+      "s3:GetBucketLocation",
+      "s3:ListBucketMultipartUploads",
+    ]
+  }
+
+  statement {
+    sid    = ""
+    effect = "Allow"
+
+    resources = [for b in local.s3_buckets : "${b.arn}/*" if b.is_irsa_bucket]
 
     actions = [
       "s3:PutObject",
@@ -30,6 +59,13 @@ resource "aws_iam_policy" "s3" {
   name   = "${var.deploy_id}-S3"
   path   = "/"
   policy = data.aws_iam_policy_document.s3.json
+}
+
+resource "aws_iam_policy" "s3_irsa" {
+  count  = var.irsa.enabled ? 1 : 0
+  name   = "${var.deploy_id}-S3-irsa"
+  path   = "/"
+  policy = data.aws_iam_policy_document.s3_irsa[0].json
 }
 
 data "aws_iam_policy_document" "ecr" {

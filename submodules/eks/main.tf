@@ -199,6 +199,11 @@ locals {
         ]
       )
       custom_roles = var.eks.custom_role_maps
+      irsa = {
+        namespace_service_accounts = var.eks.irsa.namespace_service_accounts
+        role_name                  = var.eks.irsa.role_name
+        kms_policy_arn             = try(aws_iam_policy.kms[0].arn, null)
+      }
       oidc = {
         arn = aws_iam_openid_connect_provider.oidc_provider.arn
         url = aws_iam_openid_connect_provider.oidc_provider.url

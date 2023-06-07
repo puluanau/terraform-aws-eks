@@ -195,6 +195,11 @@ variable "eks" {
       username_claim                = optional(string, null)
       username_prefix               = optional(string, null)
     })), [])
+    irsa = optional(object({
+      enabled                    = bool
+      namespace_service_accounts = list(string)
+      role_name                  = optional(string)
+    }))
   })
 
   validation {
