@@ -218,6 +218,13 @@ locals {
         key   = format("k8s.io/cluster-autoscaler/node-template/taint/%v", t.key)
         value = "${t.value == null ? "" : t.value}:${local.taint_effect_map[t.effect]}"
       }
+    ]],
+    [ for name, v in var.tags : [
+      {
+        name = name
+        key = name
+        value = v
+      }
     ]]
   ]])
 

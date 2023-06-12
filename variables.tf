@@ -105,7 +105,7 @@ variable "default_node_groups" {
             "dominodatalab.com/node-pool" = "default"
           })
           taints = optional(list(object({ key = string, value = optional(string), effect = string })), [])
-          tags   = optional(map(string), var.tags)
+          tags   = optional(map(string), {})
           gpu    = optional(bool, null)
           volume = optional(object(
             {
@@ -131,7 +131,7 @@ variable "default_node_groups" {
             "dominodatalab.com/node-pool" = "platform"
           })
           taints = optional(list(object({ key = string, value = optional(string), effect = string })), [])
-          tags   = optional(map(string), var.tags)
+          tags   = optional(map(string), {})
           gpu    = optional(bool, null)
           volume = optional(object(
             {
@@ -160,7 +160,7 @@ variable "default_node_groups" {
           taints = optional(list(object({ key = string, value = optional(string), effect = string })), [
             { key = "nvidia.com/gpu", value = "true", effect = "NO_SCHEDULE" }
           ])
-          tags = optional(map(string), var.tags)
+          tags = optional(map(string), {})
           gpu  = optional(bool, null)
           volume = optional(object(
             {
